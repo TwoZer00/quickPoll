@@ -7,11 +7,17 @@ import '@fontsource/roboto/700.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { getAnalytics } from 'firebase/analytics'
 import { app } from './firebase/init'
+import Home from './pages/Home'
+import CreatePoll from './pages/CreatePoll'
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <div>Hello World</div>
+    element: <Home />
+  },
+  {
+    path: '/create',
+    element: <CreatePoll />
   }
 ])
 if (!import.meta.env.VITE_ENV) getAnalytics(app)

@@ -11,6 +11,6 @@ Web app where create poll updated in real time.
 
 ## To do
 
-- [ ] Create polls
-- [ ] show results in real time
-- [ ] Create user and save polls
+- [x] Create polls
+- [] show results in real time
+- [] Create user and save polls

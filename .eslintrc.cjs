@@ -8,7 +8,6 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'standard',
     'standard-jsx',
-    'standard-js'
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },

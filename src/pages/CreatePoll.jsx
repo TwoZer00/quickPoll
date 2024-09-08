@@ -1,6 +1,7 @@
-import { Add, PlusOne, Remove, Share } from '@mui/icons-material'
-import { Box, Button, FormControl, FormControlLabel, Radio, RadioGroup, Stack, TextField, Typography } from '@mui/material'
-import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Add, Remove, Share } from '@mui/icons-material'
+import { Box, Button, RadioGroup, Stack, TextField, Typography } from '@mui/material'
+import { useRef, useState } from 'react'
 import { createPoll } from '../firebase/utils'
 
 const requuestStateEnum = {
@@ -12,19 +13,36 @@ const requuestStateEnum = {
 
 export default function CreatePoll () {
   const [options, setOptions] = useState([{ index: 0 }])
-  const [requestState,setRequestState] = useState(requuestStateEnum.none)
+  const idPoll = useRef()
+  const [requestState, setRequestState] = useState(requuestStateEnum.none)
   const handleClick = () => setOptions([...options, { index: (options[options.length - 1].index + 1) }])
   const handleRemove = (index) => setOptions(options.filter(item => item.index !== index))
+  const navigate = useNavigate()
   const handleSubmit = (e) => {
     setRequestState(requuestStateEnum.pending)
     e.preventDefault()
     const target = e.target
     const formData = new FormData(target)
-    const data = Object.fromEntries(formData)
-    createPoll(data).then(()=>
-        setRequestState(requuestStateEnum.success)
-    )
-    console.log(data)
+    const title = formData.get('title')
+    let options = Object.fromEntries(formData)
+    delete options.title
+    options = Object.values(options).filter(item => item !== '')
+    createPoll({ title, options }).then((id) => {
+      console.log(id)
+      setRequestState(requuestStateEnum.success)
+      idPoll.current = id
+    }).catch((err) => {
+      console.log(err)
+      setRequestState(requuestStateEnum.error)
+    }).finally(() => {
+      setTimeout(() => {
+        setRequestState(requuestStateEnum.none)
+      }, 2000)
+    })
+  }
+
+  const handleShare = () => {
+    navigate(`/${idPoll.current}`)
   }
   return (
     <Box>
@@ -35,6 +53,7 @@ export default function CreatePoll () {
         </Button>
       </Stack>
       <Box component='form' maxWidth='md' display='flex' flexDirection='column' gap={1} onSubmit={handleSubmit}>
+        <TextField variant='filled' label='title' name='title' required />
         <RadioGroup sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {options.map(item => {
             return (
@@ -51,7 +70,7 @@ export default function CreatePoll () {
         {requestState === requuestStateEnum.pending && <Typography>creating poll...</Typography>}
         {requestState === requuestStateEnum.success && <Typography>poll created!</Typography>}
         {requestState === requuestStateEnum.error && <Typography>error creating poll</Typography>}
-        {requestState === requuestStateEnum.success && <Button startIcon={<Share />}>share poll</Button>}
+        {idPoll && <Button startIcon={<Share />} onClick={handleShare}>share poll</Button>}
       </Box>
     </Box>
   )

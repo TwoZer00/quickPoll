@@ -9,15 +9,35 @@ import { getAnalytics } from 'firebase/analytics'
 import { app } from './firebase/init'
 import Home from './pages/Home'
 import CreatePoll from './pages/CreatePoll'
+import Poll from './pages/Poll'
+import { getAuth, signInAnonymously } from 'firebase/auth'
+import InitAuth from './pages/InitAuth'
+import { getOptions } from './firebase/utils'
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />
-  },
-  {
-    path: '/create',
-    element: <CreatePoll />
+    element: <InitAuth />,
+    loader: async () => {
+      const auth = getAuth()
+      await signInAnonymously(auth)
+      return null
+    },
+    children: [
+      {
+        path: '',
+        element: <Home />
+      },
+      {
+        path: '/create',
+        element: <CreatePoll />
+      },
+      {
+        path: '/:id',
+        element: <Poll />,
+        loader: ({ params }) => getOptions(params.id)
+      }
+    ]
   }
 ])
 if (!import.meta.env.VITE_ENV) getAnalytics(app)

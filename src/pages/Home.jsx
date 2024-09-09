@@ -1,8 +1,7 @@
 import { PropTypes } from 'prop-types'
-import { Add, Person } from '@mui/icons-material'
-import { Avatar, Box, Button, CssBaseline, Dialog, DialogTitle, Link, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Slide, Stack, ThemeProvider, Typography, createTheme } from '@mui/material'
+import { Box, Button, CssBaseline, Dialog, DialogTitle, List, Link, ListItem, ListItemButton, ListItemText, Slide, Stack, ThemeProvider, Typography, createTheme } from '@mui/material'
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
 
 export default function Home () {
   const theme = createTheme()
@@ -45,24 +44,18 @@ export default function Home () {
 }
 
 const LastPollsListModal = (props) => {
-  const navigate = useNavigate()
   const { onClose, open } = props
 
   const handleClose = () => {
     onClose()
-  }
-
-  const handleListItemClick = (value) => {
-    onClose(value)
-    navigate(`/${value}`)
   }
   return (
     <Dialog onClose={handleClose} open={open} TransitionComponent={Transition}>
       <DialogTitle>Last polls created in this session</DialogTitle>
       <List sx={{ pt: 0 }}>
         {props.data?.map((poll) => (
-          <ListItem disableGutters key={poll.uid}>
-            <ListItemButton onClick={() => handleListItemClick(poll.id)}>
+          <ListItem disableGutters key={poll.author}>
+            <ListItemButton component={RouterLink} to={`/${poll.id}`}>
               <ListItemText primary={poll.title} secondary={(new Date(poll.createdAt)).toLocaleString()} />
             </ListItemButton>
           </ListItem>

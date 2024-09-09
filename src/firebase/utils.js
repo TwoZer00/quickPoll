@@ -7,16 +7,16 @@ const db = getFirestore(app)
 async function createPoll({ title, options }) {
   const poll = doc(collection(db, 'polls'))
   const optionsTemp = options.map((option) => ({ title: option }))
+  const pollData = { title, createdAt: new Date(), author: doc(getFirestore(), 'user', getAuth().currentUser.uid) }
   await runTransaction(db, async (transaction) => {
-    transaction.set(poll, { title, author: doc(getFirestore(), 'user', getAuth().currentUser.uid) })
+    transaction.set(poll, pollData)
     for (const option in optionsTemp) {
       const optionRef = doc(collection(poll, 'options'))
       transaction.set(optionRef, optionsTemp[option])
     }
   })
-  const pollId = poll.id
   const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
-  lastPolls.push({ id: pollId, uid: getAuth().currentUser.uid, title, createdAt: new Date() })
+  lastPolls.push({ ...pollData, id: poll.id, author: getAuth().currentUser.uid })
   sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
   return poll.id
 }

@@ -8,13 +8,16 @@ async function createPoll({ title, options }) {
   const poll = doc(collection(db, 'polls'))
   const optionsTemp = options.map((option) => ({ title: option }))
   await runTransaction(db, async (transaction) => {
-    transaction.set(poll, { title })
+    transaction.set(poll, { title, author: doc(getFirestore(), 'user', getAuth().currentUser.uid) })
     for (const option in optionsTemp) {
       const optionRef = doc(collection(poll, 'options'))
       transaction.set(optionRef, optionsTemp[option])
-      // transaction.set(doc(collection(optionRef, 'votes')))
     }
   })
+  const pollId = poll.id
+  const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
+  lastPolls.push({ id: pollId, uid: getAuth().currentUser.uid, title, createdAt: new Date() })
+  sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
   return poll.id
 }
 async function getPoll(id) {
@@ -62,19 +65,6 @@ async function getResults(id) {
         return { ...option, votes: votes.docs.length }
       }))
     })
-}
-
-async function getAllVotes(id) {
-  return getDocs(collection(getFirestore(), 'polls', id, 'options'))
-    .then(options => options.docs.map(option => ({ id: option.id, ...option.data() })))
-    .then(async options => {
-      return await Promise.all(options.map(async option => {
-        const votes = await getDocs(collection(getFirestore(), 'polls', id, 'options', option.id, 'votes'))
-        return { ...option, votes: votes.docs.length }
-      }))
-    })
-    .then(options => options.reduce((acc, option) => acc + option.votes, 0))
-    .catch(err => console.log(err))
 }
 
 export {

@@ -1,5 +1,7 @@
-import { Box, Button, CssBaseline, Link, Stack, ThemeProvider, Typography, createTheme } from '@mui/material'
-import React from 'react'
+import { PropTypes } from 'prop-types'
+import { Add, Person } from '@mui/icons-material'
+import { Avatar, Box, Button, CssBaseline, Dialog, DialogTitle, Link, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Slide, Stack, ThemeProvider, Typography, createTheme } from '@mui/material'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home () {
@@ -8,15 +10,24 @@ export default function Home () {
   const handleClick = () => {
     navigate('/create')
   }
+  const [openModal, setOpenModal] = useState(false)
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Stack direction='column' height='100dvh' width='100dvw'>
         <Box component='nav' p={1}>
-          <Stack direction='row' width='100%' justifyContent='end'>
-            <Button variant='contained' sx={{ widows: 'fit-content' }} onClick={handleClick}>
+          <Stack direction='row' width='100%' gap={1} justifyContent='end'>
+            <Button variant='contained' onClick={handleClick}>
               Create poll
             </Button>
+            {
+              sessionStorage.getItem('lastPolls') &&
+              (
+                <Button variant='contained' onClick={() => setOpenModal(true)}>
+                  Last polls
+                </Button>
+              )
+            }
           </Stack>
         </Box>
         <Box component='main' flex={1} display='flex' justifyContent='center' flexDirection='column' alignItems='center'>
@@ -28,6 +39,45 @@ export default function Home () {
           <Typography variant='body1'>All rights reserved.</Typography>
         </Box>
       </Stack>
+      <LastPollsListModal data={JSON.parse(sessionStorage.getItem('lastPolls'))} open={openModal} onClose={() => { setOpenModal(false) }} />
     </ThemeProvider>
   )
 }
+
+const LastPollsListModal = (props) => {
+  const navigate = useNavigate()
+  const { onClose, open } = props
+
+  const handleClose = () => {
+    onClose()
+  }
+
+  const handleListItemClick = (value) => {
+    onClose(value)
+    navigate(`/${value}`)
+  }
+  return (
+    <Dialog onClose={handleClose} open={open} TransitionComponent={Transition}>
+      <DialogTitle>Last polls created in this session</DialogTitle>
+      <List sx={{ pt: 0 }}>
+        {props.data?.map((poll) => (
+          <ListItem disableGutters key={poll.uid}>
+            <ListItemButton onClick={() => handleListItemClick(poll.id)}>
+              <ListItemText primary={poll.title} secondary={(new Date(poll.createdAt)).toLocaleString()} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Dialog>
+  )
+}
+
+LastPollsListModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
+  data: PropTypes.array.isRequired
+}
+
+const Transition = React.forwardRef(function Transition (props, ref) {
+  return <Slide direction='up' ref={ref} {...props} />
+})

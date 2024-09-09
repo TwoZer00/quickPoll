@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom'
-import { Add, Remove, Share } from '@mui/icons-material'
+import { useNavigate, useOutletContext } from 'react-router-dom'
+import { Add, Launch, Remove } from '@mui/icons-material'
 import { Box, Button, RadioGroup, Stack, TextField, Typography } from '@mui/material'
 import { useRef, useState } from 'react'
 import { createPoll } from '../firebase/utils'
@@ -14,12 +14,13 @@ const requuestStateEnum = {
 export default function CreatePoll () {
   const [options, setOptions] = useState([{ index: 0 }])
   const idPoll = useRef()
+  const [,, setMessage] = useOutletContext()
   const [requestState, setRequestState] = useState(requuestStateEnum.none)
   const handleClick = () => setOptions([...options, { index: (options[options.length - 1].index + 1) }])
   const handleRemove = (index) => setOptions(options.filter(item => item.index !== index))
+  const [error, setError] = useState()
   const navigate = useNavigate()
   const handleSubmit = (e) => {
-    setRequestState(requuestStateEnum.pending)
     e.preventDefault()
     const target = e.target
     const formData = new FormData(target)
@@ -27,18 +28,35 @@ export default function CreatePoll () {
     let options = Object.fromEntries(formData)
     delete options.title
     options = Object.values(options).filter(item => item !== '')
-    createPoll({ title, options }).then((id) => {
-      console.log(id)
-      setRequestState(requuestStateEnum.success)
-      idPoll.current = id
-    }).catch((err) => {
-      console.log(err)
-      setRequestState(requuestStateEnum.error)
-    }).finally(() => {
-      setTimeout(() => {
-        setRequestState(requuestStateEnum.none)
-      }, 2000)
-    })
+    try {
+      handleValidations(options, title)
+      setRequestState(requuestStateEnum.pending)
+      createPoll({ title, options }).then((id) => {
+        console.log(id)
+        setRequestState(requuestStateEnum.success)
+        idPoll.current = id
+        setMessage({ message: 'poll created', severity: 'success' })
+      }).catch((err) => {
+        console.log(err)
+        setRequestState(requuestStateEnum.error)
+      }).finally(() => {
+        setTimeout(() => {
+          setRequestState(requuestStateEnum.none)
+        }, 2000)
+      })
+    } catch (err) {
+      setError(err.message)
+      setMessage({ message: err.message, severity: 'error' })
+    }
+  }
+
+  const handleValidations = (options, title) => {
+    if (options.length < 2) {
+      throw new Error('At least two options are required')
+    }
+    if (title.length < 3) {
+      throw new Error('Title must be at least 3 characters long')
+    }
   }
 
   const handleShare = () => {
@@ -64,13 +82,14 @@ export default function CreatePoll () {
             )
           })}
         </RadioGroup>
+        <Typography variant='caption' color='error'>{error}</Typography>
         <Button type='submit' variant='contained'>
           create poll
         </Button>
         {requestState === requuestStateEnum.pending && <Typography>creating poll...</Typography>}
         {requestState === requuestStateEnum.success && <Typography>poll created!</Typography>}
         {requestState === requuestStateEnum.error && <Typography>error creating poll</Typography>}
-        {idPoll && <Button startIcon={<Share />} onClick={handleShare}>share poll</Button>}
+        {idPoll.current && <Button startIcon={<Launch />} onClick={handleShare}>View poll</Button>}
       </Box>
     </Box>
   )

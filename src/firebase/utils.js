@@ -34,7 +34,7 @@ async function setVote({ lastVote, voteId, pollId }) {
     const lastVoteRef = doc(collection(pollRef, 'options', lastVote.id, 'votes'), getAuth().currentUser.uid)
     await deleteDoc(lastVoteRef).catch((err) => console.log(err))
   }
-  await setDoc(voterRef, { id: getAuth().currentUser.uid })
+  await setDoc(voterRef, { id: getAuth().currentUser.uid, votedAt: new Date() })
 }
 
 async function isVoted({ pollId, voteId }) {

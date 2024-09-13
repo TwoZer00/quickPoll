@@ -66,11 +66,23 @@ async function getResults(id) {
       }))
     })
 }
-function getSuscribeOption(poll, option, votes, setVotes) {
+function getSuscribeOption(poll, option, votes, setVotes, totalOpt) {
   const q = query(collection(getFirestore(), 'polls', poll.id, 'options', option.id, 'votes'))
   return onSnapshot(q, (querySnapshot) => {
     setVotes(querySnapshot.docs.length)
+    totalOpt((prev) => {
+      const temp = { ...prev }
+      temp[option.id] = querySnapshot.docs.length
+      return temp
+    })
   })
+}
+
+const requuestStateEnum = {
+  none: 'none',
+  pending: 'pending',
+  success: 'success',
+  error: 'error'
 }
 
 export {
@@ -80,5 +92,6 @@ export {
   isVoted,
   getOptions,
   getResults,
-  getSuscribeOption
+  getSuscribeOption,
+  requuestStateEnum
 }

@@ -1,13 +1,13 @@
 import { useLoaderData, useOutletContext, useParams } from 'react-router-dom'
-import { Box, Button, CssBaseline, FormControlLabel, IconButton, Paper, Radio, RadioGroup, Typography } from '@mui/material'
+import { Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
-import { getPoll, getResults, getSuscribeOption, setVote } from '../firebase/utils'
+import { getPoll, getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
 import { Share } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
-
 export default function Poll () {
   const [data, setData] = useState()
   const [,, setMessage] = useOutletContext()
+  const [state, setState] = useState()
   const [options, setOptions] = useState(useLoaderData())
   const [option, setOption] = useState(options.find(option => option.voted)?.id || options[0].id)
   const [results, setResults] = useState()
@@ -29,6 +29,7 @@ export default function Poll () {
     // getVotesFromPoll(id, options).then(results => setResults(results))
   }, [data, id, option, options])
   const handleSubmit = (event) => {
+    setState(requuestStateEnum.pending)
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const selectedOption = data.get('radio-buttons-group')
@@ -41,8 +42,10 @@ export default function Poll () {
         setOptions(tempOptions.map(option => option.id === selectedOption ? { ...option, voted: true } : option))
         setOption(selectedOption)
         setMessage({ message: 'vote sent', severity: 'success' })
+        setState(requuestStateEnum.success)
       }).catch((error) => {
         setMessage({ message: error.message, severity: 'error' })
+        setState(requuestStateEnum.error)
       })
   }
 
@@ -55,24 +58,27 @@ export default function Poll () {
           <Typography variant='subtitle1' fontSize={14}>Create, share and see in real time your polls</Typography>
         </Box>
         <Box height='100%' component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>
-          <Box component={Paper} minWidth='xl' width='100%' maxWidth='lg' variant='elevation' elevation={3} p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Box display='flex' alignSelf='end' flexDirection='row'>
-              <IconButton
-                size='small' onClick={() => {
-                  navigator.clipboard.writeText(window.location.href).then(() => setMessage({ message: 'link paste in clipboard' }))
-                }}
-              >
-                <Share fontSize='inherit' />
-              </IconButton>
-              {/*
+          <Box component={Paper} minWidth='xl' width='100%' maxWidth='lg' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
+            <Box p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box display='flex' alignSelf='end' flexDirection='row'>
+                <IconButton
+                  size='small' onClick={() => {
+                    navigator.clipboard.writeText(window.location.href).then(() => setMessage({ message: 'link paste in clipboard' }))
+                  }}
+                >
+                  <Share fontSize='inherit' />
+                </IconButton>
+                {/*
               <IconButton size='small'>
                 <Flag fontSize='inherit' />
               </IconButton> */}
+              </Box>
+              <Typography variant='h1' fontSize={28} fontWeight='400'>{data?.title}</Typography>
+              {data?.user && <Typography variant='subtitle1'>created by {data?.user?.name}</Typography>}
+              <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
+              <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={options.find(option => option.voted)?.id === option || state === requuestStateEnum.pending}>vote</Button>
             </Box>
-            <Typography variant='h1' fontSize={28} fontWeight='400'>{data?.title}</Typography>
-            {data?.user && <Typography variant='subtitle1'>created by {data?.user?.name}</Typography>}
-            <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
-            <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={options.find(option => option.voted)?.id === option}>vote</Button>
+            <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
           </Box>
         </Box>
       </Box>
@@ -81,35 +87,39 @@ export default function Poll () {
 }
 
 const OptionsList = ({ poll, handleChange, option, options }) => {
+  const [tempOpt, setTempOpt] = useState()
+  const total = tempOpt ? Object.values(tempOpt).reduce((a, b) => a + b, 0) : 0
   return (
     <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option}>
       {
         options.map((option) => (
-          <Option key={option.id} poll={poll} option={option} showResult={options.some(option => option.voted)} />
+          <Option key={option.id} poll={poll} option={option} totalOpt={setTempOpt} total={total} showResult={options.some(option => option.voted)} />
         ))
       }
     </RadioGroup>
   )
 }
 
-const Option = ({ poll, option, showResult }) => {
+const Option = ({ poll, option, showResult, totalOpt, total }) => {
   const unsuscribe = useRef()
   const [voutCounter, setVoutCounter] = useState(0)
   useEffect(() => {
     if (!unsuscribe.current) {
-      unsuscribe.current = getSuscribeOption(poll, option, voutCounter, setVoutCounter)
+      unsuscribe.current = getSuscribeOption(poll, option, voutCounter, setVoutCounter, totalOpt)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return (
-    <FormControlLabel value={option.id} label={`${option.title} ${showResult ? voutCounter : ''} `} control={<Radio />} />
+    <FormControlLabel value={option.id} label={`${option.title} ${showResult ? voutCounter : ''} ${showResult ? Math.round(voutCounter / total * 100) + '%' : ''}`} control={<Radio />} />
   )
 }
 
 Option.propTypes = {
   option: PropTypes.object,
   poll: PropTypes.object,
-  showResult: PropTypes.bool
+  showResult: PropTypes.bool,
+  totalOpt: PropTypes.func,
+  total: PropTypes.number
 }
 
 OptionsList.propTypes = {

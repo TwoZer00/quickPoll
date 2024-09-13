@@ -2,15 +2,7 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Add, Launch, Remove } from '@mui/icons-material'
 import { Box, Button, RadioGroup, Stack, TextField, Typography } from '@mui/material'
 import { useRef, useState } from 'react'
-import { createPoll } from '../firebase/utils'
-
-const requuestStateEnum = {
-  none: 'none',
-  pending: 'pending',
-  success: 'success',
-  error: 'error'
-}
-
+import { createPoll, requuestStateEnum } from '../firebase/utils'
 export default function CreatePoll () {
   const [options, setOptions] = useState([{ index: 0 }])
   const idPoll = useRef()

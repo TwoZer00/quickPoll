@@ -1,5 +1,5 @@
 /* eslint-disable space-before-function-paren */
-import { collection, doc, getFirestore, runTransaction, getDoc, getDocs, setDoc, deleteDoc } from 'firebase/firestore'
+import { collection, doc, getFirestore, runTransaction, getDoc, getDocs, setDoc, deleteDoc, onSnapshot, query } from 'firebase/firestore'
 import { app } from './init'
 import { getAuth } from 'firebase/auth'
 
@@ -66,6 +66,12 @@ async function getResults(id) {
       }))
     })
 }
+function getSuscribeOption(poll, option, votes, setVotes) {
+  const q = query(collection(getFirestore(), 'polls', poll.id, 'options', option.id, 'votes'))
+  return onSnapshot(q, (querySnapshot) => {
+    setVotes(querySnapshot.docs.length)
+  })
+}
 
 export {
   createPoll,
@@ -73,5 +79,6 @@ export {
   setVote,
   isVoted,
   getOptions,
-  getResults
+  getResults,
+  getSuscribeOption
 }

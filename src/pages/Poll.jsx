@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { getPoll, getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
 import { Share } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
+import { useTransition, animated, useSpring } from '@react-spring/web'
+
 export default function Poll () {
   const [data, setData] = useState()
   const [,, setMessage] = useOutletContext()
@@ -103,6 +105,15 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
 const Option = ({ poll, option, showResult, totalOpt, total }) => {
   const unsuscribe = useRef()
   const [voutCounter, setVoutCounter] = useState(0)
+  const sprig = useSpring(
+    { number: voutCounter || 0, from: { number: 0 }, config: { duration: 500 } }
+  )
+  // const transitionp = useTransition(name, {
+  //   from: { x: "200%" },
+  //   enter: { x: "0" },
+  //   leave: { x: "-200%" },
+  //   config: config.slow,
+  // })
   useEffect(() => {
     if (!unsuscribe.current) {
       unsuscribe.current = getSuscribeOption(poll, option, voutCounter, setVoutCounter, totalOpt)
@@ -110,7 +121,16 @@ const Option = ({ poll, option, showResult, totalOpt, total }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return (
-    <FormControlLabel value={option.id} label={`${option.title} ${showResult ? voutCounter : ''} ${showResult ? Math.round(voutCounter / total * 100) + '%' : ''}`} control={<Radio />} />
+    <Box display='flex' gap={1} alignItems='center'>
+      <FormControlLabel sx={{ flex: 1 }} value={option.id} label={`${option.title} `} control={<Radio />} />
+      <Typography variant='caption' sx={{ display: 'flex', flexDirection: 'row', gap: 1, alignItems: 'center' }} fontSize={14}>
+        {showResult && <animated.p>{sprig.number.to(x => x.toFixed(0))}</animated.p>}
+        {showResult && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
+      </Typography>
+      {/* {showResult && <Typography variant='subtitle1' fontSize={14}>{total}</Typography>} */}
+
+      {/* <animated.div>{showResult && <Typography variant='subtitle1' fontSize={14}>{number.to(x => x.toFixed(0))}</Typography>}</animated.div> */}
+    </Box>
   )
 }
 

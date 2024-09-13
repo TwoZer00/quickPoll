@@ -10,7 +10,11 @@ export default function InitAuth () {
     setOpen(false)
   }
   useEffect(() => {
-    if (message) handleOpen()
+    if (message?.message) {
+      handleOpen()
+    } else {
+      setMessage(null)
+    }
   }, [message])
   return (
     <>
@@ -20,7 +24,7 @@ export default function InitAuth () {
         TransitionComponent={SlideTransition}
         autoHideDuration={1000}
         onClose={handleClose}
-        onAnimationEnd={() => setMessage()}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
           onClose={handleClose}
@@ -28,7 +32,7 @@ export default function InitAuth () {
           variant='filled'
           sx={{ width: '100%', '& .MuiAlert-message': { ':first-letter': { textTransform: 'uppercase' } } }}
         >
-          {message?.message || 'hello world'}
+          {message?.message}
         </Alert>
       </Snackbar>
     </>

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { getPoll, getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
 import { Share } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
-import { useTransition, animated, useSpring } from '@react-spring/web'
+import { animated, useSpring } from '@react-spring/web'
 
 export default function Poll () {
   const [data, setData] = useState()
@@ -124,8 +124,8 @@ const Option = ({ poll, option, showResult, totalOpt, total }) => {
     <Box display='flex' gap={1} alignItems='center'>
       <FormControlLabel sx={{ flex: 1 }} value={option.id} label={`${option.title} `} control={<Radio />} />
       <Typography variant='caption' sx={{ display: 'flex', flexDirection: 'row', gap: 1, alignItems: 'center' }} fontSize={14}>
-        {showResult && <animated.p>{sprig.number.to(x => x.toFixed(0))}</animated.p>}
-        {showResult && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
+        {(showResult) && <animated.p>{sprig.number.to(x => x.toFixed(0))}</animated.p>}
+        {(showResult && voutCounter) && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
       </Typography>
       {/* {showResult && <Typography variant='subtitle1' fontSize={14}>{total}</Typography>} */}
 

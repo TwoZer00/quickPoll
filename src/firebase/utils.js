@@ -7,7 +7,7 @@ const db = getFirestore(app)
 async function createPoll({ title, options }) {
   const poll = doc(collection(db, 'polls'))
   const optionsTemp = options.map((option) => ({ title: option }))
-  const pollData = { title, createdAt: new Date(), author: doc(getFirestore(), 'user', getAuth().currentUser.uid) }
+  const pollData = { title, createdAt: new Date(), author: doc(getFirestore(), 'user', getAuth().currentUser?.uid) }
   await runTransaction(db, async (transaction) => {
     transaction.set(poll, pollData)
     for (const option in optionsTemp) {
@@ -16,7 +16,7 @@ async function createPoll({ title, options }) {
     }
   })
   const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
-  lastPolls.push({ ...pollData, id: poll.id, author: getAuth().currentUser.uid })
+  lastPolls.push({ ...pollData, id: poll.id, author: getAuth().currentUser?.uid })
   sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
   return poll.id
 }
@@ -28,7 +28,7 @@ async function setVote({ lastVote, voteId, pollId }) {
   const pollRef = doc(db, 'polls', pollId)
   const optionRef = doc(pollRef, 'options', voteId)
   const votesRef = collection(optionRef, 'votes')
-  const voterRef = doc(votesRef, getAuth().currentUser.uid)
+  const voterRef = doc(votesRef, getAuth().currentUser?.uid)
 
   if (lastVote) {
     const lastVoteRef = doc(collection(pollRef, 'options', lastVote.id, 'votes'), getAuth().currentUser.uid)
@@ -41,7 +41,7 @@ async function isVoted({ pollId, voteId }) {
   const pollRef = doc(db, 'polls', pollId)
   const optionRef = doc(pollRef, 'options', voteId)
   const votesRef = collection(optionRef, 'votes')
-  const voterRef = doc(votesRef, getAuth().currentUser.uid)
+  const voterRef = doc(votesRef, getAuth().currentUser?.uid)
   return await getDoc(voterRef).then((doc) => doc.exists())
 }
 

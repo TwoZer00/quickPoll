@@ -18,10 +18,9 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <InitAuth />,
-    loader: async () => {
+    loader: () => {
       const auth = getAuth()
-      await signInAnonymously(auth)
-      return null
+      return signInAnonymously(auth)
     },
     children: [
       {

@@ -34,14 +34,15 @@ async function setVote({ lastVote, voteId, pollId }) {
   const votesRef = collection(optionRef, 'votes')
   const voterRef = doc(votesRef, getAuth().currentUser?.uid)
 
-  if (lastVote) {
-    const lastVoteRef = doc(collection(pollRef, 'options', lastVote.id, 'votes'), getAuth().currentUser.uid)
-    await deleteDoc(lastVoteRef).catch((error) => {
-      if (error.code === 'permission-denied') throw CError.fromCode(16)
-      else throw error
-    })
+  try {
+    if (lastVote) {
+      const lastVoteRef = doc(collection(pollRef, 'options', lastVote.id, 'votes'), getAuth().currentUser.uid)
+      await deleteDoc(lastVoteRef)
+    }
+    await setDoc(voterRef, { id: getAuth().currentUser.uid, votedAt: new Date() })
+  } catch (error) {
+    if (error.code === 'permission-denied') throw CError.fromCode(16)
   }
-  await setDoc(voterRef, { id: getAuth().currentUser.uid, votedAt: new Date() })
 }
 
 async function isVoted({ pollId, voteId }) {

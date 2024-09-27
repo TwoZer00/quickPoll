@@ -1,5 +1,5 @@
 import { useLoaderData, useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import { alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Stack, Typography, useTheme } from '@mui/material'
+import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Stack, Typography, useTheme } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import { getPoll, getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
 import { Share } from '@mui/icons-material'
@@ -8,6 +8,7 @@ import { animated, useSpring } from '@react-spring/web'
 // import  crypto
 import { v4 as uuidv4 } from 'uuid'
 import ERRORS from '../const/Const'
+import dayjs from 'dayjs'
 
 export default function Poll () {
   const [data, setData] = useState()
@@ -21,6 +22,10 @@ export default function Poll () {
   useEffect(() => {
     const getData = async () => {
       const tempData = await getPoll(id)
+      if (dayjs().diff(dayjs(tempData.createdAt.seconds * 1000), 'minute') > 30) {
+        tempData.closed = true
+        setOption()
+      }
       if (options.find(option => option.voted)?.id === option) {
         const results = await getResults(id, options)
         setResults(() => {
@@ -80,6 +85,7 @@ export default function Poll () {
               {data?.user && <Typography variant='subtitle1'>created by {data?.user?.name}</Typography>}
               <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
               <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={options.find(option => option.voted)?.id === option || state === requuestStateEnum.pending}>vote</Button>
+              <Alert severity='warning'>Poll closed.</Alert>
             </Box>
             <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
           </Box>
@@ -96,7 +102,7 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
     <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
       {
         options.map((option) => (
-          <Option key={option.id} poll={poll} option={option} totalOpt={setTempOpt} total={total} showResult={options.some(option => option.voted)} />
+          <Option key={option.id} poll={poll} option={option} totalOpt={setTempOpt} total={total} showResult={options.some(option => option.voted) || poll.closed} />
         ))
       }
     </RadioGroup>
@@ -120,6 +126,7 @@ const Option = ({ poll, option, showResult, totalOpt, total }) => {
     <Box position='relative' display='flex' gap={1} alignItems='center' borderRadius='5rem' overflow='hidden'>
       <Stack direction='row' flex={1} zIndex={1} px={1}>
         <FormControlLabel
+          disabled={poll.closed}
           sx={{ flex: 1 }} value={option.id} label={`${option.title} `}
           control={
             <Radio

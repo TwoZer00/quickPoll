@@ -61,7 +61,8 @@ export default function CreatePoll () {
       <Box width='100%' maxWidth='md' mx='auto' p={2}>
         <Typography variant='h1' fontSize={38} align='center'>Create poll</Typography>
         <Typography variant='subtitle1' align='center'>
-          add options to your poll
+          add options to your poll <br />
+          Once created the poll, this will be available for voting <b>30 mins</b>
         </Typography>
         <Stack direction='row' alignItems='center'>
           <Button onClick={handleClick} startIcon={<Add />}>

@@ -85,7 +85,7 @@ export default function Poll () {
               {data?.user && <Typography variant='subtitle1'>created by {data?.user?.name}</Typography>}
               <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
               <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={options.find(option => option.voted)?.id === option || state === requuestStateEnum.pending}>vote</Button>
-              <Alert severity='warning'>Poll closed.</Alert>
+              {data?.closed && <Alert severity='warning'>Poll closed.</Alert>}
             </Box>
             <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
           </Box>

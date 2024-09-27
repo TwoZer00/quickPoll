@@ -13,6 +13,7 @@ import Poll from './pages/Poll'
 import { getAuth } from 'firebase/auth'
 import InitAuth from './pages/InitAuth'
 import { getOptions } from './firebase/utils'
+import Error from './pages/Error'
 
 const router = createBrowserRouter([
   {
@@ -34,9 +35,12 @@ const router = createBrowserRouter([
       {
         path: '/:id',
         element: <Poll />,
-        loader: ({ params }) => getOptions(params.id)
+        loader: ({ params }) => {
+          return getOptions(params.id)
+        }
       }
-    ]
+    ],
+    errorElement: <Error />
   }
 ])
 if (!import.meta.env.VITE_ENV) getAnalytics(app)

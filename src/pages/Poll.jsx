@@ -1,10 +1,12 @@
-import { useLoaderData, useOutletContext, useParams } from 'react-router-dom'
-import { Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Typography } from '@mui/material'
+import { useLoaderData, useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import { alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Stack, Typography, useTheme } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import { getPoll, getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
 import { Share } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
+// import  crypto
+import { v4 as uuidv4 } from 'uuid'
 
 export default function Poll () {
   const [data, setData] = useState()
@@ -23,12 +25,10 @@ export default function Poll () {
         setResults(() => {
           return results
         })
-        // getVotesFromPoll(id, options, setResults)
       }
       setData(tempData)
     }
     if (!data) getData()
-    // getVotesFromPoll(id, options).then(results => setResults(results))
   }, [data, id, option, options])
   const handleSubmit = (event) => {
     setState(requuestStateEnum.pending)
@@ -92,7 +92,7 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
   const [tempOpt, setTempOpt] = useState()
   const total = tempOpt ? Object.values(tempOpt).reduce((a, b) => a + b, 0) : 0
   return (
-    <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option}>
+    <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
       {
         options.map((option) => (
           <Option key={option.id} poll={poll} option={option} totalOpt={setTempOpt} total={total} showResult={options.some(option => option.voted)} />
@@ -104,16 +104,11 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
 
 const Option = ({ poll, option, showResult, totalOpt, total }) => {
   const unsuscribe = useRef()
+  const optionColor = useRef(generateColorBySeed(option.id))
   const [voutCounter, setVoutCounter] = useState(0)
   const sprig = useSpring(
     { number: voutCounter || 0, from: { number: 0 }, config: { duration: 500 } }
   )
-  // const transitionp = useTransition(name, {
-  //   from: { x: "200%" },
-  //   enter: { x: "0" },
-  //   leave: { x: "-200%" },
-  //   config: config.slow,
-  // })
   useEffect(() => {
     if (!unsuscribe.current) {
       unsuscribe.current = getSuscribeOption(poll, option, voutCounter, setVoutCounter, totalOpt)
@@ -121,15 +116,27 @@ const Option = ({ poll, option, showResult, totalOpt, total }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return (
-    <Box display='flex' gap={1} alignItems='center'>
-      <FormControlLabel sx={{ flex: 1 }} value={option.id} label={`${option.title} `} control={<Radio />} />
-      <Typography variant='caption' sx={{ display: 'flex', flexDirection: 'row', gap: 1, alignItems: 'center' }} fontSize={14}>
-        {(showResult) && <animated.p>{sprig.number.to(x => x.toFixed(0))}</animated.p>}
-        {(showResult && voutCounter) && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
-      </Typography>
-      {/* {showResult && <Typography variant='subtitle1' fontSize={14}>{total}</Typography>} */}
-
-      {/* <animated.div>{showResult && <Typography variant='subtitle1' fontSize={14}>{number.to(x => x.toFixed(0))}</Typography>}</animated.div> */}
+    <Box position='relative' display='flex' gap={1} alignItems='center' borderRadius='5rem' overflow='hidden'>
+      <Stack direction='row' flex={1} zIndex={1} px={1}>
+        <FormControlLabel
+          sx={{ flex: 1 }} value={option.id} label={`${option.title} `}
+          control={
+            <Radio
+              sx={{
+                color: `${optionColor.current}`,
+                '&.Mui-checked': {
+                  color: `${optionColor.current}`
+                }
+              }}
+            />
+          }
+        />
+        <Typography variant='caption' sx={{ display: 'flex', flexDirection: 'row', gap: 1, alignItems: 'center' }} fontSize={14}>
+          {(showResult) && <animated.p>{sprig.number.to(x => x.toFixed(0))}</animated.p>}
+          {(showResult && voutCounter) && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
+        </Typography>
+      </Stack>
+      <Box position='absolute' left={0} top={0} flex={1} height='100%' zIndex={0} borderRadius='5rem' bgcolor={alpha(optionColor.current, 0.2)} width={`${(voutCounter / total) * 100}%`} sx={{ transition: 'width .75s' }} />
     </Box>
   )
 }
@@ -148,4 +155,13 @@ OptionsList.propTypes = {
   handleChange: PropTypes.func,
   results: PropTypes.array,
   poll: PropTypes.object
+}
+// given id(fdBoIY6Bcu1r5q6PvDfx) generate color using it as seed
+function generateColorBySeed (seed) {
+  const hash = uuidv4(seed)
+  const color = parseInt(hash.substring(0, 6), 16)
+  // exclude white and black colors
+  if (color < 0x7FFFFF && color > 0x000000) return `#${color.toString(16).padStart(6, '0')}`
+  // if color is white or black generate another color
+  return generateColorBySeed(seed + 1)
 }

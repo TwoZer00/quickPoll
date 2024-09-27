@@ -2,6 +2,7 @@
 import { collection, doc, getFirestore, runTransaction, getDoc, getDocs, setDoc, deleteDoc, onSnapshot, query } from 'firebase/firestore'
 import { app } from './init'
 import { getAuth, signInAnonymously } from 'firebase/auth'
+import CError from '../error/Error'
 
 const db = getFirestore(app)
 async function createPoll({ title, options }) {
@@ -23,6 +24,7 @@ async function createPoll({ title, options }) {
 }
 async function getPoll(id) {
   const poll = await getDoc(doc(db, 'polls', id))
+  if (!poll.exists()) throw CError.fromCode(15)
   return poll.data()
 }
 async function setVote({ lastVote, voteId, pollId }) {
@@ -40,6 +42,7 @@ async function setVote({ lastVote, voteId, pollId }) {
 }
 
 async function isVoted({ pollId, voteId }) {
+  if (!getAuth().currentUser) return false
   const pollRef = doc(db, 'polls', pollId)
   const optionRef = doc(pollRef, 'options', voteId)
   const votesRef = collection(optionRef, 'votes')
@@ -48,14 +51,35 @@ async function isVoted({ pollId, voteId }) {
 }
 
 async function getOptions(id) {
+  // return getOptionsA(id)
   return getDocs(collection(getFirestore(), 'polls', id, 'options'))
-    .then(options => options.docs.map(option => ({ id: option.id, ...option.data() })))
+    .then(options => {
+      if (options.empty) throw CError.fromCode(15)
+      return options.docs.map(option => ({ id: option.id, ...option.data() }))
+    })
     .then(async options => {
       return await Promise.all(options.map(async option => {
         const voted = await isVoted({ pollId: id, voteId: option.id })
         return { ...option, voted }
       }))
     })
+  // .catch((err) => {
+  //   // console.log(err.code)
+  //   // if (err.code === 'permission-denied') {
+  //   //   throw CError.fromCode(16)
+  //   // } else err
+  // })
+}
+
+async function getOptionsA(id) {
+  const pollRef = doc(db, 'polls', id)
+  const options = collection(pollRef, 'options')
+  return getDocs(options)
+    .then((options) => {
+      if (options.empty) throw CError.fromCode(15)
+      return options.docs.map(option => ({ id: option.id, ...option.data() }))
+    })
+  // options => options.docs.map(option => ({ id: option.id, ...option.data() }))
 }
 
 async function getResults(id) {

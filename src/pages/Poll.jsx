@@ -136,7 +136,7 @@ const Option = ({ poll, option, showResult, totalOpt, total }) => {
           {(showResult && voutCounter) && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
         </Typography>
       </Stack>
-      <Box position='absolute' left={0} top={0} flex={1} height='100%' zIndex={0} borderRadius='5rem' bgcolor={alpha(optionColor.current, 0.2)} width={`${(voutCounter / total) * 100}%`} sx={{ transition: 'width .75s' }} />
+      <Box position='absolute' left={0} top={0} flex={1} height='100%' zIndex={0} borderRadius='5rem' bgcolor={alpha(optionColor.current, 0.2)} width={`${showResult ? (voutCounter / total) * 100 : 0}%`} sx={{ transition: 'width .75s' }} />
     </Box>
   )
 }

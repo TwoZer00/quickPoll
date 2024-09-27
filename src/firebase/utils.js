@@ -1,10 +1,11 @@
 /* eslint-disable space-before-function-paren */
 import { collection, doc, getFirestore, runTransaction, getDoc, getDocs, setDoc, deleteDoc, onSnapshot, query } from 'firebase/firestore'
 import { app } from './init'
-import { getAuth } from 'firebase/auth'
+import { getAuth, signInAnonymously } from 'firebase/auth'
 
 const db = getFirestore(app)
 async function createPoll({ title, options }) {
+  if (!getAuth().currentUser) await signInAnonymously(getAuth())
   const poll = doc(collection(db, 'polls'))
   const optionsTemp = options.map((option) => ({ title: option }))
   const pollData = { title, createdAt: new Date(), author: doc(getFirestore(), 'user', getAuth().currentUser?.uid) }
@@ -25,6 +26,7 @@ async function getPoll(id) {
   return poll.data()
 }
 async function setVote({ lastVote, voteId, pollId }) {
+  if (!getAuth().currentUser) await signInAnonymously(getAuth())
   const pollRef = doc(db, 'polls', pollId)
   const optionRef = doc(pollRef, 'options', voteId)
   const votesRef = collection(optionRef, 'votes')

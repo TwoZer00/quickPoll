@@ -10,7 +10,7 @@ import { app } from './firebase/init'
 import Home from './pages/Home'
 import CreatePoll from './pages/CreatePoll'
 import Poll from './pages/Poll'
-import { getAuth, signInAnonymously } from 'firebase/auth'
+import { getAuth } from 'firebase/auth'
 import InitAuth from './pages/InitAuth'
 import { getOptions } from './firebase/utils'
 
@@ -20,7 +20,7 @@ const router = createBrowserRouter([
     element: <InitAuth />,
     loader: () => {
       const auth = getAuth()
-      return signInAnonymously(auth)
+      return auth
     },
     children: [
       {

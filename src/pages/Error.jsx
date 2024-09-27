@@ -1,6 +1,7 @@
-import { CssBaseline, Typography } from '@mui/material'
+import { CssBaseline, Link, Typography } from '@mui/material'
 import React from 'react'
-import { useRouteError } from 'react-router-dom'
+import { useRouteError, Link as RouterLink } from 'react-router-dom'
+import ERRORS from '../const/Const'
 
 export default function Error () {
   const error = useRouteError()
@@ -8,12 +9,8 @@ export default function Error () {
   return (
     <>
       <CssBaseline />
-      <Typography variant='h1'>{ERRORS[error.code]}</Typography>
+      <Typography sx={{ ':first-letter': { textTransform: 'uppercase' } }} textAlign='center' variant='h1' fontWeight={500}>{ERRORS[error.code]}</Typography>
+      <Link component={RouterLink} textAlign='center' to='..'>Go home</Link>
     </>
   )
-}
-
-const ERRORS = {
-  15: 'poll not found',
-  16: 'poll closed'
 }

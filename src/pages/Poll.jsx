@@ -7,6 +7,7 @@ import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
 // import  crypto
 import { v4 as uuidv4 } from 'uuid'
+import ERRORS from '../const/Const'
 
 export default function Poll () {
   const [data, setData] = useState()
@@ -46,7 +47,7 @@ export default function Poll () {
         setMessage({ message: 'vote sent', severity: 'success' })
         setState(requuestStateEnum.success)
       }).catch((error) => {
-        setMessage({ message: error.message, severity: 'error' })
+        setMessage({ message: ERRORS[error.code], severity: 'error' })
         setState(requuestStateEnum.error)
       })
   }

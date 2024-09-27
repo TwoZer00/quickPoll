@@ -36,7 +36,10 @@ async function setVote({ lastVote, voteId, pollId }) {
 
   if (lastVote) {
     const lastVoteRef = doc(collection(pollRef, 'options', lastVote.id, 'votes'), getAuth().currentUser.uid)
-    await deleteDoc(lastVoteRef).catch((err) => console.log(err))
+    await deleteDoc(lastVoteRef).catch((error) => {
+      if (error.code === 'permission-denied') throw CError.fromCode(16)
+      else throw error
+    })
   }
   await setDoc(voterRef, { id: getAuth().currentUser.uid, votedAt: new Date() })
 }

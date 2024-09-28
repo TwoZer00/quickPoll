@@ -9,7 +9,7 @@ export default function Error () {
   return (
     <>
       <CssBaseline />
-      <Typography sx={{ ':first-letter': { textTransform: 'uppercase' } }} textAlign='center' variant='h1' fontWeight={500}>{ERRORS[error.code]}</Typography>
+      <Typography sx={{ ':first-letter': { textTransform: 'uppercase' } }} textAlign='center' variant='h1' fontWeight={500}>{ERRORS[error.code] || ('Something went wrong')}</Typography>
       <Link component={RouterLink} textAlign='center' to='..'>Go home</Link>
     </>
   )

@@ -1,11 +1,10 @@
-import { useLoaderData, useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Stack, Typography, useTheme } from '@mui/material'
+import { useLoaderData, useOutletContext, useParams } from 'react-router-dom'
+import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Stack, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import { getPoll, getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
 import { Share } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
-// import  crypto
 import { v4 as uuidv4 } from 'uuid'
 import ERRORS from '../const/Const'
 import dayjs from 'dayjs'

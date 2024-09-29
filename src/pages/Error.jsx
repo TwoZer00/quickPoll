@@ -5,12 +5,11 @@ import ERRORS from '../const/Const'
 
 export default function Error () {
   const error = useRouteError()
-  console.error(error)
   return (
     <>
       <CssBaseline />
       <Typography sx={{ ':first-letter': { textTransform: 'uppercase' } }} textAlign='center' variant='h1' fontWeight={500}>{ERRORS[error.code] || ('Something went wrong')}</Typography>
-      <Link component={RouterLink} textAlign='center' to='..'>Go home</Link>
+      <Link component={RouterLink} display='block' textAlign='center' to='..'>Go home</Link>
     </>
   )
 }

@@ -21,7 +21,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 if (import.meta.env.VITE_ENV) {
   connectFirestoreEmulator(getFirestore(), (import.meta.env.VITE_LOCAL_FIREBASE || process.env.VITE_LOCAL_FIREBASE), 8080)
-  connectAuthEmulator(getAuth(), `http://${(import.meta.env.VITE_LOCAL_FIREBASE || process.env.VITE_LOCAL_FIREBASE)}:9099`)
+  connectAuthEmulator(getAuth(), `http://${(import.meta.env.VITE_LOCAL_FIREBASE || process.env.VITE_LOCAL_FIREBASE)}:9099`, true)
 }
 export {
   app

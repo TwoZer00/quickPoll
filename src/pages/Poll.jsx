@@ -23,7 +23,6 @@ export default function Poll () {
       const tempData = await getPoll(id)
       if (dayjs().diff(dayjs(tempData.createdAt.seconds * 1000), 'm') >= 30) {
         tempData.closed = true
-        !options.some(option => option.voted) && setOption()
       }
       if (options.find(option => option.voted)?.id === option) {
         const results = await getResults(id, options)
@@ -60,6 +59,16 @@ export default function Poll () {
       setData((value) => { return { ...value, closed: true } })
     }
   }, [duration])
+  useEffect(() => {
+    if (data?.closed) {
+      !isVoted() && setOption('-1')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data])
+
+  const isVoted = () => {
+    return options.some(option => option.voted)
+  }
 
   return (
     <>
@@ -101,7 +110,7 @@ export default function Poll () {
                   </Typography>
                   )}
               <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
-              <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={(options.find(option => option.voted)?.id === option || state === requuestStateEnum.pending) || data?.closed}>vote</Button>
+              <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={!data || (options.find(option => option.voted)?.id === option || state === requuestStateEnum.pending) || data?.closed}>vote</Button>
               {data?.closed && <Alert severity='warning'>Poll closed.</Alert>}
             </Box>
             <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
@@ -129,7 +138,8 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
 const Option = ({ poll, option, showResult, totalOpt, total }) => {
   const unsuscribe = useRef()
   const optionColor = useRef(generateColorBySeed(option.id))
-  const [voutCounter, setVoutCounter] = useState(0)
+  const [voutCounter, setVoutCounter] = useState()
+  const [porcentage, setPorcentage] = useState(0)
   const sprig = useSpring(
     { number: voutCounter || 0, from: { number: 0 }, config: { duration: 500 } }
   )
@@ -139,8 +149,15 @@ const Option = ({ poll, option, showResult, totalOpt, total }) => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (voutCounter >= 0 && showResult) {
+      setPorcentage((voutCounter / total) * 100)
+    }
+  }, [voutCounter, total, showResult])
+
   return (
-    <Box position='relative' display='flex' gap={1} alignItems='center' borderRadius='5rem' overflow='hidden'>
+    <Box position='relative' display='flex' gap={1} alignItems='center' borderRadius='5rem' overflow='hidden' height='3rem'>
       <Stack direction='row' flex={1} zIndex={1} px={1}>
         <FormControlLabel
           disabled={poll.closed}
@@ -161,9 +178,23 @@ const Option = ({ poll, option, showResult, totalOpt, total }) => {
           {(showResult && voutCounter) && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
         </Typography>
       </Stack>
-      <Box position='absolute' left={0} top={0} flex={1} height='100%' zIndex={0} borderRadius='5rem' bgcolor={alpha(optionColor.current, 0.2)} width={`${showResult ? (voutCounter / total) * 100 : 0}%`} sx={{ transition: 'width .75s' }} />
+      {/* <Box position='absolute' left={0} top={0} flex={1} height='100%' zIndex={0} borderRadius='5rem' bgcolor={alpha(optionColor.current, 0.2)} sx={{ transition: 'width .75s' }} width={porcentage} /> */}
+      <PorcentageBar porcentage={porcentage} color={optionColor.current} />
     </Box>
   )
+}
+
+const PorcentageBar = ({ porcentage, color }) => {
+  return (
+    <Box height='100%' position='absolute' flex={1} left={0} top={0} zIndex={0} borderRadius='5rem' width={`${porcentage}%`} overflow='hidden' sx={{ transition: 'width .75s' }}>
+      <Box height='100%' bgcolor={alpha(color, 0.2)} />
+    </Box>
+  )
+}
+
+PorcentageBar.propTypes = {
+  porcentage: PropTypes.number,
+  color: PropTypes.string
 }
 
 Option.propTypes = {

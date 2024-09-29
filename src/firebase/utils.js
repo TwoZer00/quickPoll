@@ -55,7 +55,6 @@ async function isVoted({ pollId, voteId }) {
 }
 
 async function getOptions(id) {
-  // return getOptionsA(id)
   return getDocs(collection(getFirestore(), 'polls', id, 'options'))
     .then(options => {
       if (options.empty) throw CError.fromCode(15)
@@ -67,23 +66,6 @@ async function getOptions(id) {
         return { ...option, voted }
       }))
     })
-  // .catch((err) => {
-  //   // console.log(err.code)
-  //   // if (err.code === 'permission-denied') {
-  //   //   throw CError.fromCode(16)
-  //   // } else err
-  // })
-}
-
-async function getOptionsA(id) {
-  const pollRef = doc(db, 'polls', id)
-  const options = collection(pollRef, 'options')
-  return getDocs(options)
-    .then((options) => {
-      if (options.empty) throw CError.fromCode(15)
-      return options.docs.map(option => ({ id: option.id, ...option.data() }))
-    })
-  // options => options.docs.map(option => ({ id: option.id, ...option.data() }))
 }
 
 async function getResults(id) {

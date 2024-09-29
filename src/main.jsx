@@ -37,11 +37,11 @@ const router = createBrowserRouter([
         path: '/:id',
         element: <Poll />,
         loader: async ({ params }) => {
-          const poll = await getPoll(params.id)
-          poll.closed = isPollClosed(poll.createdAt.seconds * 1000)
-          const options = await getOptions(params.id)
-          return { ...poll, options }
-          // return getOptions(params.id)
+          return Promise.all([getPoll(params.id), getOptions(params.id)]).then((values) => {
+            const poll = { ...values[0], options: values[1] }
+            poll.closed = isPollClosed(poll.createdAt.seconds * 1000)
+            return poll
+          })
         }
       }
     ],

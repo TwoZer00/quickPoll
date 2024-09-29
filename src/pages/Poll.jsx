@@ -1,5 +1,5 @@
 import { useLoaderData, useOutletContext, useParams } from 'react-router-dom'
-import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Stack, Typography } from '@mui/material'
+import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Skeleton, Stack, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import { getPoll, getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
 import { Share } from '@mui/icons-material'
@@ -86,7 +86,11 @@ export default function Poll () {
                 <Flag fontSize='inherit' />
               </IconButton> */}
               </Box>
-              <Typography variant='h1' fontSize={32} fontWeight='400'>{data?.title}</Typography>
+              {
+                data?.title
+                  ? <Typography variant='h1' fontSize={32} fontWeight='400'>{data?.title}</Typography>
+                  : <Skeleton variant='text' height={32} width='12ch' />
+              }
               {data?.user && <Typography variant='subtitle1'>created by {data?.user?.name}</Typography>}
               {!data?.closed
                 ? (
@@ -202,14 +206,15 @@ generateColorBySeed.propTypes = {
  * @returns {JSX.Element}
  */
 function TimeRemain ({ date, setDuration }) {
-  const [time, setTime] = useState(dateToTime(date))
+  const [time, setTime] = useState()
   const [diff, setDiff] = useState()
 
   useEffect(() => {
+    const diff = (1800 - dayjs().diff(dayjs(date), 's'))
+    if (diff >= 0) setDiff(diff)
     const interval = setInterval(() => {
       const diff = (1800 - dayjs().diff(dayjs(date), 's'))
       if (diff >= 0) setDiff(diff)
-      console.log(diff)
       if (diff <= 0) { return clearInterval(interval) }
     }, 1000)
     return () => clearInterval(interval)
@@ -225,9 +230,13 @@ function TimeRemain ({ date, setDuration }) {
     if (diff <= 60) setTime(`${diff} second${diff !== 1 ? 's' : ''}`)
   }, [diff])
 
-  if (date) {
+  if (date && diff) {
     return (
       <Typography variant='caption'>Time remaining {time}</Typography>
+    )
+  } else {
+    return (
+      <Skeleton variant='text' width={100} />
     )
   }
 }
@@ -238,11 +247,6 @@ TimeRemain.propTypes = {
 
 /**
  * Convert miliseconds to time
- * @param {number} date
+ * @param {number} date miliseconds
  * @returns {string}
  */
-const dateToTime = (date) => {
-  const diff = (1800 - dayjs().diff(dayjs(date), 's'))
-  if (diff > 60) return `${(diff / 60).toFixed(0)} minutes`
-  return `${diff} seconds`
-}

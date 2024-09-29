@@ -208,7 +208,8 @@ function TimeRemain ({ date, setDuration }) {
   useEffect(() => {
     const interval = setInterval(() => {
       const diff = (1800 - dayjs().diff(dayjs(date), 's'))
-      if (diff > 0) setDiff(diff)
+      if (diff >= 0) setDiff(diff)
+      console.log(diff)
       if (diff <= 0) { return clearInterval(interval) }
     }, 1000)
     return () => clearInterval(interval)

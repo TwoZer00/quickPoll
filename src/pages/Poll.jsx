@@ -146,7 +146,7 @@ const Option = ({ poll, option, showResult, totalOpt, total }) => {
   }, [])
 
   useEffect(() => {
-    if (voutCounter >= 0 && showResult) {
+    if (total > 0 && voutCounter >= 0 && showResult) {
       setPorcentage((voutCounter / total) * 100)
     }
   }, [voutCounter, total, showResult])

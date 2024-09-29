@@ -1,7 +1,7 @@
 import { useLoaderData, useOutletContext, useParams } from 'react-router-dom'
 import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Skeleton, Stack, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
-import { getPoll, getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
+import { getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
 import { Share } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
@@ -9,10 +9,10 @@ import ERRORS from '../const/Const'
 import dayjs from 'dayjs'
 
 export default function Poll () {
-  const [data, setData] = useState()
+  const [data, setData] = useState((useLoaderData()))
   const [,, setMessage] = useOutletContext()
   const [state, setState] = useState()
-  const [options, setOptions] = useState(useLoaderData())
+  const [options, setOptions] = useState(data.options)
   const [option, setOption] = useState(options.find(option => option.voted)?.id || options[0].id)
   const [results, setResults] = useState()
   const [duration, setDuration] = useState()
@@ -20,19 +20,14 @@ export default function Poll () {
 
   useEffect(() => {
     const getData = async () => {
-      const tempData = await getPoll(id)
-      if (dayjs().diff(dayjs(tempData.createdAt.seconds * 1000), 'm') >= 30) {
-        tempData.closed = true
-      }
       if (options.find(option => option.voted)?.id === option) {
         const results = await getResults(id, options)
         setResults(() => {
           return results
         })
       }
-      setData(tempData)
     }
-    if (!data) getData()
+    if (data.closed) getData()
   }, [data, id, option, options])
   const handleSubmit = (event) => {
     setState(requuestStateEnum.pending)

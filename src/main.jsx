@@ -12,8 +12,9 @@ import CreatePoll from './pages/CreatePoll'
 import Poll from './pages/Poll'
 import { getAuth } from 'firebase/auth'
 import InitAuth from './pages/InitAuth'
-import { getOptions } from './firebase/utils'
+import { getOptions, getPoll } from './firebase/utils'
 import Error from './pages/Error'
+import { isPollClosed } from './utils/utils'
 
 const router = createBrowserRouter([
   {
@@ -35,8 +36,12 @@ const router = createBrowserRouter([
       {
         path: '/:id',
         element: <Poll />,
-        loader: ({ params }) => {
-          return getOptions(params.id)
+        loader: async ({ params }) => {
+          const poll = await getPoll(params.id)
+          poll.closed = isPollClosed(poll.createdAt.seconds * 1000)
+          const options = await getOptions(params.id)
+          return { ...poll, options }
+          // return getOptions(params.id)
         }
       }
     ],

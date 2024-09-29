@@ -38,7 +38,7 @@ export default function Home () {
           <Typography variant='body1'>All rights reserved.</Typography>
         </Box>
       </Stack>
-      <LastPollsListModal data={JSON.parse(sessionStorage.getItem('lastPolls'))} open={openModal} onClose={() => { setOpenModal(false) }} />
+      <LastPollsListModal data={sessionStorage.getItem('lastPolls') ? JSON.parse(sessionStorage.getItem('lastPolls')) : []} open={openModal} onClose={() => { setOpenModal(false) }} />
     </ThemeProvider>
   )
 }

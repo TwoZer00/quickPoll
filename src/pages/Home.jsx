@@ -1,6 +1,6 @@
 import { PropTypes } from 'prop-types'
 import { Box, Button, CssBaseline, Dialog, DialogTitle, List, Link, ListItem, ListItemButton, ListItemText, Slide, Stack, ThemeProvider, Typography, createTheme } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
 
 export default function Home () {
@@ -9,6 +9,9 @@ export default function Home () {
   const handleClick = () => {
     navigate('/create')
   }
+  useEffect(() => {
+    document.title = 'QuickPoll - Create your polls, share it and see the results'
+  }, [])
   const [openModal, setOpenModal] = useState(false)
   return (
     <ThemeProvider theme={theme}>

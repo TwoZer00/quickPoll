@@ -1,5 +1,5 @@
-import { useLoaderData, useOutletContext, useParams } from 'react-router-dom'
-import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Paper, Radio, RadioGroup, Skeleton, Stack, Typography } from '@mui/material'
+import { useLoaderData, useOutletContext, useParams, Link as RouterLink } from 'react-router-dom'
+import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Link, Paper, Radio, RadioGroup, Skeleton, Stack, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import { getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
 import { Share } from '@mui/icons-material'
@@ -74,7 +74,8 @@ export default function Poll () {
       <Box height='100dvh' sx={{ display: 'flex', flexDirection: 'column' }}>
         <Box display='block' textAlign='center'>
           <Typography variant='h1' fontSize={32} fontWeight='bold'>QuickPoll</Typography>
-          <Typography variant='subtitle1' fontSize={14}>Create, share and see in real time your polls</Typography>
+          <Typography variant='subtitle1' fontSize={14}>Create, share and see in real time your polls.</Typography>
+          <Link component={RouterLink} to='/' p={1}>Home</Link>
         </Box>
         <Box height='100%' component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>
           <Box component={Paper} minWidth='xl' width='100%' maxWidth='lg' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
@@ -113,6 +114,12 @@ export default function Poll () {
             </Box>
             <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
           </Box>
+        </Box>
+        <Box textAlign='center'>
+          <Typography component='footer' variant='caption'>
+            Made with ❤️ by <a target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</a>. <br />
+            Create your own poll in <Link component={RouterLink} to='/create'>here</Link>.
+          </Typography>
         </Box>
       </Box>
     </>

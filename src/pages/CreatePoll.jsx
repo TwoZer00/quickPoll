@@ -1,7 +1,7 @@
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Add, Launch, Remove } from '@mui/icons-material'
 import { Box, Button, CssBaseline, LinearProgress, RadioGroup, Stack, TextField, Typography } from '@mui/material'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPoll, requuestStateEnum } from '../firebase/utils'
 export default function CreatePoll () {
   const [options, setOptions] = useState([{ index: 0 }])
@@ -12,6 +12,10 @@ export default function CreatePoll () {
   const handleRemove = (index) => setOptions(options.filter(item => item.index !== index))
   const [error, setError] = useState()
   const navigate = useNavigate()
+  useEffect(() => {
+    document.title = 'QuickPoll - Create poll'
+  }, [])
+
   const handleSubmit = (e) => {
     e.preventDefault()
     const target = e.target

@@ -64,13 +64,16 @@ export default function Poll () {
   const isVoted = () => {
     return options.some(option => option.voted)
   }
+  useEffect(() => {
+    document.title = `QuickPoll - ${data?.title}`
+  }, [data?.title])
 
   return (
     <>
       <CssBaseline />
       <Box height='100dvh' sx={{ display: 'flex', flexDirection: 'column' }}>
         <Box display='block' textAlign='center'>
-          <Typography variant='h2' fontSize={32} fontWeight='bold'>QuickPoll</Typography>
+          <Typography variant='h1' fontSize={32} fontWeight='bold'>QuickPoll</Typography>
           <Typography variant='subtitle1' fontSize={14}>Create, share and see in real time your polls</Typography>
         </Box>
         <Box height='100%' component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>

@@ -1,10 +1,13 @@
 import { CssBaseline, Link, Typography } from '@mui/material'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useRouteError, Link as RouterLink } from 'react-router-dom'
 import ERRORS from '../const/Const'
 
 export default function Error () {
   const error = useRouteError()
+  useEffect(() => {
+    document.title = 'Error'
+  }, [])
   return (
     <>
       <CssBaseline />

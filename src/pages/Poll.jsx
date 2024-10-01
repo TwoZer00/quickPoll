@@ -80,7 +80,7 @@ export default function Poll () {
         </Box>
         <Stack flex={1} justifyContent='space-around' sx={{ flexDirection: { lg: 'column', xl: 'row' } }}>
           <Box display='flex' height='100%' alignItems='center' sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
-            <GoogleAd />
+            <GoogleAd adSlot='3837806330' />
           </Box>
           <Box flex={1} component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>
             <Box component={Paper} minWidth='xl' width='100%' maxWidth='lg' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
@@ -121,7 +121,7 @@ export default function Poll () {
             </Box>
           </Box>
           <Box sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} height='100%' display='flex' alignItems='center' className='ad-wrapper'>
-            <GoogleAd />
+            <GoogleAd adSlot='5542566407' />
           </Box>
         </Stack>
         <Typography component='footer' variant='caption' textAlign='center'>

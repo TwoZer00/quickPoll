@@ -78,7 +78,7 @@ export default function Poll () {
           <Typography variant='subtitle1' fontSize={14}>Create, share and see in real time your polls.</Typography>
           <Link component={RouterLink} to='/' p={1}>Home</Link>
         </Box>
-        <Stack flex={1} justifyContent='space-around' sx={{ flexDirection: { sm: 'column', md: 'row' } }}>
+        <Stack height='100%' flex={1} justifyContent='space-around' sx={{ flexDirection: { sm: 'column', md: 'row' } }}>
           <Box flex={0.25}>
             <GoogleAd />
           </Box>

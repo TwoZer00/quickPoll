@@ -78,8 +78,8 @@ export default function Poll () {
           <Typography variant='subtitle1' fontSize={14}>Create, share and see in real time your polls.</Typography>
           <Link component={RouterLink} to='/' p={1}>Home</Link>
         </Box>
-        <Stack height='100%' flex={1} justifyContent='space-around' sx={{ flexDirection: { sm: 'column', md: 'row' } }}>
-          <Box flex={0.25}>
+        <Stack flex={1} justifyContent='space-around' sx={{ flexDirection: { sm: 'column', md: 'row' } }}>
+          <Box height='100%' flex={0.25}>
             <GoogleAd />
           </Box>
           <Box flex={1} maxWidth='md' component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>
@@ -120,16 +120,14 @@ export default function Poll () {
               <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
             </Box>
           </Box>
-          <Box flex={0.25}>
+          <Box flex={0.25} height='100%'>
             <GoogleAd />
           </Box>
         </Stack>
-        <Box textAlign='center'>
-          <Typography component='footer' variant='caption'>
-            Made with ❤️ by <a target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</a>. <br />
-            Create your own poll in <Link component={RouterLink} to='/create'>here</Link>.
-          </Typography>
-        </Box>
+        <Typography component='footer' variant='caption' textAlign='center'>
+          Made with ❤️ by <a target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</a>. <br />
+          Create your own poll in <Link component={RouterLink} to='/create'>here</Link>.
+        </Typography>
       </Box>
     </>
   )

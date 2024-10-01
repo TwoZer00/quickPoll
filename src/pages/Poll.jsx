@@ -79,7 +79,7 @@ export default function Poll () {
           <Link component={RouterLink} to='/' p={1}>Home</Link>
         </Box>
         <Stack flex={1} justifyContent='space-around' sx={{ flexDirection: { sm: 'column', md: 'row' } }}>
-          <Box display='flex' height='100%' alignItems='center' flex={0.25} className='ad-wrapper'>
+          <Box display='flex' height='100%' alignItems='center' maxWidth='300px' flex={0.25} className='ad-wrapper'>
             <GoogleAd />
           </Box>
           <Box flex={1} maxWidth='md' component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>
@@ -120,7 +120,7 @@ export default function Poll () {
               <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
             </Box>
           </Box>
-          <Box flex={0.25} height='100%' display='flex' alignItems='center' className='ad-wrapper'>
+          <Box flex={0.25} maxWidth='300px' height='100%' display='flex' alignItems='center' className='ad-wrapper'>
             <GoogleAd />
           </Box>
         </Stack>

@@ -78,11 +78,11 @@ export default function Poll () {
           <Typography variant='subtitle1' fontSize={14}>Create, share and see in real time your polls.</Typography>
           <Link component={RouterLink} to='/' p={1}>Home</Link>
         </Box>
-        <Stack flex={1} justifyContent='space-around' sx={{ flexDirection: { sm: 'column', md: 'row' } }}>
+        <Stack flex={1} justifyContent='space-around' sx={{ flexDirection: { lg: 'column', xl: 'row' } }}>
           <Box display='flex' height='100%' alignItems='center' sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
             <GoogleAd />
           </Box>
-          <Box flex={1} maxWidth='md' component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>
+          <Box flex={1} component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>
             <Box component={Paper} minWidth='xl' width='100%' maxWidth='lg' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
               <Box p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Box display='flex' alignSelf='end' flexDirection='row'>

@@ -7,6 +7,7 @@ import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
 import ERRORS from '../const/Const'
 import dayjs from 'dayjs'
+import GoogleAd from '../components/GoogleAd'
 
 export default function Poll () {
   const [data, setData] = useState((useLoaderData()))
@@ -77,44 +78,52 @@ export default function Poll () {
           <Typography variant='subtitle1' fontSize={14}>Create, share and see in real time your polls.</Typography>
           <Link component={RouterLink} to='/' p={1}>Home</Link>
         </Box>
-        <Box height='100%' component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>
-          <Box component={Paper} minWidth='xl' width='100%' maxWidth='lg' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
-            <Box p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Box display='flex' alignSelf='end' flexDirection='row'>
-                <IconButton
-                  size='small' onClick={() => {
-                    navigator.clipboard.writeText(window.location.href).then(() => setMessage({ message: 'link paste in clipboard' }))
-                  }}
-                >
-                  <Share fontSize='inherit' />
-                </IconButton>
-                {/*
+        <Stack flex={1} justifyContent='space-around' sx={{ flexDirection: { sm: 'column', md: 'row' } }}>
+          <Box>
+            <GoogleAd />
+          </Box>
+          <Box flex={1} maxWidth='md' component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>
+            <Box component={Paper} minWidth='xl' width='100%' maxWidth='lg' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
+              <Box p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box display='flex' alignSelf='end' flexDirection='row'>
+                  <IconButton
+                    size='small' onClick={() => {
+                      navigator.clipboard.writeText(window.location.href).then(() => setMessage({ message: 'link paste in clipboard' }))
+                    }}
+                  >
+                    <Share fontSize='inherit' />
+                  </IconButton>
+                  {/*
               <IconButton size='small'>
                 <Flag fontSize='inherit' />
               </IconButton> */}
-              </Box>
-              {
+                </Box>
+                {
                 data?.title
                   ? <Typography variant='h1' fontSize={32} fontWeight='400'>{data?.title}</Typography>
                   : <Skeleton variant='text' height={32} width='12ch' />
               }
-              {data?.user && <Typography variant='subtitle1'>created by {data?.user?.name}</Typography>}
-              {!data?.closed
-                ? (
-                  <TimeRemain duration={duration} setDuration={setDuration} date={data && data?.createdAt?.seconds * 1000} />
-                  )
-                : (
-                  <Typography variant='caption'>
-                    Created at {dayjs(data.createdAt.seconds * 1000).format('DD/MM/YYYY HH:mm')}
-                  </Typography>
-                  )}
-              <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
-              <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={!data || (options.find(option => option.voted)?.id === option || state === requuestStateEnum.pending) || data?.closed}>vote</Button>
-              {data?.closed && <Alert severity='warning'>Poll closed.</Alert>}
+                {data?.user && <Typography variant='subtitle1'>created by {data?.user?.name}</Typography>}
+                {!data?.closed
+                  ? (
+                    <TimeRemain duration={duration} setDuration={setDuration} date={data && data?.createdAt?.seconds * 1000} />
+                    )
+                  : (
+                    <Typography variant='caption'>
+                      Created at {dayjs(data.createdAt.seconds * 1000).format('DD/MM/YYYY HH:mm')}
+                    </Typography>
+                    )}
+                <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
+                <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={!data || (options.find(option => option.voted)?.id === option || state === requuestStateEnum.pending) || data?.closed}>vote</Button>
+                {data?.closed && <Alert severity='warning'>Poll closed.</Alert>}
+              </Box>
+              <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
             </Box>
-            <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
           </Box>
-        </Box>
+          <Box>
+            <GoogleAd />
+          </Box>
+        </Stack>
         <Box textAlign='center'>
           <Typography component='footer' variant='caption'>
             Made with ❤️ by <a target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</a>. <br />

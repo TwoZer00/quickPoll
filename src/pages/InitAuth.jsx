@@ -35,16 +35,6 @@ export default function InitAuth () {
           {message?.message}
         </Alert>
       </Snackbar>
-      <amp-ad
-        width='100vw' height='320'
-        type='adsense'
-        data-ad-client='ca-pub-7731037445831235'
-        data-ad-slot='5542566407'
-        data-auto-format='rspv'
-        data-full-width=''
-      >
-        <div overflow='' />
-      </amp-ad>
     </>
   )
 }

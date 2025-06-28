@@ -1,5 +1,5 @@
 import { PropTypes } from 'prop-types'
-import { Box, Button, CssBaseline, Dialog, DialogTitle, List, Link, ListItem, ListItemButton, ListItemText, Slide, Stack, ThemeProvider, Typography, createTheme } from '@mui/material'
+import { Box, Button, Dialog, DialogTitle, List, Link, ListItem, ListItemButton, ListItemText, Slide, Stack, ThemeProvider, Typography, createTheme, CssBaseline } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
 
@@ -7,11 +7,13 @@ export default function Home () {
   const theme = createTheme()
   const navigate = useNavigate()
   const handleClick = () => {
-    navigate('/create')
+    navigate('/poll/create')
   }
-  useEffect(() => {
-    document.title = 'QuickPoll - Create your polls, share it and see the results'
-  }, [])
+  useEffect(
+    () => {
+      document.title = 'QuickPoll - Home'
+    }, []
+  )
   const [openModal, setOpenModal] = useState(false)
   return (
     <ThemeProvider theme={theme}>
@@ -58,7 +60,7 @@ const LastPollsListModal = (props) => {
       <List sx={{ pt: 0 }}>
         {props.data?.map((poll) => (
           <ListItem disableGutters key={poll.author}>
-            <ListItemButton component={RouterLink} to={`/${poll.id}`}>
+            <ListItemButton component={RouterLink} to={`/poll/${poll.id}`}>
               <ListItemText primary={poll.title} secondary={(new Date(poll.createdAt)).toLocaleString()} />
             </ListItemButton>
           </ListItem>

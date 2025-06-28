@@ -1,20 +1,41 @@
 import { useNavigate, useOutletContext, Link as RouterLink } from 'react-router-dom'
 import { Add, Launch, Remove } from '@mui/icons-material'
-import { Box, Button, CssBaseline, LinearProgress, Link, RadioGroup, Stack, TextField, Typography } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { Box, Button, IconButton, LinearProgress, RadioGroup, TextField, Typography } from '@mui/material'
+import { useRef, useState } from 'react'
 import { createPoll, requuestStateEnum } from '../firebase/utils'
+import useTitle from '../hook/useTitle'
 export default function CreatePoll () {
   const [options, setOptions] = useState([{ index: 0 }])
   const idPoll = useRef()
   const [,, setMessage] = useOutletContext()
   const [requestState, setRequestState] = useState(requuestStateEnum.none)
   const handleClick = () => setOptions([...options, { index: (options[options.length - 1].index + 1) }])
-  const handleRemove = (index) => setOptions(options.filter(item => item.index !== index))
-  const [error, setError] = useState()
+  const handleRemove = (index) => setOptions(options.filter(item => item.index !== index).map((item, i) => {
+    if (item.index > index) {
+      item.index = i
+    }
+    return item
+  }))
+  const handleAdd = (index) => setOptions((val) => {
+    if (val.length === 1) {
+      return [...val, { index: (val[val.length - 1].index + 1) }]
+    } else {
+      console.log('newOptions0', index)
+      const newOptions = val.slice(0, index + 1)
+      newOptions.push({ index: index + 2, value: '' })
+      const newOptions1 = val.slice(index + 1, val.length)
+      const newOptions2 = [...newOptions, ...newOptions1]
+      newOptions2.map((item, i) => {
+        if (item.index > index) {
+          item.index = i
+        }
+        return item
+      })
+      return newOptions2
+    }
+  })
   const navigate = useNavigate()
-  useEffect(() => {
-    document.title = 'QuickPoll - Create poll'
-  }, [])
+  useTitle({ title: 'Create Poll' })
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -23,7 +44,7 @@ export default function CreatePoll () {
     const title = formData.get('title')
     let options = Object.fromEntries(formData)
     delete options.title
-    options = Object.values(options).filter(item => item !== '')
+    options = Object.values(options)
     try {
       handleValidations(options, title)
       setRequestState(requuestStateEnum.pending)
@@ -41,13 +62,15 @@ export default function CreatePoll () {
         }, 2000)
       })
     } catch (err) {
-      setError(err.message)
       setMessage({ message: err.message, severity: 'error' })
     }
   }
 
   const handleValidations = (options, title) => {
-    if (options.length < 2) {
+    if (options.some(item => item.length === 0)) {
+      throw new Error('All options must be at least a character long')
+    }
+    if (options.filter(item => item.length > 0).length <= 2) {
       throw new Error('At least two options are required')
     }
     if (title.length < 3) {
@@ -56,43 +79,77 @@ export default function CreatePoll () {
   }
 
   const handleShare = () => {
-    navigate(`/${idPoll.current}`)
+    navigate(`/poll/${idPoll.current}`)
+  }
+  const handleChange = (e, index) => {
+    if (e.target.value !== '' && e.target.value.length > 0 && (index + 1) - options.length === 0) {
+      handleClick()
+    }
+    const value = e.target.value
+    setOptions(options => {
+      const newOptions = options.map(item => {
+        if (item.index === index) {
+          return { ...item, value }
+        }
+        return item
+      })
+      return newOptions
+    })
   }
   return (
     <>
-      <CssBaseline />
       <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
-      <Box width='100%' maxWidth='md' mx='auto' px={2}>
-        <Typography variant='h1' fontSize={38} fontWeight={500} align='center'>Create poll</Typography>
-        <Typography lineHeight={1.25} variant='subtitle1' align='center' fontSize={12}>
-          Add options to your poll. <br />
-          Once created the poll, this will be available for voting <b>30 mins</b>. After that, the results will be public.
+      <Box width='100%' maxWidth='md' mx='auto' px={2} mt={2} display='flex' flex='1' flexDirection='column' gap={2}>
+        <Typography lineHeight={1.25} variant='body2' align='center' fontSize={12}>
+          Once created, this will be available for voting <b>30 mins</b>. After that, the poll will be closed and the results will be public.
         </Typography>
-        <Link textAlign='center' to='/' display='block' py={1} component={RouterLink}>Home</Link>
-        <Stack direction='row' alignItems='center'>
-          <Button onClick={handleClick} startIcon={<Add />}>
-            add option
-          </Button>
-        </Stack>
-        <Box component='form' maxWidth='md' display='flex' flexDirection='column' gap={1} onSubmit={handleSubmit}>
+        <Box sx={{ flex: '1' }} component='form' maxWidth='md' display='flex' flexDirection='column' gap={1} onSubmit={handleSubmit}>
           <TextField variant='filled' label='title' name='title' required />
-          <RadioGroup sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <RadioGroup
+            sx={{
+              flexGrow: '1',
+              flexShrink: '1',
+              flexBasis: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              gap: 1,
+              flexWrap: 'nowrap',
+              height: '100%',
+              maxHeight: '100%'
+            }} name='options'
+          >
             {options.map(item => {
               return (
-                <Box key={item.index} display='flex' flexDirection='row' alignItems='center'>
-                  <TextField variant='filled' label='option' name={`option ${item.index}`} required />
-                  <Button startIcon={<Remove />} onClick={() => handleRemove(item.index)} disabled={!(options.length > 1)}>remove option</Button>
+                <Box key={item.index} display='flex' flexDirection='row' alignItems='center' gap={1}>
+                  <IconButton
+                    onClick={() => handleRemove(item.index)} disabled={!(options.length > 1)} sx={{
+                      border: '1px solid',
+                      borderColor: 'divider'
+                    }}
+                  ><Remove />
+                  </IconButton>
+                  <TextField
+                    onChange={(e) => {
+                      handleChange(e, item.index)
+                    }} variant='filled' label='option' autoComplete='off' name={`option ${item.index}`} value={item.value || ''}
+                  />
+                  <IconButton
+                    onClick={() => handleAdd(item.index)} sx={{
+                      border: '1px solid',
+                      borderColor: 'divider'
+                    }}
+                  ><Add />
+                  </IconButton>
                 </Box>
               )
             })}
           </RadioGroup>
-          <Typography variant='caption' color='error'>{error}</Typography>
-          <Button type='submit' variant='contained'>
-            create poll
-          </Button>
-          {/* {requestState === requuestStateEnum.pending && <Typography>creating poll...</Typography>}
-          {requestState === requuestStateEnum.success && <Typography>poll created!</Typography>}
-          {requestState === requuestStateEnum.error && <Typography>error creating poll</Typography>} */}
+          <Box display='flex' flexDirection='column' justifyContent='flex-end'>
+            <Button sx={{ width: 'fit-content', alignSelf: 'flex-end' }} type='submit' variant='contained' startIcon={<Add />} disabled={requestState === requuestStateEnum.pending}>
+              create poll
+            </Button>
+          </Box>
           {idPoll.current && <Button startIcon={<Launch />} onClick={handleShare}>View poll</Button>}
         </Box>
       </Box>

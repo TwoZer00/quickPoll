@@ -8,6 +8,7 @@ import { animated, useSpring } from '@react-spring/web'
 import ERRORS from '../const/Const'
 import dayjs from 'dayjs'
 import GoogleAd from '../components/GoogleAd'
+import useTitle from '../hook/useTitle'
 
 export default function Poll () {
   const [data, setData] = useState((useLoaderData()))
@@ -18,6 +19,7 @@ export default function Poll () {
   const [results, setResults] = useState()
   const [duration, setDuration] = useState()
   const { id } = useParams()
+  useTitle({ title: `QuickPoll - ${data?.title}` || 'QuickPoll - Poll' })
 
   useEffect(() => {
     const getData = async () => {
@@ -65,19 +67,10 @@ export default function Poll () {
   const isVoted = () => {
     return options.some(option => option.voted)
   }
-  useEffect(() => {
-    document.title = `QuickPoll - ${data?.title}`
-  }, [data?.title])
 
   return (
     <>
-      <CssBaseline />
-      <Box height='100dvh' sx={{ display: 'flex', flexDirection: 'column' }}>
-        <Box display='block' textAlign='center'>
-          <Typography variant='h1' fontSize={32} fontWeight='bold'>QuickPoll</Typography>
-          <Typography variant='subtitle1' fontSize={14}>Create, share and see in real time your polls.</Typography>
-          <Link component={RouterLink} to='/' p={1}>Home</Link>
-        </Box>
+      <Box height='100%' sx={{ display: 'flex', flexDirection: 'column' }}>
         <Stack flex={1} justifyContent='space-around' sx={{ flexDirection: { lg: 'column', xl: 'row' } }}>
           <Box display='flex' height='100%' alignItems='center' sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
             <GoogleAd adSlot='3837806330' />
@@ -124,10 +117,6 @@ export default function Poll () {
             <GoogleAd adSlot='5542566407' />
           </Box>
         </Stack>
-        <Typography component='footer' variant='caption' textAlign='center'>
-          Made with ❤️ by <a target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</a>. <br />
-          Create your own poll in <Link component={RouterLink} to='/create'>here</Link>.
-        </Typography>
       </Box>
     </>
   )

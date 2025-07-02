@@ -7,6 +7,7 @@ import useTitle from '../hook/useTitle'
 export default function CreatePoll () {
   const [options, setOptions] = useState([{ index: 0 }])
   const idPoll = useRef()
+  const [errors, setErrors] = useState({})
   const [,, setMessage] = useOutletContext()
   const [requestState, setRequestState] = useState(requuestStateEnum.none)
   const handleClick = () => setOptions([...options, { index: (options[options.length - 1].index + 1) }])
@@ -68,9 +69,16 @@ export default function CreatePoll () {
 
   const handleValidations = (options, title) => {
     if (options.some(item => item.length === 0)) {
-      throw new Error('All options must be at least a character long')
+      setOptions(options => options.map((item, index) => {
+        if ((!item.value || item.value.length === 0)) {
+          return { ...item, error: true }
+        }
+        item.error = false
+        return item
+      })
+      )
     }
-    if (options.filter(item => item.length > 0).length <= 2) {
+    if (options.filter(item => item.length > 0).length < 2) {
       throw new Error('At least two options are required')
     }
     if (title.length < 3) {
@@ -85,6 +93,14 @@ export default function CreatePoll () {
     if (e.target.value !== '' && e.target.value.length > 0 && (index + 1) - options.length === 0) {
       handleClick()
     }
+    setOptions(options => {
+      return options.map(item => {
+        if (item.index === index) {
+          return { ...item, error: false }
+        }
+        return item
+      })
+    })
     const value = e.target.value
     setOptions(options => {
       const newOptions = options.map(item => {
@@ -99,12 +115,12 @@ export default function CreatePoll () {
   return (
     <>
       <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
-      <Box width='100%' maxWidth='md' mx='auto' px={2} mt={2} display='flex' flex='1' flexDirection='column' gap={2}>
+      <Box width='100%' maxWidth='md' mx='auto' px={2} display='flex' flex='1' flexDirection='column' gap={2} py={2} bgcolor='background.paper'>
         <Typography lineHeight={1.25} variant='body2' align='center' fontSize={12}>
           Once created, this will be available for voting <b>30 mins</b>. After that, the poll will be closed and the results will be public.
         </Typography>
         <Box sx={{ flex: '1' }} component='form' maxWidth='md' display='flex' flexDirection='column' gap={1} onSubmit={handleSubmit}>
-          <TextField variant='filled' label='title' name='title' required />
+          <TextField variant='filled' label='title' name='title' required error={errors.title} />
           <RadioGroup
             sx={{
               flexGrow: '1',
@@ -119,6 +135,7 @@ export default function CreatePoll () {
               maxHeight: '100%'
             }} name='options'
           >
+            {errors.options && <Typography variant='caption' color='error'>{errors.options[0]} item in <b>{errors.options[1] + 1}</b> position</Typography>}
             {options.map(item => {
               return (
                 <Box key={item.index} display='flex' flexDirection='row' alignItems='center' gap={1}>
@@ -130,6 +147,7 @@ export default function CreatePoll () {
                   ><Remove />
                   </IconButton>
                   <TextField
+                    error={item.error}
                     onChange={(e) => {
                       handleChange(e, item.index)
                     }} variant='filled' label='option' autoComplete='off' name={`option ${item.index}`} value={item.value || ''}
@@ -146,7 +164,7 @@ export default function CreatePoll () {
             })}
           </RadioGroup>
           <Box display='flex' flexDirection='column' justifyContent='flex-end'>
-            <Button sx={{ width: 'fit-content', alignSelf: 'flex-end' }} type='submit' variant='contained' startIcon={<Add />} disabled={requestState === requuestStateEnum.pending}>
+            <Button sx={{ width: 'fit-content', alignSelf: 'flex-end' }} type='submit' variant='contained' color='secondary' startIcon={<Add />} disabled={requestState === requuestStateEnum.pending}>
               create poll
             </Button>
           </Box>

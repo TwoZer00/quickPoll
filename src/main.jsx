@@ -18,11 +18,7 @@ import { isPollClosed } from './utils/utils'
 
 const router = createBrowserRouter([
   {
-    path: '',
-    element: <Home />
-  },
-  {
-    path: 'poll',
+    path: '/',
     element: <InitAuth />,
     loader: () => {
       const auth = getAuth()
@@ -30,11 +26,15 @@ const router = createBrowserRouter([
     },
     children: [
       {
+        path: '',
+        element: <Home />
+      },
+      {
         path: 'create',
         element: <CreatePoll />
       },
       {
-        path: ':id',
+        path: 'poll/:id',
         element: <Poll />,
         loader: async ({ params }) => {
           return Promise.all([getPoll(params.id), getOptions(params.id)]).then((values) => {

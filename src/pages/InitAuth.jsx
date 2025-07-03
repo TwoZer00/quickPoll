@@ -1,19 +1,21 @@
-import { Alert, Box, createTheme, CssBaseline, Dialog, DialogTitle, Link, List, ListItem, ListItemButton, ListItemText, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
+import { Alert, Badge, Box, Chip, createTheme, CssBaseline, Dialog, DialogTitle, Divider, Link, List, ListItem, ListItemButton, ListItemText, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { Outlet, Link as RouterLink } from 'react-router-dom'
 import Menu from '../components/Menu'
 import { amber, blueGrey, deepOrange } from '@mui/material/colors'
 import { PropTypes } from 'prop-types'
+import { isPollClosed } from '../utils/utils'
 
 export default function InitAuth () {
   const bgColor = blueGrey[50]
   const color = blueGrey[900]
-  const theme = createTheme({
+  let theme = createTheme({
     palette: {
       primary: amber,
       secondary: deepOrange
     }
   })
+  theme = responsiveFontSizes(theme)
   const [open, setOpen] = useState(false)
   const [openModal, setOpenModal] = useState(false)
   const [message, setMessage] = useState()
@@ -29,6 +31,9 @@ export default function InitAuth () {
       setMessage(null)
     }
   }, [message])
+  const handleCloseModal = () => {
+    setOpenModal(false)
+  }
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -41,7 +46,7 @@ export default function InitAuth () {
             <Link component={RouterLink} to='/privacy' color='inherit' underline='hover'>Privacy Policy</Link> | <Link component={RouterLink} to='/terms' color='inherit' underline='hover'>Terms of Service</Link>
           </Typography>
         </Box>
-        <LastPollsListModal data={sessionStorage.getItem('lastPolls') ? JSON.parse(sessionStorage.getItem('lastPolls')) : []} open={openModal} onClose={() => { setOpenModal(false) }} />
+        <LastPollsListModal data={sessionStorage.getItem('lastPolls') ? JSON.parse(sessionStorage.getItem('lastPolls')) : []} open={openModal} onClose={handleCloseModal} />
         <Snackbar
           open={open}
           TransitionComponent={SlideTransition}
@@ -75,11 +80,32 @@ const LastPollsListModal = (props) => {
   return (
     <Dialog onClose={handleClose} open={open} TransitionComponent={Transition}>
       <DialogTitle>Last polls created in this session</DialogTitle>
+      <Divider />
       <List sx={{ pt: 0 }}>
         {props.data?.map((poll) => (
           <ListItem disableGutters key={poll.author}>
-            <ListItemButton component={RouterLink} to={`/poll/${poll.id}`}>
-              <ListItemText primary={poll.title} secondary={(new Date(poll.createdAt)).toLocaleString()} />
+            <ListItemButton component={RouterLink} to={`/poll/${poll.id}`} onClick={handleClose}>
+              <ListItemText
+                primary={
+                  <>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant='body1' noWrap>
+                        {poll.title}
+                      </Typography>
+                      <Chip
+                        label={isPollClosed(poll.createdAt) ? 'Closed' : 'Open'}
+                        color={isPollClosed(poll.createdAt) ? 'error' : 'success'}
+                        size='small'
+                        variant='outlined'
+                      />
+                    </Box>
+                  </>
+                } secondary={
+                  <>
+                    <Typography variant='caption' color='text.secondary'>Created at {new Date(poll.createdAt).toLocaleString()}</Typography>
+                  </>
+                }
+              />
             </ListItemButton>
           </ListItem>
         ))}

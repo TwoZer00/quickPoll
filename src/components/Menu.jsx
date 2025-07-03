@@ -10,23 +10,25 @@ export default function Menu ({ title, openModal }) {
     <Box>
       <AppBar position='sticky'>
         <Toolbar>
-          <Typography variant='h6' component='div' sx={{ flexGrow: 1 }}>
-            {title || 'QuickPoll'}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <Typography variant='h6' maxWidth='9ch' sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {title}
+            </Typography>
+          </Box>
           <Button color='inherit' component={Link} to='/' disableRipple>
             Home
           </Button>
           {
               sessionStorage.getItem('lastPolls') &&
               (
-                <Button color='inherit' onClick={() => openModal(true)}>
+                <Button sx={{ whiteSpace: 'nowrap' }} color='inherit' onClick={() => openModal(true)} disableRipple>
                   Last polls
                 </Button>
               )
             }
           {
             title !== 'Create Poll' && (
-              <Button color='inherit' component={Link} to='/create' disableRipple>
+              <Button sx={{ whiteSpace: 'nowrap' }} color='inherit' component={Link} to='/create' disableRipple>
                 Create Poll
               </Button>
             )

@@ -8,7 +8,7 @@ export default function Home () {
       <Stack direction='column' height='100dvh' width='100dvw'>
         <Box component='main' flex={1} display='flex' justifyContent='center' flexDirection='column' alignItems='center'>
           <Typography variant='h1' fontWeight={500}>QuickPoll</Typography>
-          <Typography variant='body1'>Create quick poll, share it and see the results in realt time.</Typography>
+          <Typography variant='body1' align='center'>Create quick poll, share it and see the results in real time.</Typography>
         </Box>
       </Stack>
     </>

@@ -93,7 +93,7 @@ export default function Poll () {
                 </Box>
                 {
                 data?.title
-                  ? <Typography variant='h1' fontSize={32} fontWeight='400'>{data?.title}</Typography>
+                  ? <Typography variant='h2' component='h1' fontWeight='400' maxWidth='22ch' title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{data?.title}</Typography>
                   : <Skeleton variant='text' height={32} width='12ch' />
               }
                 {data?.user && <Typography variant='subtitle1'>created by {data?.user?.name}</Typography>}

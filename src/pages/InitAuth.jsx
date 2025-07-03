@@ -83,7 +83,7 @@ const LastPollsListModal = (props) => {
       <Divider />
       <List sx={{ pt: 0 }}>
         {props.data?.map((poll) => (
-          <ListItem disableGutters key={poll.author}>
+          <ListItem disableGutters key={poll.id}>
             <ListItemButton component={RouterLink} to={`/poll/${poll.id}`} onClick={handleClose}>
               <ListItemText
                 primary={

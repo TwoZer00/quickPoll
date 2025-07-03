@@ -46,6 +46,7 @@ export default function CreatePoll () {
     let options = Object.fromEntries(formData)
     delete options.title
     options = Object.values(options)
+    options[options.length - 1].length === 0 && options.pop() // remove last empty option
     try {
       handleValidations(options, title)
       setRequestState(requuestStateEnum.pending)

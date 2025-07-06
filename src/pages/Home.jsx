@@ -2,7 +2,7 @@ import { Box, Stack, Typography } from '@mui/material'
 import useTitle from '../hook/useTitle'
 
 export default function Home () {
-  useTitle({ title: 'QuickPoll - Create your polls, share it and see the results' })
+  useTitle({ title: 'QuickPoll' })
   return (
     <>
       <Stack direction='column' flex={1}>

@@ -3,6 +3,7 @@ import { collection, doc, getFirestore, runTransaction, getDoc, getDocs, setDoc,
 import { app } from './init'
 import { getAuth, signInAnonymously } from 'firebase/auth'
 import CError from '../error/Error'
+import { getAnalytics, logEvent } from 'firebase/analytics'
 
 const db = getFirestore(app)
 async function createPoll({ title, options }) {
@@ -17,6 +18,8 @@ async function createPoll({ title, options }) {
       transaction.set(optionRef, optionsTemp[option])
     }
   })
+  const analytics = getAnalytics()
+  logEvent(analytics, 'poll_created', { pollId: poll.id, author: getAuth().currentUser?.uid })
   const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
   lastPolls.push({ ...pollData, id: poll.id, author: getAuth().currentUser?.uid })
   sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
@@ -33,13 +36,14 @@ async function setVote({ lastVote, voteId, pollId }) {
   const optionRef = doc(pollRef, 'options', voteId)
   const votesRef = collection(optionRef, 'votes')
   const voterRef = doc(votesRef, getAuth().currentUser?.uid)
-
+  const analytics = getAnalytics()
   try {
     if (lastVote) {
       const lastVoteRef = doc(collection(pollRef, 'options', lastVote.id, 'votes'), getAuth().currentUser.uid)
       await deleteDoc(lastVoteRef)
     }
     await setDoc(voterRef, { id: getAuth().currentUser.uid, votedAt: new Date() })
+    logEvent(analytics, 'poll_voted', { pollId, voteId, voterId: getAuth().currentUser?.uid })
   } catch (error) {
     if (error.code === 'permission-denied') throw CError.fromCode(16)
   }

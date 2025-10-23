@@ -1,4 +1,4 @@
-import { Alert, Badge, Box, Chip, createTheme, CssBaseline, Dialog, DialogTitle, Divider, Link, List, ListItem, ListItemButton, ListItemText, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
+import { Alert, Box, Chip, createTheme, CssBaseline, Dialog, DialogTitle, Divider, Link, List, ListItem, ListItemButton, ListItemText, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { Outlet, Link as RouterLink } from 'react-router-dom'
 import Menu from '../components/Menu'
@@ -43,7 +43,7 @@ export default function InitAuth () {
           <Outlet context={[handleOpen, handleClose, setMessage, [title, setTitle], [openModal, setOpenModal]]} />
           <Typography component='footer' variant='caption' textAlign='center' bgcolor={bgColor} color={color} py={2}>
             Made with ❤️ by <Link color='inherit' target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</Link>. <br />
-            <Link component={RouterLink} to='/privacy' color='inherit' underline='hover'>Privacy Policy</Link> | <Link component={RouterLink} to='/terms' color='inherit' underline='hover'>Terms of Service</Link>
+            <Link color='inherit' underline='hover' href='/pp.md'>Privacy Policy</Link> | <Link href='/tos.md' color='inherit' underline='hover'>Terms of Service</Link>
           </Typography>
         </Box>
         <LastPollsListModal data={sessionStorage.getItem('lastPolls') ? JSON.parse(sessionStorage.getItem('lastPolls')) : []} open={openModal} onClose={handleCloseModal} />

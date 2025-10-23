@@ -20,7 +20,7 @@ export default function InitAuth () {
   const [openModal, setOpenModal] = useState(false)
   const [message, setMessage] = useState()
   const handleOpen = () => setOpen(true)
-  const [title, setTitle] = useState('QuickPoll - Create your polls, share it and see the results')
+  const [title, setTitle] = useState('')
   const handleClose = () => {
     setOpen(false)
   }

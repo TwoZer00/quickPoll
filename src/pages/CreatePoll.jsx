@@ -117,9 +117,6 @@ export default function CreatePoll () {
     <>
       <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
       <Box width='100%' maxWidth='md' mx='auto' px={2} display='flex' flex='1' flexDirection='column' gap={2} py={2} bgcolor='background.paper'>
-        <Typography lineHeight={1.25} variant='body2' align='center' fontSize={12}>
-          Once created, this will be available for voting <b>30 mins</b>. After that, the poll will be closed and the results will be public.
-        </Typography>
         <Box sx={{ flex: '1' }} component='form' maxWidth='md' display='flex' flexDirection='column' gap={1} onSubmit={handleSubmit}>
           <TextField variant='filled' label='title' name='title' required error={errors.title} />
           <RadioGroup
@@ -171,6 +168,9 @@ export default function CreatePoll () {
           </Box>
           {idPoll.current && <Button startIcon={<Launch />} onClick={handleShare}>View poll</Button>}
         </Box>
+        <Typography variant='body2' align='center' fontSize={12}>
+          Once created, this will be available for voting <b>30 mins</b>. After that, the poll will be closed and the results will be public.
+        </Typography>
       </Box>
     </>
   )

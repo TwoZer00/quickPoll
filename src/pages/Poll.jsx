@@ -19,7 +19,7 @@ export default function Poll () {
   const [results, setResults] = useState()
   const [duration, setDuration] = useState()
   const { id } = useParams()
-  useTitle({ title: `QuickPoll - ${data?.title}` || 'QuickPoll - Poll' })
+  useTitle({ title: `QuickPoll - ${data?.title}` || 'QuickPoll - Poll', description: `Vote on: ${data?.title}` })
 
   useEffect(() => {
     const getData = async () => {

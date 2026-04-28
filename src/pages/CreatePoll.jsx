@@ -36,7 +36,7 @@ export default function CreatePoll () {
     }
   })
   const navigate = useNavigate()
-  useTitle({ title: 'Create Poll' })
+  useTitle({ title: 'Create Poll', description: 'Create a new poll and share it with others.' })
 
   const handleSubmit = (e) => {
     e.preventDefault()

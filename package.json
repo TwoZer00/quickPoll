@@ -20,7 +20,7 @@
     "@mui/material": "^5.15.19",
     "@react-spring/web": "^9.7.4",
     "dayjs": "^1.11.13",
-    "firebase": "^10.12.2",
+    "firebase": "^12.12.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.1",
@@ -29,11 +29,11 @@
   "devDependencies": {
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
-    "vite": "^5.2.0"
+    "vite": "^8.0.10"
   }
 }

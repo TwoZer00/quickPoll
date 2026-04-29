@@ -81,7 +81,7 @@ export default function Poll () {
                 <ShareMenu setMessage={setMessage} />
                 {
                 data?.title
-                  ? <Typography variant='h4' component='h1' fontWeight={700} maxWidth='30ch' title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{data?.title}</Typography>
+                  ? <Typography variant='h4' component='h1' fontWeight={700} title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis', wordBreak: 'break-word' }}>{data?.title}</Typography>
                   : <Skeleton variant='text' height={32} width='12ch' />
               }
                 {data?.user && <Typography variant='body2' color='text.secondary'>by {data?.user?.name}</Typography>}

@@ -86,7 +86,7 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
         </ToggleButtonGroup>
       )}
       <Box sx={{ display: viewMode === 'vote' ? 'block' : 'none' }}>
-        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: 'repeat(2, 1fr)', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 'none' : 300, overflowY: 'auto' }}>
+        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: '1fr', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 'none' : 300, overflowY: 'auto' }}>
           {options.map((opt) => (
             <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} cardMode={hasImages} selected={option} />
           ))}
@@ -113,8 +113,8 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
       )}
       {!dataReady && viewMode !== 'vote' && (
         viewMode === 'pie'
-          ? <Box display='flex' justifyContent='center' alignItems='center' height={250}><Skeleton variant='circular' width={160} height={160} /></Box>
-          : <Box display='flex' alignItems='end' justifyContent='center' gap={1} height={250} pb={3}>{[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (<Skeleton key={i} variant='rounded' width={32} height={`${h * 70}%`} />))}</Box>
+          ? <Box display='flex' justifyContent='center' alignItems='center' height={200}><Skeleton variant='circular' width={160} height={160} /></Box>
+          : <Box display='flex' alignItems='end' justifyContent='center' gap={1} height={200} pb={3}>{[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (<Skeleton key={i} variant='rounded' width={32} height={`${h * 70}%`} />))}</Box>
       )}
       {showResult && dataReady && (
         <>

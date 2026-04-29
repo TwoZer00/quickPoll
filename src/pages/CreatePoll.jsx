@@ -150,7 +150,7 @@ export default function CreatePoll () {
 
           <Divider />
 
-          <Box ref={optionsRef} display='flex' flexDirection='column' gap={1.5} sx={{ maxHeight: '40vh', pt: 1, overflowY: 'auto' }}>
+          <Box ref={optionsRef} display='flex' flexDirection='column' gap={1.5} sx={{ maxHeight: 250, pt: 1, overflowY: 'auto' }}>
             {options.map(item => (
               <Box key={item.index} display='flex' gap={1} alignItems='center'>
                 {item.imagePreview

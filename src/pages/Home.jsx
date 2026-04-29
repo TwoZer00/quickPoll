@@ -20,7 +20,8 @@ export default function Home () {
           sx={{
             background: 'linear-gradient(135deg, #ff6d00 0%, #ffa000 100%)',
             WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            WebkitTextFillColor: 'transparent',
+            overflowWrap: 'break-word'
           }}
         >
           QuickPoll

@@ -38,7 +38,7 @@ const PieChartView = memo(({ options, voteCounts }) => {
   )
 
   return (
-    <ResponsiveContainer width='100%' height={250}>
+    <ResponsiveContainer width='100%' aspect={1.6} minHeight={180} maxHeight={280}>
       <PieChart role='img' aria-label='Pie chart of poll results'>
         <defs>
           {data.map(entry => entry.image && (

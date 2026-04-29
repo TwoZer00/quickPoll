@@ -21,7 +21,7 @@ export default function Menu ({ openModal }) {
           bgcolor: 'rgba(255,160,0,0.9)',
           backdropFilter: 'blur(16px)',
           borderRadius: 3,
-          mx: { xs: 1, sm: 2 },
+          mx: { xs: 0.5, sm: 2 },
           mt: 1,
           width: 'auto',
           boxShadow: '0 4px 24px rgba(255,160,0,0.25)',

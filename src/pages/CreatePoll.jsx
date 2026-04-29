@@ -1,8 +1,9 @@
 import { useNavigate, useOutletContext } from 'react-router-dom'
-import { Add, Launch, Remove } from '@mui/icons-material'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, InputAdornment, LinearProgress, Paper, TextField, Typography } from '@mui/material'
+import { Add, Launch, Remove, AddPhotoAlternate, Close } from '@mui/icons-material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, InputAdornment, LinearProgress, Paper, TextField, Typography, Avatar } from '@mui/material'
 import { useRef, useState } from 'react'
 import { createPoll, requestStateEnum } from '../firebase/utils'
+import { uploadImage } from '../utils/cloudinary'
 import useTitle from '../hook/useTitle'
 import PageWrapper from '../components/PageWrapper'
 
@@ -31,6 +32,23 @@ export default function CreatePoll () {
     const value = e.target.value
     setOptions(prev => prev.map(item =>
       item.index === index ? { ...item, value, error: false } : item
+    ))
+  }
+
+  const handleImageChange = (e, index) => {
+    const file = e.target.files[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) { setMessage({ message: 'Only image files are allowed', severity: 'error' }); return }
+    if (file.size > 5 * 1024 * 1024) { setMessage({ message: 'Image must be under 5MB', severity: 'error' }); return }
+    const preview = URL.createObjectURL(file)
+    setOptions(prev => prev.map(item =>
+      item.index === index ? { ...item, imageFile: file, imagePreview: preview } : item
+    ))
+  }
+
+  const handleRemoveImage = (index) => {
+    setOptions(prev => prev.map(item =>
+      item.index === index ? { ...item, imageFile: null, imagePreview: null } : item
     ))
   }
 
@@ -73,7 +91,7 @@ export default function CreatePoll () {
     if (!valid) throw new Error('Please fix the errors above')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
     const title = formData.get('title').trim()
@@ -84,7 +102,19 @@ export default function CreatePoll () {
     try {
       handleValidations(optionsData, title)
       setRequestState(requestStateEnum.pending)
-      createPoll({ title, options: optionsData }).then((id) => {
+
+      const filledOptions = options.filter(o => o.value && o.value.trim().length > 0)
+      const imageUploads = await Promise.all(
+        filledOptions.map(o => o.imageFile
+          ? uploadImage(o.imageFile).catch(() => null)
+          : Promise.resolve(null))
+      )
+      const optionsWithImages = optionsData.map((text, i) => ({
+        title: text,
+        ...(imageUploads[i] && { image: imageUploads[i] })
+      }))
+
+      createPoll({ title, options: optionsWithImages }).then((id) => {
         setRequestState(requestStateEnum.success)
         idPoll.current = id
         setShowSuccess(true)
@@ -122,25 +152,41 @@ export default function CreatePoll () {
 
           <Box ref={optionsRef} display='flex' flexDirection='column' gap={1} sx={{ maxHeight: '40vh', pt:1,overflowY: 'auto' }}>
             {options.map(item => (
-              <TextField
-                key={item.index}
-                fullWidth size='small'
-                error={!!item.error}
-                helperText={item.error || ''}
-                onChange={(e) => handleChange(e, item.index)}
-                variant='outlined' label={`Option ${item.index + 1}`} autoComplete='off'
-                name={`option ${item.index}`} value={item.value || ''}
-                inputProps={{ maxLength: 200 }}
-                InputProps={options.length > 2 ? {
-                  endAdornment: (
-                    <InputAdornment position='end'>
-                      <IconButton edge='end' aria-label={`Remove option ${item.index + 1}`} onClick={() => handleRemove(item.index)} size='small'>
-                        <Remove fontSize='small' />
+              <Box key={item.index} display='flex' gap={1} alignItems='center'>
+                {item.imagePreview
+                  ? (
+                    <Box position='relative'>
+                      <Avatar src={item.imagePreview} variant='rounded' sx={{ width: 40, height: 40 }} />
+                      <IconButton size='small' onClick={() => handleRemoveImage(item.index)} sx={{ position: 'absolute', top: -8, right: -8, bgcolor: 'background.paper', p: 0.25 }}>
+                        <Close sx={{ fontSize: 14 }} />
                       </IconButton>
-                    </InputAdornment>
-                  )
-                } : undefined}
-              />
+                    </Box>
+                    )
+                  : (
+                    <IconButton component='label' size='small' aria-label={`Add image to option ${item.index + 1}`}>
+                      <AddPhotoAlternate fontSize='small' />
+                      <input type='file' hidden accept='image/*' onChange={(e) => handleImageChange(e, item.index)} />
+                    </IconButton>
+                    )}
+                <TextField
+                  fullWidth size='small'
+                  error={!!item.error}
+                  helperText={item.error || ''}
+                  onChange={(e) => handleChange(e, item.index)}
+                  variant='outlined' label={`Option ${item.index + 1}`} autoComplete='off'
+                  name={`option ${item.index}`} value={item.value || ''}
+                  inputProps={{ maxLength: 200 }}
+                  InputProps={options.length > 2 ? {
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton edge='end' aria-label={`Remove option ${item.index + 1}`} onClick={() => handleRemove(item.index)} size='small'>
+                          <Remove fontSize='small' />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  } : undefined}
+                />
+              </Box>
             ))}
           </Box>
           <Button

@@ -60,6 +60,8 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
   const total = useMemo(() => Object.values(voteCounts).reduce((a, b) => a + b, 0), [voteCounts])
   const showResult = options.some(option => option.voted) || poll.closed
   const dataReady = Object.keys(voteCounts).length === options.length
+  const hasImages = options.some(opt => opt.image)
+  const cols = Math.min(options.length, 4)
 
   const handleViewChange = (_, v) => {
     if (!v) return
@@ -79,14 +81,14 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
           <ToggleButton value='bars' aria-label='Bar chart'><BarChartIcon fontSize='small' /></ToggleButton>
         </ToggleButtonGroup>
       )}
-      {viewMode === 'vote' && (
-        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 300, overflowY: 'auto' }}>
+      <Box sx={{ display: viewMode === 'vote' ? 'block' : 'none' }}>
+        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: 'repeat(2, 1fr)', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 'none' : 300, overflowY: 'auto' }}>
           {options.map((opt) => (
-            <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} />
+            <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} cardMode={hasImages} selected={option} />
           ))}
         </RadioGroup>
-      )}
-      {showResult && dataReady && (viewMode === 'pie' || viewMode === 'bars') && (
+      </Box>
+      {showResult && dataReady && viewMode !== 'vote' && (
         <Stack gap={0.5}>
           {options.map(opt => {
             const count = voteCounts[opt.id] || 0
@@ -94,7 +96,9 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
             return (
               <Stack key={opt.id} direction='row' justifyContent='space-between' alignItems='center' px={1}>
                 <Stack direction='row' alignItems='center' gap={1}>
-                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: generateColorBySeed(opt.id), flexShrink: 0 }} />
+                  {opt.image
+                    ? <Box component='img' src={opt.image} alt={opt.title} sx={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    : <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: generateColorBySeed(opt.id), flexShrink: 0 }} />}
                   <Typography variant='body2'>{opt.title}</Typography>
                 </Stack>
                 <Typography variant='body2' fontWeight={600} color='text.secondary'>{count} · {pct}%</Typography>
@@ -103,28 +107,21 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
           })}
         </Stack>
       )}
-      {viewMode === 'pie' && !dataReady && (
-        <Box display='flex' justifyContent='center' alignItems='center' height={250}>
-          <Skeleton variant='circular' width={160} height={160} />
-        </Box>
+      {!dataReady && viewMode !== 'vote' && (
+        viewMode === 'pie'
+          ? <Box display='flex' justifyContent='center' alignItems='center' height={250}><Skeleton variant='circular' width={160} height={160} /></Box>
+          : <Box display='flex' alignItems='end' justifyContent='center' gap={1} height={250} pb={3}>{[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (<Skeleton key={i} variant='rounded' width={32} height={`${h * 70}%`} />))}</Box>
       )}
-      {viewMode === 'bars' && !dataReady && (
-        <Box display='flex' alignItems='end' justifyContent='center' gap={1} height={250} pb={3}>
-          {[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (
-            <Skeleton key={i} variant='rounded' width={32} height={`${h * 70}%`} />
-          ))}
-        </Box>
-      )}
-      {viewMode === 'pie' && dataReady && (
+      {showResult && dataReady && (
         <>
-          <Typography variant='caption' align='center' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
-          <PieChartView options={options} voteCounts={voteCounts} />
-        </>
-      )}
-      {viewMode === 'bars' && dataReady && (
-        <>
-          <Typography variant='caption' align='center' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
-          <BarChartView options={options} voteCounts={voteCounts} />
+          <Box sx={{ display: viewMode === 'pie' ? 'block' : 'none' }}>
+            <Typography variant='caption' align='center' display='block' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
+            <PieChartView options={options} voteCounts={voteCounts} />
+          </Box>
+          <Box sx={{ display: viewMode === 'bars' ? 'block' : 'none' }}>
+            <Typography variant='caption' align='center' display='block' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
+            <BarChartView options={options} voteCounts={voteCounts} />
+          </Box>
         </>
       )}
     </>

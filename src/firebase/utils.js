@@ -8,11 +8,15 @@ import { getAnalytics, logEvent } from 'firebase/analytics'
 const db = getFirestore(app)
 async function createPoll({ title, options }) {
   title = title.trim()
-  options = [...new Set(options.map(o => o.trim()).filter(o => o.length > 0))]
+  if (typeof options[0] === 'string') {
+    options = [...new Set(options.map(o => o.trim()).filter(o => o.length > 0))].map(o => ({ title: o }))
+  } else {
+    options = options.filter(o => o.title.trim().length > 0).map(o => ({ ...o, title: o.title.trim() }))
+  }
   if (title.length < 3 || title.length > 200 || options.length < 2) throw CError.fromCode(17, 'Invalid poll data')
   if (!getAuth().currentUser) await signInAnonymously(getAuth())
   const poll = doc(collection(db, 'polls'))
-  const optionsTemp = options.map((option) => ({ title: option }))
+  const optionsTemp = options.map((option) => typeof option === 'string' ? { title: option } : option)
   const pollData = { title, createdAt: new Date(), author: doc(getFirestore(), 'user', getAuth().currentUser?.uid) }
   await runTransaction(db, async (transaction) => {
     transaction.set(poll, pollData)

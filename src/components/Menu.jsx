@@ -26,13 +26,13 @@ export default function Menu ({ title, openModal }) {
               <Button sx={{ whiteSpace: 'nowrap' }} color='inherit' component={Link} to='/create' disableRipple size='small'>Create Poll</Button>
             )}
           </Box>
-          <IconButton color='inherit' onClick={() => setDrawerOpen(true)} sx={{ display: { sm: 'none' } }}>
+          <IconButton color='inherit' aria-label='Open navigation menu' onClick={() => setDrawerOpen(true)} sx={{ display: { sm: 'none' } }}>
             <MenuIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
       <Drawer anchor='right' open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <List sx={{ minWidth: 200 }}>
+        <List sx={{ minWidth: 200 }} role='navigation' aria-label='Main navigation'>
           <ListItemButton onClick={() => { navigate('/'); setDrawerOpen(false) }}>
             <ListItemText primary='Home' />
           </ListItemButton>
@@ -79,7 +79,7 @@ export function PollListItem ({ poll, onClick, sx }) {
   const closed = isPollClosed(poll.createdAt)
   return (
     <ListItemButton onClick={onClick} sx={{ overflow: 'hidden', ...sx }}>
-      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: closed ? 'error.main' : 'success.main', mr: 1.5, flexShrink: 0 }} />
+      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: closed ? 'error.main' : 'success.main', mr: 1.5, flexShrink: 0 }} role='img' aria-label={closed ? 'Closed' : 'Open'} />
       <ListItemText
         sx={{ overflow: 'hidden' }}
         primary={<Typography variant='body2' noWrap>{poll.title}</Typography>}

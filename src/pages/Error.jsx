@@ -22,7 +22,7 @@ export default function Error () {
   return (
     <>
       <CssBaseline />
-      <Box display='flex' flexDirection='column' justifyContent='center' alignItems='center' minHeight='100dvh' gap={2} p={3}>
+      <Box component='main' display='flex' flexDirection='column' justifyContent='center' alignItems='center' minHeight='100dvh' gap={2} p={3} role='alert'>
         <Typography sx={{ ':first-letter': { textTransform: 'uppercase' } }} textAlign='center' variant='h3' fontWeight={500}>
           {message}
         </Typography>

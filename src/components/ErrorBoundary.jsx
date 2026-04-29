@@ -13,7 +13,7 @@ export default class ErrorBoundary extends React.Component {
       return (
         <>
           <CssBaseline />
-          <Box display='flex' flexDirection='column' justifyContent='center' alignItems='center' minHeight='100dvh' gap={2} p={3}>
+            <Box display='flex' flexDirection='column' justifyContent='center' alignItems='center' minHeight='100dvh' gap={2} p={3} role='alert'>
             <Typography variant='h3' fontWeight={500} textAlign='center'>
               Something went wrong
             </Typography>

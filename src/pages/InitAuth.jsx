@@ -41,9 +41,12 @@ export default function InitAuth () {
         <CssBaseline />
         <Box sx={{ display: 'flex', flexDirection: 'column', flex: 'none', width: '100dvw', maxWidth: '100dvw', height: '100dvh', maxHeight: '100dvh' }}>
           <Menu title={title} openModal={setOpenModal} />
-          <LinearProgress sx={{ visibility: isLoading ? 'visible' : 'hidden' }} />
+          <a href='#main-content' style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden', zIndex: 9999 }} onFocus={(e) => { e.target.style.position = 'static'; e.target.style.width = 'auto'; e.target.style.height = 'auto' }} onBlur={(e) => { e.target.style.position = 'absolute'; e.target.style.left = '-9999px'; e.target.style.width = '1px'; e.target.style.height = '1px' }}>Skip to main content</a>
+          <LinearProgress sx={{ visibility: isLoading ? 'visible' : 'hidden' }} aria-hidden={!isLoading} />
           <Suspense fallback={<Box flex={1} />}>
-            <Outlet context={[handleOpen, handleClose, setMessage, [title, setTitle], [openModal, setOpenModal]]} />
+            <Box id='main-content' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              <Outlet context={[handleOpen, handleClose, setMessage, [title, setTitle], [openModal, setOpenModal]]} />
+            </Box>
           </Suspense>
           <Typography component='footer' variant='caption' textAlign='center' bgcolor={bgColor} color={color} py={2}>
             Made with ❤️ by <Link color='inherit' target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</Link>. <br />

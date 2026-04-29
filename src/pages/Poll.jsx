@@ -1,5 +1,5 @@
 import { useLoaderData, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
-import { Alert, alpha, Box, Button, FormControlLabel, IconButton, LinearProgress, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Radio, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { alpha, Box, Button, FormControlLabel, IconButton, LinearProgress, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Radio, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { memo, useMemo, useEffect, useRef, useState } from 'react'
 import { getResults, setVote, requestStateEnum } from '../firebase/utils'
 import { collection, query, onSnapshot } from 'firebase/firestore'
@@ -80,7 +80,7 @@ export default function Poll () {
           </Box>
           <Box flex={1} component='form' onSubmit={handleSubmit} display='flex' alignItems='center' justifyContent='center' width='100%' maxWidth='md'>
             <Box component={Paper} width='100%' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
-              <Box p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box component='main' p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <ShareMenu pollId={id} setMessage={setMessage} />
                 {
                 data?.title
@@ -98,8 +98,8 @@ export default function Poll () {
                     </Typography>
                     )}
                 <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
-                <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={!data || (options.find(option => option.voted)?.id === option || state === requestStateEnum.pending) || data?.closed}>vote</Button>
-                {data?.closed && <Alert severity='warning'>Poll closed.</Alert>}
+                {!data?.closed && <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={!data || (options.find(option => option.voted)?.id === option || state === requestStateEnum.pending)}>vote</Button>}
+                {data?.closed && <Typography variant='body2' color='text.secondary' align='center'>Poll closed — {Object.values(options).length} options</Typography>}
               </Box>
               <LinearProgress variant='indeterminate' sx={{ visibility: state === requestStateEnum.pending ? 'visible' : 'hidden' }} />
             </Box>
@@ -134,7 +134,7 @@ const ShareMenu = ({ pollId, setMessage }) => {
 
   return (
     <Box display='flex' alignSelf='end'>
-      <IconButton size='small' onClick={(e) => setAnchorEl(e.currentTarget)}>
+      <IconButton size='small' aria-label='Share poll' onClick={(e) => setAnchorEl(e.currentTarget)}>
         <Share fontSize='inherit' />
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
@@ -199,7 +199,7 @@ function useVoteCounts(pollId, options) {
 const OptionsList = ({ poll, handleChange, option, options }) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const paramView = searchParams.get('resultsOnly')?.toLowerCase()
-  const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : 'vote')
+  const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : poll.closed ? 'pie' : 'vote')
   const voteCounts = useVoteCounts(poll.id, options)
   const total = useMemo(() => Object.values(voteCounts).reduce((a, b) => a + b, 0), [voteCounts])
   const showResult = options.some(option => option.voted) || poll.closed
@@ -217,10 +217,10 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
   return (
     <>
       {showResult && total > 0 && (
-        <ToggleButtonGroup size='small' value={viewMode} exclusive onChange={handleViewChange} sx={{ alignSelf: 'center' }}>
-          <ToggleButton value='vote'><BallotOutlined fontSize='small' /></ToggleButton>
-          <ToggleButton value='pie'><PieChartIcon fontSize='small' /></ToggleButton>
-          <ToggleButton value='bars'><BarChartIcon fontSize='small' /></ToggleButton>
+        <ToggleButtonGroup size='small' value={viewMode} exclusive onChange={handleViewChange} sx={{ alignSelf: 'center' }} aria-label='Results view'>
+          {!poll.closed && <ToggleButton value='vote' aria-label='Vote view'><BallotOutlined fontSize='small' /></ToggleButton>}
+          <ToggleButton value='pie' aria-label='Pie chart'><PieChartIcon fontSize='small' /></ToggleButton>
+          <ToggleButton value='bars' aria-label='Bar chart'><BarChartIcon fontSize='small' /></ToggleButton>
         </ToggleButtonGroup>
       )}
       {viewMode === 'vote' && (
@@ -232,13 +232,61 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
           }
         </RadioGroup>
       )}
+      {showResult && dataReady && (viewMode === 'pie' || viewMode === 'bars') && (
+        <Stack gap={0.5}>
+          {options.map(opt => {
+            const count = voteCounts[opt.id] || 0
+            const pct = total > 0 ? Math.round((count / total) * 100) : 0
+            return (
+              <Stack key={opt.id} direction='row' justifyContent='space-between' alignItems='center' px={1}>
+                <Stack direction='row' alignItems='center' gap={1}>
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: generateColorBySeed(opt.id), flexShrink: 0 }} />
+                  <Typography variant='body2'>{opt.title}</Typography>
+                </Stack>
+                <Typography variant='body2' fontWeight={600} color='text.secondary'>{count} · {pct}%</Typography>
+              </Stack>
+            )
+          })}
+        </Stack>
+      )}
+      {viewMode === 'pie' && !dataReady && (
+        <Box display='flex' justifyContent='center' alignItems='center' height={250}>
+          <Skeleton variant='circular' width={160} height={160} />
+        </Box>
+      )}
+      {viewMode === 'bars' && !dataReady && (
+        <Box display='flex' alignItems='end' justifyContent='center' gap={1} height={250} pb={3}>
+          {[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (
+            <Skeleton key={i} variant='rounded' width={32} height={`${h * 70}%`} />
+          ))}
+        </Box>
+      )}
       {viewMode === 'pie' && dataReady && (
-        <PieChartView options={options} voteCounts={voteCounts} />
+        <>
+          <Typography variant='caption' align='center' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
+          <PieChartView options={options} voteCounts={voteCounts} />
+        </>
       )}
       {viewMode === 'bars' && dataReady && (
-        <BarChartView options={options} voteCounts={voteCounts} />
+        <>
+          <Typography variant='caption' align='center' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
+          <BarChartView options={options} voteCounts={voteCounts} />
+        </>
       )}
     </>
+  )
+}
+
+const RADIAN = Math.PI / 180
+const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+  if (percent < 0.05) return null
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+  const x = cx + radius * Math.cos(-midAngle * RADIAN)
+  const y = cy + radius * Math.sin(-midAngle * RADIAN)
+  return (
+    <text x={x} y={y} fill='#fff' textAnchor='middle' dominantBaseline='central' fontSize={13} fontWeight={600}>
+      {`${Math.round(percent * 100)}%`}
+    </text>
   )
 }
 
@@ -250,16 +298,14 @@ const PieChartView = memo(({ options, voteCounts }) => {
     [JSON.stringify(voteCounts)]
   )
 
-  const total = useMemo(() => data.reduce((sum, d) => sum + d.value, 0), [data])
-
   return (
     <ResponsiveContainer width='100%' height={250}>
-      <PieChart>
-        <Pie data={data} dataKey='value' nameKey='name' cx='50%' cy='50%' innerRadius={40} outerRadius={80} animationDuration={500}>
+      <PieChart role='img' aria-label='Pie chart of poll results'>
+        <Pie data={data} dataKey='value' nameKey='name' cx='50%' cy='50%' outerRadius={90} animationDuration={500} label={renderLabel} labelLine={false}>
           {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
         </Pie>
         <Tooltip formatter={(value, name) => [`${value} votes`, name]} />
-        <Legend formatter={(value, entry) => `${value} ${total > 0 ? Math.round((entry.payload.value / total) * 100) : 0}%`} />
+        <Legend />
       </PieChart>
     </ResponsiveContainer>
   )
@@ -281,8 +327,8 @@ const BarChartView = memo(({ options, voteCounts }) => {
 
   return (
     <ResponsiveContainer width='100%' height={250}>
-      <BarChart data={data}>
-        <CartesianGrid strokeDasharray='3 3' />
+      <BarChart data={data} role='img' aria-label='Bar chart of poll results'>
+
         <XAxis dataKey='name' />
         <YAxis allowDecimals={false} />
         <Tooltip formatter={(value) => [`${value} votes`, '']} />
@@ -309,7 +355,7 @@ const Option = memo(({ poll, option, showResult, voteCount, total }) => {
   )
 
   return (
-    <Box position='relative' display='flex' gap={1} alignItems='center' borderRadius='5rem' overflow='hidden' height='3rem'>
+    <Box position='relative' display='flex' gap={1} alignItems='center' borderRadius='5rem' overflow='hidden' height='3rem' role='option' aria-selected={!!option.voted} aria-label={`${option.title}${total > 0 && showResult ? `, ${voteCount} votes, ${Math.round((voteCount / total) * 100)}%` : ''}`}>
       <Stack direction='row' flex={1} zIndex={1} px={1}>
         <FormControlLabel
           disabled={poll.closed}
@@ -441,7 +487,7 @@ function TimeRemain ({ date, setDuration }) {
 
   if (date && diff) {
     return (
-      <Typography variant='caption'>Time remaining {time}</Typography>
+      <Typography variant='caption' role='timer' aria-live='polite'>Time remaining {time}</Typography>
     )
   } else {
     return (

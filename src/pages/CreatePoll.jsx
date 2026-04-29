@@ -97,6 +97,7 @@ export default function CreatePoll () {
               <Box key={item.index} display='flex' flexDirection='row' alignItems='flex-start' gap={1}>
                 {options.length > 2 && (
                   <IconButton
+                    aria-label={`Remove option ${item.index + 1}`}
                     onClick={() => handleRemove(item.index)}
                     sx={{ mt: 1, border: '1px solid', borderColor: 'divider' }}
                   >

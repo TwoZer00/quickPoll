@@ -1,3 +1,6 @@
+export const POLL_DURATION_MINUTES = 30
+export const POLL_DURATION_SECONDS = POLL_DURATION_MINUTES * 60
+
 const ERRORS = {
   15: 'poll not found',
   16: 'poll closed',

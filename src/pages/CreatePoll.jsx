@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { createPoll, requestStateEnum } from '../firebase/utils'
 import useTitle from '../hook/useTitle'
 
+import { POLL_DURATION_MINUTES } from '../const/Const'
+
 export default function CreatePoll () {
   const [options, setOptions] = useState([{ index: 0 }, { index: 1 }])
   const idPoll = useRef()
@@ -145,7 +147,7 @@ export default function CreatePoll () {
 
           <Box display='flex' justifyContent='space-between' alignItems='center'>
             <Typography variant='caption' color='text.secondary'>
-              Voting open for <b>30 min</b> after creation.
+              Voting open for <b>{POLL_DURATION_MINUTES} min</b> after creation.
             </Typography>
             <Button type='submit' variant='contained' color='secondary' disabled={requestState === requestStateEnum.pending}>
               Create Poll

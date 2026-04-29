@@ -1,5 +1,5 @@
 /* eslint-disable space-before-function-paren */
-import { collection, doc, getFirestore, runTransaction, getDoc, getDocs, onSnapshot, query } from 'firebase/firestore'
+import { collection, doc, getFirestore, runTransaction, getDoc, getDocs } from 'firebase/firestore'
 import { app } from './init'
 import { getAuth, signInAnonymously } from 'firebase/auth'
 import CError from '../error/Error'
@@ -55,14 +55,6 @@ async function setVote({ lastVote, voteId, pollId }) {
   }
 }
 
-async function isVoted({ pollId, voteId }) {
-  if (!getAuth().currentUser) return false
-  const pollRef = doc(db, 'polls', pollId)
-  const optionRef = doc(pollRef, 'options', voteId)
-  const votesRef = collection(optionRef, 'votes')
-  const voterRef = doc(votesRef, getAuth().currentUser?.uid)
-  return await getDoc(voterRef).then((doc) => doc.exists())
-}
 
 async function getOptions(id) {
   const options = await getDocs(collection(getFirestore(), 'polls', id, 'options'))
@@ -85,20 +77,6 @@ async function getResults(id) {
       }))
     })
 }
-function getSubscribeOption(poll, option, votes, setVotes, totalOpt) {
-  const q = query(collection(getFirestore(), 'polls', poll.id, 'options', option.id, 'votes'))
-  return onSnapshot(q, (querySnapshot) => {
-    setVotes(querySnapshot.docs.length)
-    totalOpt((prev) => {
-      const temp = { ...prev }
-      temp[option.id] = querySnapshot.docs.length
-      return temp
-    })
-  }, (error) => {
-    console.error('Snapshot listener error:', error)
-    setVotes(0)
-  })
-}
 
 const requestStateEnum = {
   none: 'none',
@@ -111,11 +89,7 @@ export {
   createPoll,
   getPoll,
   setVote,
-  isVoted,
   getOptions,
   getResults,
-  getSubscribeOption,
-  getSubscribeOption as getSuscribeOption,
-  requestStateEnum,
-  requestStateEnum as requuestStateEnum
+  requestStateEnum
 }

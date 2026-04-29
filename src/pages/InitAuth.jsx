@@ -4,6 +4,7 @@ import { Outlet, useNavigate, useNavigation } from 'react-router-dom'
 import Menu, { PollListItem } from '../components/Menu'
 import { amber, blueGrey, deepOrange } from '@mui/material/colors'
 import { PropTypes } from 'prop-types'
+import { getLastPolls } from '../utils/storage'
 
 export default function InitAuth () {
   const bgColor = blueGrey[50]
@@ -53,7 +54,7 @@ export default function InitAuth () {
             <Link color='inherit' underline='hover' href='/pp.md'>Privacy Policy</Link> | <Link href='/tos.md' color='inherit' underline='hover'>Terms of Service</Link>
           </Typography>
         </Box>
-        <LastPollsListModal data={sessionStorage.getItem('lastPolls') ? JSON.parse(sessionStorage.getItem('lastPolls')) : []} open={openModal} onClose={handleCloseModal} />
+        <LastPollsListModal data={getLastPolls()} open={openModal} onClose={handleCloseModal} />
         <Snackbar
           open={open}
           TransitionComponent={SlideTransition}

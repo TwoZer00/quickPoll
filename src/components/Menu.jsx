@@ -2,12 +2,14 @@ import { AppBar, Box, Button, Collapse, Divider, Drawer, IconButton, List, ListI
 import { ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { PropTypes } from 'prop-types'
 import { isPollClosed } from '../utils/utils'
+import { getLastPolls } from '../utils/storage'
 
 export default function Menu ({ title, openModal }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const navigate = useNavigate()
-  const hasLastPolls = !!sessionStorage.getItem('lastPolls')
+  const hasLastPolls = getLastPolls().length > 0
   const showCreate = title !== 'Create Poll'
 
   return (
@@ -56,7 +58,7 @@ export default function Menu ({ title, openModal }) {
 function DrawerLastPolls ({ onNavigate }) {
   const [expanded, setExpanded] = useState(false)
   const navigate = useNavigate()
-  const polls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
+  const polls = getLastPolls()
 
   return (
     <>
@@ -87,6 +89,21 @@ export function PollListItem ({ poll, onClick, sx }) {
       />
     </ListItemButton>
   )
+}
+
+Menu.propTypes = {
+  title: PropTypes.string.isRequired,
+  openModal: PropTypes.func.isRequired
+}
+
+DrawerLastPolls.propTypes = {
+  onNavigate: PropTypes.func.isRequired
+}
+
+PollListItem.propTypes = {
+  poll: PropTypes.object.isRequired,
+  onClick: PropTypes.func.isRequired,
+  sx: PropTypes.object
 }
 
 function timeAgo (timestamp) {

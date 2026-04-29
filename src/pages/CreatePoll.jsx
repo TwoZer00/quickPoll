@@ -17,7 +17,8 @@ export default function CreatePoll () {
 
   const optionsRef = useRef()
 
-  const handleAddOption = () => setOptions(prev => [...prev, { index: prev[prev.length - 1].index + 1 }])
+  const MAX_OPTIONS = 20
+  const handleAddOption = () => setOptions(prev => prev.length >= MAX_OPTIONS ? prev : [...prev, { index: prev[prev.length - 1].index + 1 }])
 
   const handleRemove = (index) => setOptions(prev =>
     prev.filter(item => item.index !== index).map((item, i) => ({ ...item, index: i }))
@@ -35,6 +36,9 @@ export default function CreatePoll () {
     if (title.length < 3) {
       setTitleError('Title must be at least 3 characters')
       valid = false
+    } else if (title.length > 200) {
+      setTitleError('Title must be at most 200 characters')
+      valid = false
     } else {
       setTitleError('')
     }
@@ -43,7 +47,22 @@ export default function CreatePoll () {
     if (filledOptions.length < 2) {
       setOptions(prev => prev.map(item => ({
         ...item,
-        error: (!item.value || item.value.length === 0) ? 'Option cannot be empty' : ''
+        error: (!item.value || item.value.trim().length === 0) ? 'Option cannot be empty' : ''
+      })))
+      valid = false
+    }
+
+    const duplicates = new Set()
+    const dupeValues = filledOptions.filter(v => {
+      const lower = v.toLowerCase()
+      if (duplicates.has(lower)) return true
+      duplicates.add(lower)
+      return false
+    })
+    if (dupeValues.length > 0) {
+      setOptions(prev => prev.map(item => ({
+        ...item,
+        error: item.value && duplicates.has(item.value.trim().toLowerCase()) && dupeValues.includes(item.value.trim().toLowerCase()) ? 'Duplicate option' : item.error
       })))
       valid = false
     }
@@ -54,10 +73,10 @@ export default function CreatePoll () {
   const handleSubmit = (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
-    const title = formData.get('title')
+    const title = formData.get('title').trim()
     let optionsData = Object.fromEntries(formData)
     delete optionsData.title
-    optionsData = Object.values(optionsData).filter(v => v.length > 0)
+    optionsData = Object.values(optionsData).map(v => v.trim()).filter(v => v.length > 0)
 
     try {
       handleValidations(optionsData, title)
@@ -89,6 +108,7 @@ export default function CreatePoll () {
           <TextField
             variant='filled' label='Title' name='title' required fullWidth
             error={!!titleError} helperText={titleError}
+            inputProps={{ maxLength: 200 }}
             onChange={() => titleError && setTitleError('')}
           />
 
@@ -111,6 +131,7 @@ export default function CreatePoll () {
                   onChange={(e) => handleChange(e, item.index)}
                   variant='filled' label={`Option ${item.index + 1}`} autoComplete='off'
                   name={`option ${item.index}`} value={item.value || ''}
+                  inputProps={{ maxLength: 200 }}
                 />
               </Box>
             ))}

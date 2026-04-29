@@ -7,6 +7,9 @@ import { getAnalytics, logEvent } from 'firebase/analytics'
 
 const db = getFirestore(app)
 async function createPoll({ title, options }) {
+  title = title.trim()
+  options = [...new Set(options.map(o => o.trim()).filter(o => o.length > 0))]
+  if (title.length < 3 || title.length > 200 || options.length < 2) throw CError.fromCode(17, 'Invalid poll data')
   if (!getAuth().currentUser) await signInAnonymously(getAuth())
   const poll = doc(collection(db, 'polls'))
   const optionsTemp = options.map((option) => ({ title: option }))

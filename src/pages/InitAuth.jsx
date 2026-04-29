@@ -2,29 +2,53 @@ import { Alert, Box, createTheme, CssBaseline, Dialog, DialogTitle, Divider, Lin
 import React, { Suspense, useEffect, useState } from 'react'
 import { Outlet, useNavigate, useNavigation } from 'react-router-dom'
 import Menu, { PollListItem } from '../components/Menu'
-import { amber, blueGrey, deepOrange } from '@mui/material/colors'
+import { amber, deepOrange } from '@mui/material/colors'
 import { PropTypes } from 'prop-types'
 import { getLastPolls } from '../utils/storage'
 
 const theme = responsiveFontSizes(createTheme({
   palette: {
     primary: { main: amber[700] },
-    secondary: deepOrange
+    secondary: deepOrange,
+    background: { default: '#fafafa' }
+  },
+  shape: { borderRadius: 12 },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: { textTransform: 'none', fontWeight: 600, borderRadius: 24 }
+      }
+    },
+    MuiPaper: {
+      styleOverrides: {
+        rounded: { borderRadius: 16 }
+      }
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: { borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)' }
+      }
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: { borderRadius: 12 }
+      }
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: { fontWeight: 600 }
+      }
+    }
   }
 }))
-
-const FOOTER_BG = blueGrey[50]
-const FOOTER_COLOR = blueGrey[900]
 
 export default function InitAuth () {
   const [open, setOpen] = useState(false)
   const [openModal, setOpenModal] = useState(false)
   const [message, setMessage] = useState()
   const handleOpen = () => setOpen(true)
-  const [title, setTitle] = useState('')
-  const handleClose = () => {
-    setOpen(false)
-  }
+  const handleClose = () => setOpen(false)
+
   useEffect(() => {
     if (message?.message) {
       handleOpen()
@@ -32,34 +56,43 @@ export default function InitAuth () {
       setMessage(null)
     }
   }, [message])
-  const handleCloseModal = () => {
-    setOpenModal(false)
-  }
+
   const navigation = useNavigation()
   const isLoading = navigation.state === 'loading'
+
   return (
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box sx={{ display: 'flex', flexDirection: 'column', flex: 'none', width: '100dvw', maxWidth: '100dvw', height: '100dvh', maxHeight: '100dvh' }}>
-          <Menu title={title} openModal={setOpenModal} />
+        <Box sx={{
+          display: 'flex', flexDirection: 'column', flex: 'none',
+          width: '100dvw', maxWidth: '100dvw', height: '100dvh', maxHeight: '100dvh',
+          background: 'linear-gradient(135deg, #fff8e1 0%, #fff3e0 50%, #fce4ec 100%)',
+          backgroundAttachment: 'fixed'
+        }}>
+          <Menu openModal={setOpenModal} />
           <a href='#main-content' style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden', zIndex: 9999 }} onFocus={(e) => { e.target.style.position = 'static'; e.target.style.width = 'auto'; e.target.style.height = 'auto' }} onBlur={(e) => { e.target.style.position = 'absolute'; e.target.style.left = '-9999px'; e.target.style.width = '1px'; e.target.style.height = '1px' }}>Skip to main content</a>
           <LinearProgress sx={{ visibility: isLoading ? 'visible' : 'hidden' }} aria-hidden={!isLoading} />
           <Suspense fallback={<Box flex={1} />}>
             <Box id='main-content' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              <Outlet context={{ setMessage, setTitle, setOpenModal }} />
+              <Outlet context={{ setMessage, setOpenModal }} />
             </Box>
           </Suspense>
-          <Typography component='footer' variant='caption' textAlign='center' bgcolor={FOOTER_BG} color={FOOTER_COLOR} py={2}>
-            Made with ❤️ by <Link color='inherit' target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</Link>. <br />
-            <Link color='inherit' underline='hover' href='/pp.md'>Privacy Policy</Link> | <Link href='/tos.md' color='inherit' underline='hover'>Terms of Service</Link>
-          </Typography>
+          <Box component='footer' sx={{ py: 1.5, px: 2, textAlign: 'center' }}>
+            <Typography variant='caption' color='text.secondary'>
+              Made by <Link color='inherit' fontWeight={600} target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</Link>
+              {' · '}
+              <Link color='inherit' underline='hover' href='/pp.md'>Privacy</Link>
+              {' · '}
+              <Link href='/tos.md' color='inherit' underline='hover'>Terms</Link>
+            </Typography>
+          </Box>
         </Box>
-        <LastPollsListModal open={openModal} onClose={handleCloseModal} />
+        <LastPollsListModal open={openModal} onClose={() => setOpenModal(false)} />
         <Snackbar
           open={open}
           TransitionComponent={SlideTransition}
-          autoHideDuration={1000}
+          autoHideDuration={3000}
           onClose={handleClose}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         >
@@ -67,7 +100,13 @@ export default function InitAuth () {
             onClose={handleClose}
             severity={message?.severity || 'info'}
             variant='filled'
-            sx={{ width: '100%', '& .MuiAlert-message': { ':first-letter': { textTransform: 'uppercase' } } }}
+            sx={{
+              width: '100%',
+              borderRadius: 3,
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+              '& .MuiAlert-message': { ':first-letter': { textTransform: 'uppercase' } }
+            }}
           >
             {message?.message}
           </Alert>
@@ -76,6 +115,7 @@ export default function InitAuth () {
     </>
   )
 }
+
 function SlideTransition (props) {
   return <Slide {...props} direction='up' />
 }
@@ -86,7 +126,7 @@ const LastPollsListModal = ({ onClose, open }) => {
 
   return (
     <Dialog onClose={onClose} open={open} TransitionComponent={Transition}>
-      <DialogTitle>Last polls</DialogTitle>
+      <DialogTitle fontWeight={700}>Last polls</DialogTitle>
       <Divider />
       <List sx={{ pt: 0, minWidth: 280 }}>
         {polls.map((poll) => (

@@ -1,65 +1,65 @@
-Terms of Service
+# Terms of Service
 
-Last Updated: 10/22/2025
+**Last Updated:** October 22, 2025
 
-1. Acceptance of Terms
+## 1. Acceptance of Terms
 
-By accessing or using Quickpoll, you agree to these Terms of Service and our Privacy Policy.
-If you do not agree, please do not use the app.
+By accessing or using QuickPoll, you agree to these Terms of Service and our [Privacy Policy](/pp.md). If you do not agree, please do not use the app.
 
-2. Description of Service
+## 2. Description of Service
 
-Quickpoll allows users to:
+QuickPoll allows users to:
 
-Create and participate in short surveys.
+- Create and participate in short polls.
+- Access public poll results after each poll closes.
 
-Access public survey results after each survey closes.
+Each poll remains open for **30 minutes** and is then automatically closed and published publicly.
 
-Each survey remains open for 30 minutes and is then automatically closed and published publicly.
-
-3. User Responsibilities
+## 3. User Responsibilities
 
 You agree to:
 
-Use the app only for lawful purposes.
-
-Not post, share, or request personal or sensitive information in surveys.
-
-Not attempt to disrupt or misuse the service or its infrastructure.
+- Use the app only for lawful purposes.
+- Not post, share, or request personal or sensitive information in polls.
+- Not attempt to disrupt or misuse the service or its infrastructure.
 
 You are responsible for the content you create through the app.
 
-4. Anonymous Usage
+## 4. Anonymous Usage
 
-We use anonymous sign-up through Firebase.
-You will not be personally identified unless you voluntarily share information within survey content (which we strongly advise against).
+We use anonymous sign-in through Firebase. You will not be personally identified unless you voluntarily share information within poll content (which we strongly advise against).
 
-5. Public Content
+## 5. Public Content
 
-After a survey closes, all responses and results become publicly accessible.
-You understand and agree that once published, your responses cannot be removed or made private.
+After a poll closes, all responses and results become **publicly accessible**. You understand and agree that once published, your responses cannot be removed or made private.
 
-6. Service Availability
+## 6. Service Availability
 
-We strive to keep the service running smoothly, but we do not guarantee continuous or error-free operation.
-We may suspend, modify, or discontinue the app at any time without notice.
+We strive to keep the service running smoothly, but we do not guarantee continuous or error-free operation. We may suspend, modify, or discontinue the app at any time without notice.
 
-7. Intellectual Property
+## 7. Intellectual Property
 
-All code, design, and functionality of Quickpoll are owned by TwoZer00.
-Users retain ownership of their survey content but grant us a license to host and display it publicly as part of the service.
+All code, design, and functionality of QuickPoll are owned by **TwoZer00**. Users retain ownership of their poll content but grant us a license to host and display it publicly as part of the service.
 
-8. Limitation of Liability
+## 8. Limitation of Liability
 
-Quickpoll is provided "as is" without warranties of any kind.
-We are not liable for any damages resulting from use or inability to use the app, including data loss or exposure of survey responses.
+QuickPoll is provided **"as is"** without warranties of any kind. We are not liable for any damages resulting from use or inability to use the app, including data loss or exposure of poll responses.
 
-9. Changes to the Terms
+## 9. Third-Party Services
 
-We may update these Terms from time to time.
-Continued use of the app after changes are posted means you accept the updated Terms.
+QuickPoll relies on third-party services to operate, including **Firebase** (Google LLC) and **Cloudinary** (Cloudinary Ltd.). Your use of QuickPoll is also subject to their respective terms of service:
 
-10. Contact
+- [Google Terms of Service](https://policies.google.com/terms)
+- [Cloudinary Terms of Use](https://cloudinary.com/tos)
 
-For questions or concerns about these Terms, contact us at:
-twozer00.dev
+## 10. Governing Law
+
+These Terms shall be governed by and construed in accordance with applicable law, without regard to conflict of law principles.
+
+## 11. Changes to These Terms
+
+We may update these Terms from time to time. Continued use of the app after changes are posted means you accept the updated Terms.
+
+## 12. Contact
+
+For questions or concerns about these Terms, contact us at: [twozer00.dev](https://twozer00.dev)

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Skeleton, Typography } from '@mui/material'
+import { Chip, Skeleton } from '@mui/material'
+import { TimerOutlined } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import dayjs from 'dayjs'
 import { POLL_DURATION_SECONDS } from '../../const/Const'
@@ -25,17 +26,21 @@ export default function TimeRemain ({ date, setDuration }) {
   }, [diff, setDuration])
 
   useEffect(() => {
-    if (diff > 60) setTime(`${(diff / 60).toFixed(0)} minutes`)
-    if (diff <= 60) setTime(`${diff} second${diff !== 1 ? 's' : ''}`)
+    if (diff > 60) setTime(`${(diff / 60).toFixed(0)} min left`)
+    if (diff <= 60) setTime(`${diff}s left`)
   }, [diff])
 
   if (date && diff != null && diff >= 0) {
     return (
-      <Typography variant='caption' role='timer' aria-live='polite'>Time remaining {time}</Typography>
+      <Chip
+        icon={<TimerOutlined />} label={time} size='small' variant='outlined'
+        role='timer' aria-live='polite'
+        sx={{ alignSelf: 'flex-start' }}
+      />
     )
   } else {
     return (
-      <Skeleton variant='text' width={100} />
+      <Skeleton variant='rounded' width={100} height={24} sx={{ borderRadius: 3 }} />
     )
   }
 }

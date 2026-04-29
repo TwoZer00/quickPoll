@@ -1,34 +1,58 @@
-import { AppBar, Box, Button, Collapse, Divider, Drawer, IconButton, List, ListItemButton, ListItemText, Toolbar, Typography } from '@mui/material'
-import { ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material'
+import { AppBar, Box, Chip, Collapse, Divider, Drawer, IconButton, List, ListItemButton, ListItemText, Toolbar, Typography } from '@mui/material'
+import { Add, ExpandLess, ExpandMore, History, Menu as MenuIcon } from '@mui/icons-material'
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { PropTypes } from 'prop-types'
 import { isPollClosed } from '../utils/utils'
 import { getLastPolls } from '../utils/storage'
 
-export default function Menu ({ title, openModal }) {
+export default function Menu ({ openModal }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
   const hasLastPolls = getLastPolls().length > 0
-  const showCreate = title !== 'Create Poll'
+  const isCreate = location.pathname === '/create'
 
   return (
     <>
-      <AppBar position='sticky' elevation={1}>
-        <Toolbar sx={{ gap: 1 }}>
-          <Typography variant='h6' noWrap component='div' sx={{ flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {title}
+      <AppBar
+        position='sticky' elevation={0}
+        sx={{
+          bgcolor: 'rgba(255,160,0,0.9)',
+          backdropFilter: 'blur(16px)',
+          borderRadius: 3,
+          mx: { xs: 1, sm: 2 },
+          mt: 1,
+          width: 'auto',
+          boxShadow: '0 4px 24px rgba(255,160,0,0.25)',
+          color: '#fff'
+        }}
+      >
+        <Toolbar variant='dense' sx={{ gap: 1, minHeight: 48 }}>
+          <Typography
+            variant='subtitle1' fontWeight={800} letterSpacing={0.5} component={Link} to='/'
+            sx={{ textDecoration: 'none', color: 'inherit', flexGrow: 1 }}
+          >
+            QuickPoll
           </Typography>
-          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
-            <Button color='inherit' component={Link} to='/' disableRipple size='small'>Home</Button>
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.75, alignItems: 'center' }}>
             {hasLastPolls && (
-              <Button sx={{ whiteSpace: 'nowrap' }} color='inherit' onClick={() => openModal(true)} disableRipple size='small'>Last polls</Button>
+              <Chip
+                icon={<History sx={{ color: 'inherit' }} />} label='Last polls' size='small'
+                onClick={() => openModal(true)}
+                sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.5)', fontWeight: 600, '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' } }}
+                variant='outlined'
+              />
             )}
-            {showCreate && (
-              <Button sx={{ whiteSpace: 'nowrap' }} color='inherit' component={Link} to='/create' disableRipple size='small'>Create Poll</Button>
+            {!isCreate && (
+              <Chip
+                icon={<Add sx={{ color: 'inherit' }} />} label='Create Poll' size='small'
+                onClick={() => navigate('/create')}
+                sx={{ bgcolor: '#fff', color: 'primary.dark', fontWeight: 600, '&:hover': { bgcolor: 'rgba(255,255,255,0.85)' } }}
+              />
             )}
           </Box>
-          <IconButton color='inherit' aria-label='Open navigation menu' onClick={() => setDrawerOpen(true)} sx={{ display: { sm: 'none' } }}>
+          <IconButton aria-label='Open navigation menu' onClick={() => setDrawerOpen(true)} sx={{ display: { sm: 'none' }, color: 'inherit' }}>
             <MenuIcon />
           </IconButton>
         </Toolbar>
@@ -38,7 +62,7 @@ export default function Menu ({ title, openModal }) {
           <ListItemButton onClick={() => { navigate('/'); setDrawerOpen(false) }}>
             <ListItemText primary='Home' />
           </ListItemButton>
-          {showCreate && (
+          {!isCreate && (
             <ListItemButton onClick={() => { navigate('/create'); setDrawerOpen(false) }}>
               <ListItemText primary='Create Poll' />
             </ListItemButton>
@@ -92,7 +116,6 @@ export function PollListItem ({ poll, onClick, sx }) {
 }
 
 Menu.propTypes = {
-  title: PropTypes.string.isRequired,
   openModal: PropTypes.func.isRequired
 }
 

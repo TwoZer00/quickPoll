@@ -1,4 +1,4 @@
-import { Box, CssBaseline, Link, Typography } from '@mui/material'
+import { Box, Button, CssBaseline, Typography } from '@mui/material'
 import { useEffect } from 'react'
 import { useRouteError, Link as RouterLink, isRouteErrorResponse } from 'react-router-dom'
 import ERRORS from '../const/Const'
@@ -23,13 +23,18 @@ export default function Error () {
     <>
       <CssBaseline />
       <Box component='main' display='flex' flexDirection='column' justifyContent='center' alignItems='center' minHeight='100dvh' gap={2} p={3} role='alert'>
-        <Typography sx={{ ':first-letter': { textTransform: 'uppercase' } }} textAlign='center' variant='h3' fontWeight={500}>
+        <Typography
+          sx={{ ':first-letter': { textTransform: 'uppercase' }, background: 'linear-gradient(135deg, #ff6d00 0%, #ffa000 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+          textAlign='center' variant='h3' fontWeight={700}
+        >
           {message}
         </Typography>
         <Typography variant='body2' color='text.secondary' textAlign='center'>
           Try going back or refreshing the page.
         </Typography>
-        <Link component={RouterLink} to='/'>Go home</Link>
+        <Button variant='contained' component={RouterLink} to='/' sx={{ borderRadius: 3, px: 4, textTransform: 'none', fontWeight: 600, bgcolor: '#ffa000', '&:hover': { bgcolor: '#ff8f00' } }}>
+          Go home
+        </Button>
       </Box>
     </>
   )

@@ -75,7 +75,11 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
   return (
     <>
       {showResult && total > 0 && (
-        <ToggleButtonGroup size='small' value={viewMode} exclusive onChange={handleViewChange} sx={{ alignSelf: 'center' }} aria-label='Results view'>
+        <ToggleButtonGroup
+          size='small' value={viewMode} exclusive onChange={handleViewChange}
+          sx={{ alignSelf: 'center', gap: 1, '& .MuiToggleButton-root': { borderRadius: '20px !important', px: 2, border: '1px solid', borderColor: 'divider' } }}
+          aria-label='Results view'
+        >
           {!poll.closed && <ToggleButton value='vote' aria-label='Vote view'><BallotOutlined fontSize='small' /></ToggleButton>}
           <ToggleButton value='pie' aria-label='Pie chart'><PieChartIcon fontSize='small' /></ToggleButton>
           <ToggleButton value='bars' aria-label='Bar chart'><BarChartIcon fontSize='small' /></ToggleButton>
@@ -94,7 +98,7 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
             const count = voteCounts[opt.id] || 0
             const pct = total > 0 ? Math.round((count / total) * 100) : 0
             return (
-              <Stack key={opt.id} direction='row' justifyContent='space-between' alignItems='center' px={1}>
+              <Stack key={opt.id} direction='row' justifyContent='space-between' alignItems='center' px={1} py={0.5} borderRadius={2} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
                 <Stack direction='row' alignItems='center' gap={1}>
                   {opt.image
                     ? <Box component='img' src={opt.image} alt={opt.title} sx={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />

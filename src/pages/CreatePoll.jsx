@@ -131,11 +131,11 @@ export default function CreatePoll () {
 
   return (
     <PageWrapper>
-      <Paper elevation={3} sx={{ width: '100%', overflow: 'hidden' }}>
+      <Paper elevation={0} sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)' }}>
         <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requestStateEnum.pending ? 'visible' : 'hidden' }} />
-        <Box component='form' display='flex' flexDirection='column' gap={2} p={3} onSubmit={handleSubmit}>
+        <Box component='form' display='flex' flexDirection='column' gap={2.5} p={3} onSubmit={handleSubmit}>
           <Box>
-            <Typography variant='h5' fontWeight={600}>Create a Poll</Typography>
+            <Typography variant='h5' fontWeight={700}>Create a Poll</Typography>
             <Typography variant='body2' color='text.secondary'>
               Add a title and at least two options to get started.
             </Typography>
@@ -150,13 +150,13 @@ export default function CreatePoll () {
 
           <Divider />
 
-          <Box ref={optionsRef} display='flex' flexDirection='column' gap={1} sx={{ maxHeight: '40vh', pt:1,overflowY: 'auto' }}>
+          <Box ref={optionsRef} display='flex' flexDirection='column' gap={1.5} sx={{ maxHeight: '40vh', pt: 1, overflowY: 'auto' }}>
             {options.map(item => (
               <Box key={item.index} display='flex' gap={1} alignItems='center'>
                 {item.imagePreview
                   ? (
                     <Box position='relative'>
-                      <Avatar src={item.imagePreview} variant='rounded' sx={{ width: 40, height: 40 }} />
+                      <Avatar src={item.imagePreview} variant='rounded' sx={{ width: 40, height: 40, borderRadius: 2 }} />
                       <IconButton size='small' onClick={() => handleRemoveImage(item.index)} sx={{ position: 'absolute', top: -8, right: -8, bgcolor: 'background.paper', p: 0.25 }}>
                         <Close sx={{ fontSize: 14 }} />
                       </IconButton>
@@ -202,7 +202,7 @@ export default function CreatePoll () {
             <Typography variant='caption' color='text.secondary'>
               Voting open for <b>{POLL_DURATION_MINUTES} min</b> after creation.
             </Typography>
-            <Button type='submit' variant='contained' color='secondary' disabled={requestState === requestStateEnum.pending}>
+            <Button type='submit' variant='contained' color='secondary' size='large' sx={{ px: 4 }} disabled={requestState === requestStateEnum.pending}>
               Create Poll
             </Button>
           </Box>
@@ -210,11 +210,11 @@ export default function CreatePoll () {
       </Paper>
 
       <Dialog open={showSuccess} onClose={() => setShowSuccess(false)}>
-        <DialogTitle>Poll Created!</DialogTitle>
+        <DialogTitle fontWeight={700}>Poll Created</DialogTitle>
         <DialogContent>
           <Typography>Your poll is ready. Share it with others to start collecting votes.</Typography>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setShowSuccess(false)}>Close</Button>
           <Button variant='contained' startIcon={<Launch />} onClick={() => navigate(`/poll/${idPoll.current}`)}>
             View Poll

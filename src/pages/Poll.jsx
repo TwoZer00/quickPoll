@@ -76,27 +76,35 @@ export default function Poll () {
           </Box>
           <PageWrapper maxWidth='md' sx={{ p: 0 }}>
             <Box component='form' onSubmit={handleSubmit} width='100%'>
-              <Box component={Paper} width='100%' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
-              <Box component='main' p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box component={Paper} width='100%' variant='elevation' elevation={0} sx={{ overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)' }}>
+              <Box component='main' p={2.5} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                 <ShareMenu setMessage={setMessage} />
                 {
                 data?.title
-                  ? <Typography variant='h4' component='h1' fontWeight={500} maxWidth='30ch' title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{data?.title}</Typography>
+                  ? <Typography variant='h4' component='h1' fontWeight={700} maxWidth='30ch' title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{data?.title}</Typography>
                   : <Skeleton variant='text' height={32} width='12ch' />
               }
-                {data?.user && <Typography variant='subtitle1'>created by {data?.user?.name}</Typography>}
+                {data?.user && <Typography variant='body2' color='text.secondary'>by {data?.user?.name}</Typography>}
                 {!data?.closed
                   ? (
                     <TimeRemain duration={duration} setDuration={setDuration} date={data && data?.createdAt?.seconds * 1000} />
                     )
                   : (
-                    <Typography variant='caption'>
-                      Created at {dayjs(data.createdAt.seconds * 1000).format('DD/MM/YYYY HH:mm')}
+                    <Typography variant='caption' color='text.secondary'>
+                      Created {dayjs(data.createdAt.seconds * 1000).format('DD/MM/YYYY HH:mm')}
                     </Typography>
                     )}
                 <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
-                {!data?.closed && <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={!data || (options.find(option => option.voted)?.id === option || state === requestStateEnum.pending)}>vote</Button>}
-                {data?.closed && <Typography variant='body2' color='text.secondary' align='center'>Poll closed — {Object.values(options).length} options</Typography>}
+                {!data?.closed && (
+                  <Button
+                    type='submit' variant='contained' color='secondary' size='large'
+                    sx={{ alignSelf: 'end', px: 4 }}
+                    disabled={!data || (options.find(option => option.voted)?.id === option || state === requestStateEnum.pending)}
+                  >
+                    Vote
+                  </Button>
+                )}
+                {data?.closed && <Typography variant='body2' color='text.secondary' align='center'>Poll closed</Typography>}
               </Box>
               <LinearProgress variant='indeterminate' sx={{ visibility: state === requestStateEnum.pending ? 'visible' : 'hidden' }} />
             </Box>

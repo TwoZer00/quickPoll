@@ -1,177 +1,148 @@
-import { useNavigate, useOutletContext, Link as RouterLink } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Add, Launch, Remove } from '@mui/icons-material'
-import { Box, Button, IconButton, LinearProgress, RadioGroup, TextField, Typography } from '@mui/material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, TextField, Typography } from '@mui/material'
 import { useRef, useState } from 'react'
 import { createPoll, requuestStateEnum } from '../firebase/utils'
 import useTitle from '../hook/useTitle'
+
 export default function CreatePoll () {
-  const [options, setOptions] = useState([{ index: 0 }])
+  const [options, setOptions] = useState([{ index: 0 }, { index: 1 }])
   const idPoll = useRef()
-  const [errors, setErrors] = useState({})
+  const [titleError, setTitleError] = useState('')
   const [,, setMessage] = useOutletContext()
   const [requestState, setRequestState] = useState(requuestStateEnum.none)
-  const handleClick = () => setOptions([...options, { index: (options[options.length - 1].index + 1) }])
-  const handleRemove = (index) => setOptions(options.filter(item => item.index !== index).map((item, i) => {
-    if (item.index > index) {
-      item.index = i
-    }
-    return item
-  }))
-  const handleAdd = (index) => setOptions((val) => {
-    if (val.length === 1) {
-      return [...val, { index: (val[val.length - 1].index + 1) }]
-    } else {
-      console.log('newOptions0', index)
-      const newOptions = val.slice(0, index + 1)
-      newOptions.push({ index: index + 2, value: '' })
-      const newOptions1 = val.slice(index + 1, val.length)
-      const newOptions2 = [...newOptions, ...newOptions1]
-      newOptions2.map((item, i) => {
-        if (item.index > index) {
-          item.index = i
-        }
-        return item
-      })
-      return newOptions2
-    }
-  })
+  const [showSuccess, setShowSuccess] = useState(false)
   const navigate = useNavigate()
   useTitle({ title: 'Create Poll', description: 'Create a new poll and share it with others.' })
 
+  const handleAddOption = () => setOptions(prev => [...prev, { index: prev[prev.length - 1].index + 1 }])
+
+  const handleRemove = (index) => setOptions(prev =>
+    prev.filter(item => item.index !== index).map((item, i) => ({ ...item, index: i }))
+  )
+
+  const handleChange = (e, index) => {
+    const value = e.target.value
+    setOptions(prev => prev.map(item =>
+      item.index === index ? { ...item, value, error: false } : item
+    ))
+  }
+
+  const handleValidations = (optionValues, title) => {
+    let valid = true
+    if (title.length < 3) {
+      setTitleError('Title must be at least 3 characters')
+      valid = false
+    } else {
+      setTitleError('')
+    }
+
+    const filledOptions = optionValues.filter(v => v.length > 0)
+    if (filledOptions.length < 2) {
+      setOptions(prev => prev.map(item => ({
+        ...item,
+        error: (!item.value || item.value.length === 0) ? 'Option cannot be empty' : ''
+      })))
+      valid = false
+    }
+
+    if (!valid) throw new Error('Please fix the errors above')
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    const target = e.target
-    const formData = new FormData(target)
+    const formData = new FormData(e.target)
     const title = formData.get('title')
-    let options = Object.fromEntries(formData)
-    delete options.title
-    options = Object.values(options)
-    options[options.length - 1].length === 0 && options.pop() // remove last empty option
+    let optionsData = Object.fromEntries(formData)
+    delete optionsData.title
+    optionsData = Object.values(optionsData).filter(v => v.length > 0)
+
     try {
-      handleValidations(options, title)
+      handleValidations(optionsData, title)
       setRequestState(requuestStateEnum.pending)
-      createPoll({ title, options }).then((id) => {
-        console.log(id)
+      createPoll({ title, options: optionsData }).then((id) => {
         setRequestState(requuestStateEnum.success)
         idPoll.current = id
-        setMessage({ message: 'poll created', severity: 'success' })
-      }).catch((err) => {
-        console.log(err)
+        setShowSuccess(true)
+      }).catch(() => {
         setRequestState(requuestStateEnum.error)
+        setMessage({ message: 'Failed to create poll', severity: 'error' })
       }).finally(() => {
-        setTimeout(() => {
-          setRequestState(requuestStateEnum.none)
-        }, 2000)
+        setTimeout(() => setRequestState(requuestStateEnum.none), 2000)
       })
     } catch (err) {
       setMessage({ message: err.message, severity: 'error' })
     }
   }
 
-  const handleValidations = (options, title) => {
-    if (options.some(item => item.length === 0)) {
-      setOptions(options => options.map((item, index) => {
-        if ((!item.value || item.value.length === 0)) {
-          return { ...item, error: true }
-        }
-        item.error = false
-        return item
-      })
-      )
-    }
-    if (options.filter(item => item.length > 0).length < 2) {
-      throw new Error('At least two options are required')
-    }
-    if (title.length < 3) {
-      throw new Error('Title must be at least 3 characters long')
-    }
-  }
-
-  const handleShare = () => {
-    navigate(`/poll/${idPoll.current}`)
-  }
-  const handleChange = (e, index) => {
-    if (e.target.value !== '' && e.target.value.length > 0 && (index + 1) - options.length === 0) {
-      handleClick()
-    }
-    setOptions(options => {
-      return options.map(item => {
-        if (item.index === index) {
-          return { ...item, error: false }
-        }
-        return item
-      })
-    })
-    const value = e.target.value
-    setOptions(options => {
-      const newOptions = options.map(item => {
-        if (item.index === index) {
-          return { ...item, value }
-        }
-        return item
-      })
-      return newOptions
-    })
-  }
   return (
     <>
       <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
       <Box width='100%' maxWidth='md' mx='auto' px={2} display='flex' flex='1' flexDirection='column' gap={2} py={2} bgcolor='background.paper'>
-        <Box sx={{ flex: '1' }} component='form' maxWidth='md' display='flex' flexDirection='column' gap={1} onSubmit={handleSubmit}>
-          <TextField variant='filled' label='title' name='title' required error={errors.title} />
-          <RadioGroup
-            sx={{
-              flexGrow: '1',
-              flexShrink: '1',
-              flexBasis: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              gap: 1,
-              flexWrap: 'nowrap',
-              height: '100%',
-              maxHeight: '100%'
-            }} name='options'
-          >
-            {errors.options && <Typography variant='caption' color='error'>{errors.options[0]} item in <b>{errors.options[1] + 1}</b> position</Typography>}
-            {options.map(item => {
-              return (
-                <Box key={item.index} display='flex' flexDirection='row' alignItems='center' gap={1}>
+        <Typography variant='body2' color='text.secondary'>
+          Add a title and at least two options to get started.
+        </Typography>
+
+        <Box sx={{ flex: '1' }} component='form' maxWidth='md' display='flex' flexDirection='column' gap={2} onSubmit={handleSubmit}>
+          <TextField
+            variant='filled' label='Title' name='title' required fullWidth
+            error={!!titleError} helperText={titleError}
+            onChange={() => titleError && setTitleError('')}
+          />
+
+          <Box display='flex' flexDirection='column' gap={1}>
+            {options.map(item => (
+              <Box key={item.index} display='flex' flexDirection='row' alignItems='flex-start' gap={1}>
+                {options.length > 2 && (
                   <IconButton
-                    onClick={() => handleRemove(item.index)} disabled={!(options.length > 1)} sx={{
-                      border: '1px solid',
-                      borderColor: 'divider'
-                    }}
-                  ><Remove />
+                    onClick={() => handleRemove(item.index)}
+                    sx={{ mt: 1, border: '1px solid', borderColor: 'divider' }}
+                  >
+                    <Remove />
                   </IconButton>
-                  <TextField
-                    error={item.error}
-                    onChange={(e) => {
-                      handleChange(e, item.index)
-                    }} variant='filled' label='option' autoComplete='off' name={`option ${item.index}`} value={item.value || ''}
-                  />
-                  <IconButton
-                    onClick={() => handleAdd(item.index)} sx={{
-                      border: '1px solid',
-                      borderColor: 'divider'
-                    }}
-                  ><Add />
-                  </IconButton>
-                </Box>
-              )
-            })}
-          </RadioGroup>
-          <Box display='flex' flexDirection='column' justifyContent='flex-end'>
-            <Button sx={{ width: 'fit-content', alignSelf: 'flex-end' }} type='submit' variant='contained' color='secondary' startIcon={<Add />} disabled={requestState === requuestStateEnum.pending}>
-              create poll
+                )}
+                <TextField
+                  fullWidth
+                  error={!!item.error}
+                  helperText={item.error || ''}
+                  onChange={(e) => handleChange(e, item.index)}
+                  variant='filled' label={`Option ${item.index + 1}`} autoComplete='off'
+                  name={`option ${item.index}`} value={item.value || ''}
+                />
+              </Box>
+            ))}
+            <Button
+              startIcon={<Add />} onClick={handleAddOption}
+              sx={{ alignSelf: 'flex-start' }}
+            >
+              Add Option
             </Button>
           </Box>
-          {idPoll.current && <Button startIcon={<Launch />} onClick={handleShare}>View poll</Button>}
+
+          <Box display='flex' justifyContent='flex-end'>
+            <Button type='submit' variant='contained' color='secondary' disabled={requestState === requuestStateEnum.pending}>
+              Create Poll
+            </Button>
+          </Box>
         </Box>
+
         <Typography variant='body2' align='center' fontSize={12}>
           Once created, this will be available for voting <b>30 mins</b>. After that, the poll will be closed and the results will be public.
         </Typography>
       </Box>
+
+      <Dialog open={showSuccess} onClose={() => setShowSuccess(false)}>
+        <DialogTitle>Poll Created!</DialogTitle>
+        <DialogContent>
+          <Typography>Your poll is ready. Share it with others to start collecting votes.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowSuccess(false)}>Close</Button>
+          <Button variant='contained' startIcon={<Launch />} onClick={() => navigate(`/poll/${idPoll.current}`)}>
+            View Poll
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

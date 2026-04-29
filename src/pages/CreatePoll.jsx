@@ -2,7 +2,7 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Add, Launch, Remove } from '@mui/icons-material'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, Paper, TextField, Typography } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
-import { createPoll, requuestStateEnum } from '../firebase/utils'
+import { createPoll, requestStateEnum } from '../firebase/utils'
 import useTitle from '../hook/useTitle'
 
 export default function CreatePoll () {
@@ -10,7 +10,7 @@ export default function CreatePoll () {
   const idPoll = useRef()
   const [titleError, setTitleError] = useState('')
   const [,, setMessage] = useOutletContext()
-  const [requestState, setRequestState] = useState(requuestStateEnum.none)
+  const [requestState, setRequestState] = useState(requestStateEnum.none)
   const [showSuccess, setShowSuccess] = useState(false)
   const navigate = useNavigate()
   useTitle({ title: 'Create Poll', description: 'Create a new poll and share it with others.' })
@@ -61,16 +61,16 @@ export default function CreatePoll () {
 
     try {
       handleValidations(optionsData, title)
-      setRequestState(requuestStateEnum.pending)
+      setRequestState(requestStateEnum.pending)
       createPoll({ title, options: optionsData }).then((id) => {
-        setRequestState(requuestStateEnum.success)
+        setRequestState(requestStateEnum.success)
         idPoll.current = id
         setShowSuccess(true)
       }).catch(() => {
-        setRequestState(requuestStateEnum.error)
+        setRequestState(requestStateEnum.error)
         setMessage({ message: 'Failed to create poll', severity: 'error' })
       }).finally(() => {
-        setTimeout(() => setRequestState(requuestStateEnum.none), 2000)
+        setTimeout(() => setRequestState(requestStateEnum.none), 2000)
       })
     } catch (err) {
       setMessage({ message: err.message, severity: 'error' })
@@ -80,7 +80,7 @@ export default function CreatePoll () {
   return (
     <Box flex={1} display='flex' alignItems='center' justifyContent='center' p={2}>
       <Paper elevation={3} sx={{ width: '100%', maxWidth: 'sm', overflow: 'hidden' }}>
-        <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
+        <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requestStateEnum.pending ? 'visible' : 'hidden' }} />
         <Box component='form' display='flex' flexDirection='column' gap={2} p={3} onSubmit={handleSubmit}>
           <Typography variant='body2' color='text.secondary'>
             Add a title and at least two options to get started.
@@ -125,7 +125,7 @@ export default function CreatePoll () {
             <Typography variant='caption' color='text.secondary'>
               Voting open for <b>30 min</b> after creation.
             </Typography>
-            <Button type='submit' variant='contained' color='secondary' disabled={requestState === requuestStateEnum.pending}>
+            <Button type='submit' variant='contained' color='secondary' disabled={requestState === requestStateEnum.pending}>
               Create Poll
             </Button>
           </Box>

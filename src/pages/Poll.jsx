@@ -1,7 +1,7 @@
 import { useLoaderData, useOutletContext, useParams, useSearchParams, Link as RouterLink } from 'react-router-dom'
 import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Link, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Radio, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import React, { memo, useMemo, useEffect, useRef, useState } from 'react'
-import { getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
+import { getResults, getSubscribeOption, setVote, requestStateEnum } from '../firebase/utils'
 import { BarChart as BarChartIcon, BallotOutlined, PieChart as PieChartIcon, Share } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
@@ -34,7 +34,7 @@ export default function Poll () {
     if (data.closed) getData()
   }, [data, id, option, options])
   const handleSubmit = (event) => {
-    setState(requuestStateEnum.pending)
+    setState(requestStateEnum.pending)
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const selectedOption = data.get('radio-buttons-group')
@@ -47,10 +47,10 @@ export default function Poll () {
         setOptions(tempOptions.map(option => option.id === selectedOption ? { ...option, voted: true } : option))
         setOption(selectedOption)
         setMessage({ message: 'vote sent', severity: 'success' })
-        setState(requuestStateEnum.success)
+        setState(requestStateEnum.success)
       }).catch((error) => {
         setMessage({ message: ERRORS[error.code], severity: 'error' })
-        setState(requuestStateEnum.error)
+        setState(requestStateEnum.error)
       })
   }
   useEffect(() => {
@@ -96,10 +96,10 @@ export default function Poll () {
                     </Typography>
                     )}
                 <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
-                <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={!data || (options.find(option => option.voted)?.id === option || state === requuestStateEnum.pending) || data?.closed}>vote</Button>
+                <Button type='submit' variant='contained' sx={{ alignSelf: 'end' }} disabled={!data || (options.find(option => option.voted)?.id === option || state === requestStateEnum.pending) || data?.closed}>vote</Button>
                 {data?.closed && <Alert severity='warning'>Poll closed.</Alert>}
               </Box>
-              <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
+              <LinearProgress variant='indeterminate' sx={{ visibility: state === requestStateEnum.pending ? 'visible' : 'hidden' }} />
             </Box>
           </Box>
           <Box sx={{ display: { xs: 'none', xl: 'flex' }, maxWidth: 300, width: '100%' }} className='ad-wrapper'>
@@ -228,6 +228,8 @@ const PieChartView = memo(({ options, voteCounts }) => {
   )
 })
 
+PieChartView.displayName = 'PieChartView'
+
 PieChartView.propTypes = {
   options: PropTypes.array,
   voteCounts: PropTypes.object
@@ -255,6 +257,8 @@ const BarChartView = memo(({ options, voteCounts }) => {
   )
 })
 
+BarChartView.displayName = 'BarChartView'
+
 BarChartView.propTypes = {
   options: PropTypes.array,
   voteCounts: PropTypes.object
@@ -263,23 +267,26 @@ BarChartView.propTypes = {
 const Option = ({ poll, option, showResult, totalOpt, total }) => {
   const unsuscribe = useRef()
   const optionColor = useRef(generateColorBySeed(option.id))
-  const [voutCounter, setVoutCounter] = useState()
-  const [porcentage, setPorcentage] = useState(0)
+  const [voteCounter, setVoteCounter] = useState()
+  const [percentage, setPercentage] = useState(0)
   const sprig = useSpring(
-    { number: voutCounter || 0, from: { number: 0 }, config: { duration: 500 } }
+    { number: voteCounter || 0, from: { number: 0 }, config: { duration: 500 } }
   )
   useEffect(() => {
     if (!unsuscribe.current) {
-      unsuscribe.current = getSuscribeOption(poll, option, voutCounter, setVoutCounter, totalOpt)
+      unsuscribe.current = getSubscribeOption(poll, option, voteCounter, setVoteCounter, totalOpt)
+    }
+    return () => {
+      if (unsuscribe.current) unsuscribe.current()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
-    if (total > 0 && voutCounter >= 0 && showResult) {
-      setPorcentage((voutCounter / total) * 100)
+    if (total > 0 && voteCounter >= 0 && showResult) {
+      setPercentage((voteCounter / total) * 100)
     }
-  }, [voutCounter, total, showResult])
+  }, [voteCounter, total, showResult])
 
   return (
     <Box position='relative' display='flex' gap={1} alignItems='center' borderRadius='5rem' overflow='hidden' height='3rem'>
@@ -300,25 +307,25 @@ const Option = ({ poll, option, showResult, totalOpt, total }) => {
         />
         <Typography variant='caption' sx={{ display: 'flex', flexDirection: 'row', gap: 1, alignItems: 'center' }} fontSize={14}>
           {(showResult) && <animated.p>{sprig.number.to(x => x.toFixed(0))}</animated.p>}
-          {(showResult && voutCounter) && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
+          {(showResult && voteCounter) && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
         </Typography>
       </Stack>
       {/* <Box position='absolute' left={0} top={0} flex={1} height='100%' zIndex={0} borderRadius='5rem' bgcolor={alpha(optionColor.current, 0.2)} sx={{ transition: 'width .75s' }} width={porcentage} /> */}
-      <PorcentageBar porcentage={porcentage} color={optionColor.current} />
+      <PercentageBar percentage={percentage} color={optionColor.current} />
     </Box>
   )
 }
 
-const PorcentageBar = ({ porcentage, color }) => {
+const PercentageBar = ({ percentage, color }) => {
   return (
-    <Box height='100%' position='absolute' flex={1} left={0} top={0} zIndex={0} borderRadius='5rem' width={`${porcentage}%`} overflow='hidden' sx={{ transition: 'width .75s' }}>
+    <Box height='100%' position='absolute' flex={1} left={0} top={0} zIndex={0} borderRadius='5rem' width={`${percentage}%`} overflow='hidden' sx={{ transition: 'width .75s' }}>
       <Box height='100%' bgcolor={alpha(color, 0.2)} />
     </Box>
   )
 }
 
-PorcentageBar.propTypes = {
-  porcentage: PropTypes.number,
+PercentageBar.propTypes = {
+  percentage: PropTypes.number,
   color: PropTypes.string
 }
 

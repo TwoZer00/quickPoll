@@ -1,5 +1,5 @@
 /* eslint-disable space-before-function-paren */
-import { collection, doc, getFirestore, runTransaction, getDoc, getDocs, setDoc, deleteDoc, onSnapshot, query } from 'firebase/firestore'
+import { collection, doc, getFirestore, runTransaction, getDoc, getDocs, onSnapshot, query } from 'firebase/firestore'
 import { app } from './init'
 import { getAuth, signInAnonymously } from 'firebase/auth'
 import CError from '../error/Error'
@@ -37,11 +37,13 @@ async function setVote({ lastVote, voteId, pollId }) {
   const votesRef = collection(optionRef, 'votes')
   const voterRef = doc(votesRef, getAuth().currentUser?.uid)
   try {
-    if (lastVote) {
-      const lastVoteRef = doc(collection(pollRef, 'options', lastVote.id, 'votes'), getAuth().currentUser.uid)
-      await deleteDoc(lastVoteRef)
-    }
-    await setDoc(voterRef, { id: getAuth().currentUser.uid, votedAt: new Date() })
+    await runTransaction(db, async (transaction) => {
+      if (lastVote) {
+        const lastVoteRef = doc(collection(pollRef, 'options', lastVote.id, 'votes'), getAuth().currentUser.uid)
+        transaction.delete(lastVoteRef)
+      }
+      transaction.set(voterRef, { id: getAuth().currentUser.uid, votedAt: new Date() })
+    })
     const analytics = !import.meta.env.VITE_ENV ? getAnalytics() : null
     if (analytics) logEvent(analytics, 'poll_voted', { pollId, voteId, voterId: getAuth().currentUser?.uid })
   } catch (error) {
@@ -60,17 +62,14 @@ async function isVoted({ pollId, voteId }) {
 }
 
 async function getOptions(id) {
-  return getDocs(collection(getFirestore(), 'polls', id, 'options'))
-    .then(options => {
-      if (options.empty) throw CError.fromCode(15)
-      return options.docs.map(option => ({ id: option.id, ...option.data() }))
-    })
-    .then(async options => {
-      return await Promise.all(options.map(async option => {
-        const voted = await isVoted({ pollId: id, voteId: option.id })
-        return { ...option, voted }
-      }))
-    })
+  const options = await getDocs(collection(getFirestore(), 'polls', id, 'options'))
+  if (options.empty) throw CError.fromCode(15)
+  const mapped = options.docs.map(option => ({ id: option.id, ...option.data() }))
+  if (!getAuth().currentUser) return mapped.map(o => ({ ...o, voted: false }))
+  const voteChecks = await Promise.all(
+    mapped.map(o => getDoc(doc(getFirestore(), 'polls', id, 'options', o.id, 'votes', getAuth().currentUser.uid)))
+  )
+  return mapped.map((o, i) => ({ ...o, voted: voteChecks[i].exists() }))
 }
 
 async function getResults(id) {
@@ -83,7 +82,7 @@ async function getResults(id) {
       }))
     })
 }
-function getSuscribeOption(poll, option, votes, setVotes, totalOpt) {
+function getSubscribeOption(poll, option, votes, setVotes, totalOpt) {
   const q = query(collection(getFirestore(), 'polls', poll.id, 'options', option.id, 'votes'))
   return onSnapshot(q, (querySnapshot) => {
     setVotes(querySnapshot.docs.length)
@@ -98,7 +97,7 @@ function getSuscribeOption(poll, option, votes, setVotes, totalOpt) {
   })
 }
 
-const requuestStateEnum = {
+const requestStateEnum = {
   none: 'none',
   pending: 'pending',
   success: 'success',
@@ -112,6 +111,8 @@ export {
   isVoted,
   getOptions,
   getResults,
-  getSuscribeOption,
-  requuestStateEnum
+  getSubscribeOption,
+  getSubscribeOption as getSuscribeOption,
+  requestStateEnum,
+  requestStateEnum as requuestStateEnum
 }

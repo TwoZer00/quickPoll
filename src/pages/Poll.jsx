@@ -7,7 +7,7 @@ import dayjs from 'dayjs'
 import GoogleAd from '../components/GoogleAd'
 import useTitle from '../hook/useTitle'
 import ShareMenu from '../components/poll/ShareMenu'
-import OptionsList from '../components/poll/OptionsList'
+import OptionsList, { useVoteCounts } from '../components/poll/OptionsList'
 import TimeRemain from '../components/poll/TimeRemain'
 import PageWrapper from '../components/PageWrapper'
 
@@ -20,6 +20,7 @@ export default function Poll () {
   const [results, setResults] = useState()
   const [duration, setDuration] = useState()
   const { id } = useParams()
+  const voteCounts = useVoteCounts(id, options)
   useTitle({ title: `QuickPoll - ${data?.title}` || 'QuickPoll - Poll', description: `Vote on: ${data?.title}` })
 
   useEffect(() => {
@@ -76,9 +77,9 @@ export default function Poll () {
           </Box>
           <PageWrapper maxWidth='md' sx={{ p: 0 }}>
             <Box component='form' onSubmit={handleSubmit} width='100%'>
-              <Box component={Paper} width='100%' variant='elevation' elevation={0} sx={{ overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)' }}>
+              <Box component={Paper} width='100%' variant='elevation' elevation={0} sx={{ overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(30,30,30,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)' }}>
               <Box component='main' p={2.5} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                <ShareMenu setMessage={setMessage} />
+                <ShareMenu setMessage={setMessage} poll={data} options={options} voteCounts={voteCounts} />
                 {
                 data?.title
                   ? <Typography variant='h4' component='h1' fontWeight={700} title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis', wordBreak: 'break-word' }}>{data?.title}</Typography>
@@ -94,7 +95,7 @@ export default function Poll () {
                       Created {dayjs(data.createdAt.seconds * 1000).format('DD/MM/YYYY HH:mm')}
                     </Typography>
                     )}
-                <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} />
+                <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} voteCounts={voteCounts} />
                 {!data?.closed && (
                   <Button
                     type='submit' variant='contained' color='secondary' size='large'

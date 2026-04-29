@@ -81,6 +81,10 @@ src/
 - [x] Create polls with auto-close timer
 - [x] Real-time results (bar & pie charts)
 - [x] Share polls
+- [x] Dark mode
+- [x] Export results as CSV
+- [x] Social sharing (X, WhatsApp)
+- [x] PWA support (installable, offline shell)
 - [ ] User accounts & poll history
 
 ## License

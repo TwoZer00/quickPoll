@@ -12,7 +12,7 @@ import BarChartView from '../charts/BarChartView'
 const VALID_VIEWS = ['vote', 'pie', 'bars']
 const DEBOUNCE_MS = 300
 
-function useVoteCounts (pollId, options) {
+export function useVoteCounts (pollId, options) {
   const [voteCounts, setVoteCounts] = useState({})
   const bufferRef = useRef({})
   const timerRef = useRef(null)
@@ -52,11 +52,10 @@ function useVoteCounts (pollId, options) {
   return voteCounts
 }
 
-const OptionsList = ({ poll, handleChange, option, options }) => {
+const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const paramView = searchParams.get('resultsOnly')?.toLowerCase()
   const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : poll.closed ? 'pie' : 'vote')
-  const voteCounts = useVoteCounts(poll.id, options)
   const total = useMemo(() => Object.values(voteCounts).reduce((a, b) => a + b, 0), [voteCounts])
   const showResult = options.some(option => option.voted) || poll.closed
   const dataReady = Object.keys(voteCounts).length === options.length
@@ -75,15 +74,17 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
   return (
     <>
       {showResult && total > 0 && (
-        <ToggleButtonGroup
-          size='small' value={viewMode} exclusive onChange={handleViewChange}
-          sx={{ alignSelf: 'center', gap: 1, '& .MuiToggleButton-root': { borderRadius: '20px !important', px: 2, minWidth: 48, minHeight: 48, border: '1px solid', borderColor: 'divider' } }}
-          aria-label='Results view'
-        >
-          {!poll.closed && <ToggleButton value='vote' aria-label='Vote view'><BallotOutlined fontSize='small' /></ToggleButton>}
-          <ToggleButton value='pie' aria-label='Pie chart'><PieChartIcon fontSize='small' /></ToggleButton>
-          <ToggleButton value='bars' aria-label='Bar chart'><BarChartIcon fontSize='small' /></ToggleButton>
-        </ToggleButtonGroup>
+        <Stack direction='row' alignItems='center' justifyContent='center' gap={1} flexWrap='wrap'>
+          <ToggleButtonGroup
+            size='small' value={viewMode} exclusive onChange={handleViewChange}
+            sx={{ gap: 1, '& .MuiToggleButton-root': { borderRadius: '20px !important', px: 2, minWidth: 48, minHeight: 48, border: '1px solid', borderColor: 'divider' } }}
+            aria-label='Results view'
+          >
+            {!poll.closed && <ToggleButton value='vote' aria-label='Vote view'><BallotOutlined fontSize='small' /></ToggleButton>}
+            <ToggleButton value='pie' aria-label='Pie chart'><PieChartIcon fontSize='small' /></ToggleButton>
+            <ToggleButton value='bars' aria-label='Bar chart'><BarChartIcon fontSize='small' /></ToggleButton>
+          </ToggleButtonGroup>
+        </Stack>
       )}
       <Box sx={{ display: viewMode === 'vote' ? 'block' : 'none' }}>
         <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: '1fr', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 'none' : 300, overflowY: 'auto' }}>
@@ -118,14 +119,18 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
       )}
       {showResult && dataReady && (
         <>
-          <Box sx={{ display: viewMode === 'pie' ? 'block' : 'none' }}>
-            <Typography variant='caption' align='center' display='block' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
-            <PieChartView options={options} voteCounts={voteCounts} />
-          </Box>
-          <Box sx={{ display: viewMode === 'bars' ? 'block' : 'none' }}>
-            <Typography variant='caption' align='center' display='block' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
-            <BarChartView options={options} voteCounts={voteCounts} />
-          </Box>
+          {viewMode === 'pie' && (
+            <Box>
+              <Typography variant='caption' align='center' display='block' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
+              <PieChartView options={options} voteCounts={voteCounts} />
+            </Box>
+          )}
+          {viewMode === 'bars' && (
+            <Box>
+              <Typography variant='caption' align='center' display='block' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
+              <BarChartView options={options} voteCounts={voteCounts} />
+            </Box>
+          )}
         </>
       )}
     </>
@@ -136,7 +141,8 @@ OptionsList.propTypes = {
   options: PropTypes.array.isRequired,
   option: PropTypes.string.isRequired,
   handleChange: PropTypes.func.isRequired,
-  poll: PropTypes.object.isRequired
+  poll: PropTypes.object.isRequired,
+  voteCounts: PropTypes.object.isRequired
 }
 
 export default OptionsList

@@ -1,10 +1,11 @@
 import { AppBar, Box, Chip, Collapse, Divider, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography } from '@mui/material'
-import { Add, Close, ExpandLess, ExpandMore, History, Home as HomeIcon, Menu as MenuIcon } from '@mui/icons-material'
+import { Add, Close, DarkMode, ExpandLess, ExpandMore, History, Home as HomeIcon, LightMode, Menu as MenuIcon } from '@mui/icons-material'
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { PropTypes } from 'prop-types'
 import { isPollClosed } from '../utils/utils'
 import { getLastPolls } from '../utils/storage'
+import useColorMode from '../hook/useColorMode'
 
 export default function Menu ({ openModal }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -12,6 +13,7 @@ export default function Menu ({ openModal }) {
   const location = useLocation()
   const hasLastPolls = getLastPolls().length > 0
   const isCreate = location.pathname === '/create'
+  const { mode, toggle } = useColorMode()
 
   return (
     <>
@@ -43,6 +45,9 @@ export default function Menu ({ openModal }) {
             QuickPoll
           </Typography>
           <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.75, alignItems: 'center' }}>
+            <IconButton aria-label='Toggle dark mode' onClick={toggle} sx={{ color: 'inherit', minWidth: 48, minHeight: 48 }}>
+              {mode === 'dark' ? <LightMode fontSize='small' /> : <DarkMode fontSize='small' />}
+            </IconButton>
             {hasLastPolls && (
               <Chip
                 icon={<History sx={{ color: 'inherit' }} />} label='Last polls' size='small'
@@ -95,6 +100,10 @@ export default function Menu ({ openModal }) {
               <ListItemText primary='Create Poll' />
             </ListItemButton>
           )}
+          <ListItemButton onClick={() => { toggle(); setDrawerOpen(false) }} sx={{ borderRadius: 2, minHeight: 52, '&:active': { bgcolor: 'action.selected' } }}>
+            <ListItemIcon sx={{ minWidth: 40 }}>{mode === 'dark' ? <LightMode /> : <DarkMode />}</ListItemIcon>
+            <ListItemText primary={mode === 'dark' ? 'Light mode' : 'Dark mode'} />
+          </ListItemButton>
           {hasLastPolls && (
             <>
               <Divider sx={{ my: 0.5 }} />

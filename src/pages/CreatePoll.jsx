@@ -131,7 +131,7 @@ export default function CreatePoll () {
 
   return (
     <PageWrapper>
-      <Paper elevation={0} sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)' }}>
+      <Paper elevation={0} sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(30,30,30,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)' }}>
         <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requestStateEnum.pending ? 'visible' : 'hidden' }} />
         <Box component='form' display='flex' flexDirection='column' gap={2.5} p={3} onSubmit={handleSubmit}>
           <Box>

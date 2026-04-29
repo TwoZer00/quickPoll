@@ -1,0 +1,22 @@
+{
+  "name": "QuickPoll",
+  "short_name": "QuickPoll",
+  "description": "Create quick polls, share them and see results in real time.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#ffa000",
+  "icons": [
+    {
+      "src": "/quickpoll.webp",
+      "sizes": "192x192",
+      "type": "image/webp"
+    },
+    {
+      "src": "/quickpoll.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ]
+}

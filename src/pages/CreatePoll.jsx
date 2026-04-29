@@ -157,13 +157,13 @@ export default function CreatePoll () {
                   ? (
                     <Box position='relative'>
                       <Avatar src={item.imagePreview} variant='rounded' sx={{ width: 40, height: 40, borderRadius: 2 }} />
-                      <IconButton size='small' onClick={() => handleRemoveImage(item.index)} sx={{ position: 'absolute', top: -8, right: -8, bgcolor: 'background.paper', p: 0.25 }}>
+                      <IconButton onClick={() => handleRemoveImage(item.index)} aria-label={`Remove image from option ${item.index + 1}`} sx={{ position: 'absolute', top: -8, right: -8, bgcolor: 'background.paper', minWidth: 44, minHeight: 44, p: 0.5 }}>
                         <Close sx={{ fontSize: 14 }} />
                       </IconButton>
                     </Box>
                     )
                   : (
-                    <IconButton component='label' size='small' aria-label={`Add image to option ${item.index + 1}`}>
+                    <IconButton component='label' aria-label={`Add image to option ${item.index + 1}`} sx={{ minWidth: 48, minHeight: 48 }}>
                       <AddPhotoAlternate fontSize='small' />
                       <input type='file' hidden accept='image/*' onChange={(e) => handleImageChange(e, item.index)} />
                     </IconButton>
@@ -179,7 +179,7 @@ export default function CreatePoll () {
                   InputProps={options.length > 2 ? {
                     endAdornment: (
                       <InputAdornment position='end'>
-                        <IconButton edge='end' aria-label={`Remove option ${item.index + 1}`} onClick={() => handleRemove(item.index)} size='small'>
+                        <IconButton edge='end' aria-label={`Remove option ${item.index + 1}`} onClick={() => handleRemove(item.index)} sx={{ minWidth: 48, minHeight: 48 }}>
                           <Remove fontSize='small' />
                         </IconButton>
                       </InputAdornment>

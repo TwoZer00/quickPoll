@@ -77,7 +77,7 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
       {showResult && total > 0 && (
         <ToggleButtonGroup
           size='small' value={viewMode} exclusive onChange={handleViewChange}
-          sx={{ alignSelf: 'center', gap: 1, '& .MuiToggleButton-root': { borderRadius: '20px !important', px: 2, border: '1px solid', borderColor: 'divider' } }}
+          sx={{ alignSelf: 'center', gap: 1, '& .MuiToggleButton-root': { borderRadius: '20px !important', px: 2, minWidth: 48, minHeight: 48, border: '1px solid', borderColor: 'divider' } }}
           aria-label='Results view'
         >
           {!poll.closed && <ToggleButton value='vote' aria-label='Vote view'><BallotOutlined fontSize='small' /></ToggleButton>}

@@ -38,7 +38,8 @@ export default function Home () {
                 bgcolor: alpha('#ffa000', 0.06),
                 border: '1px solid', borderColor: alpha('#ffa000', 0.15),
                 transition: 'transform .2s, box-shadow .2s',
-                '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 4px 16px ${alpha('#ffa000', 0.15)}` }
+                '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 4px 16px ${alpha('#ffa000', 0.15)}` },
+                '&:active': { transform: 'scale(0.97)' }
               }}
             >
               <Box sx={{ color: 'primary.main', fontSize: 28, display: 'flex' }}>{f.icon}</Box>

@@ -22,7 +22,7 @@ const ShareMenu = ({ setMessage }) => {
 
   return (
     <Box display='flex' alignSelf='end'>
-      <IconButton size='small' aria-label='Share poll' onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
+      <IconButton aria-label='Share poll' onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ minWidth: 48, minHeight: 48, '&:hover': { bgcolor: 'action.hover' } }}>
         <Share fontSize='inherit' />
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} slotProps={{ paper: { sx: { borderRadius: 3 } } }}>

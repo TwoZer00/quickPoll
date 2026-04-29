@@ -1,7 +1,7 @@
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Add, Launch, Remove } from '@mui/icons-material'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, TextField, Typography } from '@mui/material'
-import { useRef, useState } from 'react'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, Paper, TextField, Typography } from '@mui/material'
+import { useEffect, useRef, useState } from 'react'
 import { createPoll, requuestStateEnum } from '../firebase/utils'
 import useTitle from '../hook/useTitle'
 
@@ -14,6 +14,8 @@ export default function CreatePoll () {
   const [showSuccess, setShowSuccess] = useState(false)
   const navigate = useNavigate()
   useTitle({ title: 'Create Poll', description: 'Create a new poll and share it with others.' })
+
+  const optionsRef = useRef()
 
   const handleAddOption = () => setOptions(prev => [...prev, { index: prev[prev.length - 1].index + 1 }])
 
@@ -76,21 +78,21 @@ export default function CreatePoll () {
   }
 
   return (
-    <>
-      <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
-      <Box width='100%' maxWidth='md' mx='auto' px={2} display='flex' flex='1' flexDirection='column' gap={2} py={2} bgcolor='background.paper'>
-        <Typography variant='body2' color='text.secondary'>
-          Add a title and at least two options to get started.
-        </Typography>
+    <Box flex={1} display='flex' alignItems='center' justifyContent='center' p={2}>
+      <Paper elevation={3} sx={{ width: '100%', maxWidth: 'sm', overflow: 'hidden' }}>
+        <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
+        <Box component='form' display='flex' flexDirection='column' gap={2} p={3} onSubmit={handleSubmit}>
+          <Typography variant='body2' color='text.secondary'>
+            Add a title and at least two options to get started.
+          </Typography>
 
-        <Box sx={{ flex: '1' }} component='form' maxWidth='md' display='flex' flexDirection='column' gap={2} onSubmit={handleSubmit}>
           <TextField
             variant='filled' label='Title' name='title' required fullWidth
             error={!!titleError} helperText={titleError}
             onChange={() => titleError && setTitleError('')}
           />
 
-          <Box display='flex' flexDirection='column' gap={1}>
+          <Box ref={optionsRef} display='flex' flexDirection='column' gap={1} sx={{ maxHeight: 300, overflowY: 'auto' }}>
             {options.map(item => (
               <Box key={item.index} display='flex' flexDirection='row' alignItems='flex-start' gap={1}>
                 {options.length > 2 && (
@@ -112,24 +114,23 @@ export default function CreatePoll () {
               </Box>
             ))}
             <Button
-              startIcon={<Add />} onClick={handleAddOption}
+              startIcon={<Add />} onClick={() => { handleAddOption(); requestAnimationFrame(() => optionsRef.current?.scrollTo({ top: optionsRef.current.scrollHeight, behavior: 'smooth' })) }}
               sx={{ alignSelf: 'flex-start' }}
             >
               Add Option
             </Button>
           </Box>
 
-          <Box display='flex' justifyContent='flex-end'>
+          <Box display='flex' justifyContent='space-between' alignItems='center'>
+            <Typography variant='caption' color='text.secondary'>
+              Voting open for <b>30 min</b> after creation.
+            </Typography>
             <Button type='submit' variant='contained' color='secondary' disabled={requestState === requuestStateEnum.pending}>
               Create Poll
             </Button>
           </Box>
         </Box>
-
-        <Typography variant='body2' align='center' fontSize={12}>
-          Once created, this will be available for voting <b>30 mins</b>. After that, the poll will be closed and the results will be public.
-        </Typography>
-      </Box>
+      </Paper>
 
       <Dialog open={showSuccess} onClose={() => setShowSuccess(false)}>
         <DialogTitle>Poll Created!</DialogTitle>
@@ -143,6 +144,6 @@ export default function CreatePoll () {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   )
 }

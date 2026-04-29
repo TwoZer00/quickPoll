@@ -1,16 +1,19 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Button, Stack, Typography } from '@mui/material'
+import { Link } from 'react-router-dom'
+import { Add } from '@mui/icons-material'
 import useTitle from '../hook/useTitle'
 
 export default function Home () {
   useTitle({ title: 'Quick and easy polls', description: 'Create quick polls, share them and see results in real time.' })
   return (
-    <>
-      <Stack direction='column' flex={1}>
-        <Box component='main' flex={1} display='flex' justifyContent='center' flexDirection='column' alignItems='center'>
-          <Typography variant='h1' fontWeight={500}>QuickPoll</Typography>
-          <Typography variant='body1' align='center'>Create quick poll, share it and see the results in real time.</Typography>
-        </Box>
-      </Stack>
-    </>
+    <Stack component='main' flex={1} justifyContent='center' alignItems='center' gap={2} p={3}>
+      <Typography variant='h2' fontWeight={600} align='center'>QuickPoll</Typography>
+      <Typography variant='body1' align='center' color='text.secondary' maxWidth='40ch'>
+        Create quick polls, share them and see the results in real time.
+      </Typography>
+      <Button variant='contained' color='secondary' size='large' startIcon={<Add />} component={Link} to='/create'>
+        Create Poll
+      </Button>
+    </Stack>
   )
 }

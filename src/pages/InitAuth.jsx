@@ -1,17 +1,16 @@
-import { Alert, Box, Chip, createTheme, CssBaseline, Dialog, DialogTitle, Divider, Link, List, ListItem, ListItemButton, ListItemText, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
+import { Alert, Box, createTheme, CssBaseline, Dialog, DialogTitle, Divider, LinearProgress, Link, List, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { Outlet, Link as RouterLink } from 'react-router-dom'
-import Menu from '../components/Menu'
+import { Outlet, Link as RouterLink, useNavigate, useNavigation } from 'react-router-dom'
+import Menu, { PollListItem } from '../components/Menu'
 import { amber, blueGrey, deepOrange } from '@mui/material/colors'
 import { PropTypes } from 'prop-types'
-import { isPollClosed } from '../utils/utils'
 
 export default function InitAuth () {
   const bgColor = blueGrey[50]
   const color = blueGrey[900]
   let theme = createTheme({
     palette: {
-      primary: amber,
+      primary: { main: amber[700] },
       secondary: deepOrange
     }
   })
@@ -34,12 +33,15 @@ export default function InitAuth () {
   const handleCloseModal = () => {
     setOpenModal(false)
   }
+  const navigation = useNavigation()
+  const isLoading = navigation.state === 'loading'
   return (
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Box sx={{ display: 'flex', flexDirection: 'column', flex: 'none', width: '100dvw', maxWidth: '100dvw', height: '100dvh', maxHeight: '100dvh' }}>
           <Menu title={title} openModal={setOpenModal} />
+          <LinearProgress sx={{ visibility: isLoading ? 'visible' : 'hidden' }} />
           <Outlet context={[handleOpen, handleClose, setMessage, [title, setTitle], [openModal, setOpenModal]]} />
           <Typography component='footer' variant='caption' textAlign='center' bgcolor={bgColor} color={color} py={2}>
             Made with ❤️ by <Link color='inherit' target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</Link>. <br />
@@ -73,41 +75,15 @@ function SlideTransition (props) {
 
 const LastPollsListModal = (props) => {
   const { onClose, open } = props
+  const navigate = useNavigate()
 
-  const handleClose = () => {
-    onClose()
-  }
   return (
-    <Dialog onClose={handleClose} open={open} TransitionComponent={Transition}>
-      <DialogTitle>Last polls created in this session</DialogTitle>
+    <Dialog onClose={onClose} open={open} TransitionComponent={Transition}>
+      <DialogTitle>Last polls</DialogTitle>
       <Divider />
-      <List sx={{ pt: 0 }}>
+      <List sx={{ pt: 0, minWidth: 280 }}>
         {props.data?.map((poll) => (
-          <ListItem disableGutters key={poll.id}>
-            <ListItemButton component={RouterLink} to={`/poll/${poll.id}`} onClick={handleClose}>
-              <ListItemText
-                primary={
-                  <>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Typography variant='body1' noWrap>
-                        {poll.title}
-                      </Typography>
-                      <Chip
-                        label={isPollClosed(poll.createdAt) ? 'Closed' : 'Open'}
-                        color={isPollClosed(poll.createdAt) ? 'error' : 'success'}
-                        size='small'
-                        variant='outlined'
-                      />
-                    </Box>
-                  </>
-                } secondary={
-                  <>
-                    <Typography variant='caption' color='text.secondary'>Created at {new Date(poll.createdAt).toLocaleString()}</Typography>
-                  </>
-                }
-              />
-            </ListItemButton>
-          </ListItem>
+          <PollListItem key={poll.id} poll={poll} onClick={() => { navigate(`/poll/${poll.id}`); onClose() }} />
         ))}
       </List>
     </Dialog>

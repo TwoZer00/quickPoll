@@ -70,13 +70,13 @@ export default function Poll () {
 
   return (
     <>
-      <Box height='100%' sx={{ display: 'flex', flexDirection: 'column' }}>
-        <Stack flex={1} justifyContent='space-around' sx={{ flexDirection: { lg: 'column', xl: 'row' } }}>
-          <Box display='flex' height='100%' alignItems='center' sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
+      <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+        <Stack flex={1} justifyContent='center' alignItems='center' sx={{ flexDirection: { xs: 'column', xl: 'row' }, gap: 2, p: 2 }}>
+          <Box sx={{ display: { xs: 'none', xl: 'flex' }, maxWidth: 300, width: '100%' }} className='ad-wrapper'>
             <GoogleAd adSlot='3837806330' />
           </Box>
-          <Box flex={1} component='form' onSubmit={handleSubmit} m={2} display='flex' alignItems='center' justifyContent='center'>
-            <Box component={Paper} minWidth='xl' width='100%' maxWidth='lg' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
+          <Box flex={1} component='form' onSubmit={handleSubmit} display='flex' alignItems='center' justifyContent='center' width='100%' maxWidth='md'>
+            <Box component={Paper} width='100%' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
               <Box p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Box display='flex' alignSelf='end' flexDirection='row'>
                   <IconButton
@@ -93,7 +93,7 @@ export default function Poll () {
                 </Box>
                 {
                 data?.title
-                  ? <Typography variant='h2' component='h1' fontWeight='400' maxWidth='22ch' title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{data?.title}</Typography>
+                  ? <Typography variant='h4' component='h1' fontWeight={500} maxWidth='30ch' title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{data?.title}</Typography>
                   : <Skeleton variant='text' height={32} width='12ch' />
               }
                 {data?.user && <Typography variant='subtitle1'>created by {data?.user?.name}</Typography>}
@@ -113,7 +113,7 @@ export default function Poll () {
               <LinearProgress variant='indeterminate' sx={{ visibility: state === requuestStateEnum.pending ? 'visible' : 'hidden' }} />
             </Box>
           </Box>
-          <Box sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} height='100%' display='flex' alignItems='center' className='ad-wrapper'>
+          <Box sx={{ display: { xs: 'none', xl: 'flex' }, maxWidth: 300, width: '100%' }} className='ad-wrapper'>
             <GoogleAd adSlot='5542566407' />
           </Box>
         </Stack>
@@ -126,7 +126,7 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
   const [tempOpt, setTempOpt] = useState()
   const total = tempOpt ? Object.values(tempOpt).reduce((a, b) => a + b, 0) : 0
   return (
-    <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+    <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 300, overflowY: 'auto' }}>
       {
         options.map((option) => (
           <Option key={option.id} poll={poll} option={option} totalOpt={setTempOpt} total={total} showResult={options.some(option => option.voted) || poll.closed} />

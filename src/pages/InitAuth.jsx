@@ -1,6 +1,6 @@
 import { Alert, Box, createTheme, CssBaseline, Dialog, DialogTitle, Divider, LinearProgress, Link, List, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
-import React, { useEffect, useState } from 'react'
-import { Outlet, Link as RouterLink, useNavigate, useNavigation } from 'react-router-dom'
+import React, { Suspense, useEffect, useState } from 'react'
+import { Outlet, useNavigate, useNavigation } from 'react-router-dom'
 import Menu, { PollListItem } from '../components/Menu'
 import { amber, blueGrey, deepOrange } from '@mui/material/colors'
 import { PropTypes } from 'prop-types'
@@ -42,7 +42,9 @@ export default function InitAuth () {
         <Box sx={{ display: 'flex', flexDirection: 'column', flex: 'none', width: '100dvw', maxWidth: '100dvw', height: '100dvh', maxHeight: '100dvh' }}>
           <Menu title={title} openModal={setOpenModal} />
           <LinearProgress sx={{ visibility: isLoading ? 'visible' : 'hidden' }} />
-          <Outlet context={[handleOpen, handleClose, setMessage, [title, setTitle], [openModal, setOpenModal]]} />
+          <Suspense fallback={<Box flex={1} />}>
+            <Outlet context={[handleOpen, handleClose, setMessage, [title, setTitle], [openModal, setOpenModal]]} />
+          </Suspense>
           <Typography component='footer' variant='caption' textAlign='center' bgcolor={bgColor} color={color} py={2}>
             Made with ❤️ by <Link color='inherit' target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</Link>. <br />
             <Link color='inherit' underline='hover' href='/pp.md'>Privacy Policy</Link> | <Link href='/tos.md' color='inherit' underline='hover'>Terms of Service</Link>

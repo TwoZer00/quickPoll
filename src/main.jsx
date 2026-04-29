@@ -7,9 +7,9 @@ import '@fontsource/roboto/700.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { getAnalytics } from 'firebase/analytics'
 import { app } from './firebase/init'
-import Home from './pages/Home'
-import CreatePoll from './pages/CreatePoll'
-import Poll from './pages/Poll'
+const Home = React.lazy(() => import('./pages/Home'))
+const CreatePoll = React.lazy(() => import('./pages/CreatePoll'))
+const Poll = React.lazy(() => import('./pages/Poll'))
 import { getAuth } from 'firebase/auth'
 import InitAuth from './pages/InitAuth'
 import { getOptions, getPoll } from './firebase/utils'

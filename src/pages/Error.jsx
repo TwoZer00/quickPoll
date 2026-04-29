@@ -1,5 +1,5 @@
 import { Box, CssBaseline, Link, Typography } from '@mui/material'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useRouteError, Link as RouterLink, isRouteErrorResponse } from 'react-router-dom'
 import ERRORS from '../const/Const'
 

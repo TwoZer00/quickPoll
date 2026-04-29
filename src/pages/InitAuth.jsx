@@ -6,16 +6,17 @@ import { amber, blueGrey, deepOrange } from '@mui/material/colors'
 import { PropTypes } from 'prop-types'
 import { getLastPolls } from '../utils/storage'
 
+const theme = responsiveFontSizes(createTheme({
+  palette: {
+    primary: { main: amber[700] },
+    secondary: deepOrange
+  }
+}))
+
+const FOOTER_BG = blueGrey[50]
+const FOOTER_COLOR = blueGrey[900]
+
 export default function InitAuth () {
-  const bgColor = blueGrey[50]
-  const color = blueGrey[900]
-  let theme = createTheme({
-    palette: {
-      primary: { main: amber[700] },
-      secondary: deepOrange
-    }
-  })
-  theme = responsiveFontSizes(theme)
   const [open, setOpen] = useState(false)
   const [openModal, setOpenModal] = useState(false)
   const [message, setMessage] = useState()
@@ -46,10 +47,10 @@ export default function InitAuth () {
           <LinearProgress sx={{ visibility: isLoading ? 'visible' : 'hidden' }} aria-hidden={!isLoading} />
           <Suspense fallback={<Box flex={1} />}>
             <Box id='main-content' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              <Outlet context={[handleOpen, handleClose, setMessage, [title, setTitle], [openModal, setOpenModal]]} />
+              <Outlet context={{ setMessage, setTitle, setOpenModal }} />
             </Box>
           </Suspense>
-          <Typography component='footer' variant='caption' textAlign='center' bgcolor={bgColor} color={color} py={2}>
+          <Typography component='footer' variant='caption' textAlign='center' bgcolor={FOOTER_BG} color={FOOTER_COLOR} py={2}>
             Made with ❤️ by <Link color='inherit' target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</Link>. <br />
             <Link color='inherit' underline='hover' href='/pp.md'>Privacy Policy</Link> | <Link href='/tos.md' color='inherit' underline='hover'>Terms of Service</Link>
           </Typography>

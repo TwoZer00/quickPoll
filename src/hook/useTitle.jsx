@@ -7,7 +7,7 @@ function setMeta (name, content) {
 }
 
 export default function useTitle ({ title, description }) {
-  const setTitle = useOutletContext()[3][1]
+  const { setTitle } = useOutletContext()
   useEffect(() => {
     const temp = title.split(' - ')[1] || title.split(' - ')[0]
     const fullTitle = `QuickPoll - ${temp}`

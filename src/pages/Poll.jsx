@@ -9,10 +9,11 @@ import useTitle from '../hook/useTitle'
 import ShareMenu from '../components/poll/ShareMenu'
 import OptionsList from '../components/poll/OptionsList'
 import TimeRemain from '../components/poll/TimeRemain'
+import PageWrapper from '../components/PageWrapper'
 
 export default function Poll () {
   const [data, setData] = useState((useLoaderData()))
-  const [,, setMessage] = useOutletContext()
+  const { setMessage } = useOutletContext()
   const [state, setState] = useState()
   const [options, setOptions] = useState(data.options)
   const [option, setOption] = useState(options.find(option => option.voted)?.id || options[0].id)
@@ -69,12 +70,13 @@ export default function Poll () {
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <Stack flex={1} justifyContent='center' alignItems='center' sx={{ flexDirection: { xs: 'column', xl: 'row' }, gap: 2, p: 2 }}>
-          <Box sx={{ display: { xs: 'none', xl: 'flex' }, maxWidth: 300, width: '100%' }} className='ad-wrapper'>
+        <Stack flex={1} justifyContent='center' alignItems='center' sx={{ flexDirection: { xs: 'column', lg: 'row' }, gap: 2, p: 2 }}>
+          <Box sx={{ display: { xs: 'none', lg: 'flex' }, maxWidth: 300, width: '100%' }} className='ad-wrapper'>
             <GoogleAd adSlot='3837806330' />
           </Box>
-          <Box flex={1} component='form' onSubmit={handleSubmit} display='flex' alignItems='center' justifyContent='center' width='100%' maxWidth='md'>
-            <Box component={Paper} width='100%' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
+          <PageWrapper maxWidth='md' sx={{ p: 0 }}>
+            <Box component='form' onSubmit={handleSubmit} width='100%'>
+              <Box component={Paper} width='100%' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
               <Box component='main' p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <ShareMenu setMessage={setMessage} />
                 {
@@ -99,7 +101,8 @@ export default function Poll () {
               <LinearProgress variant='indeterminate' sx={{ visibility: state === requestStateEnum.pending ? 'visible' : 'hidden' }} />
             </Box>
           </Box>
-          <Box sx={{ display: { xs: 'none', xl: 'flex' }, maxWidth: 300, width: '100%' }} className='ad-wrapper'>
+          </PageWrapper>
+          <Box sx={{ display: { xs: 'none', lg: 'flex' }, maxWidth: 300, width: '100%' }} className='ad-wrapper'>
             <GoogleAd adSlot='5542566407' />
           </Box>
         </Stack>

@@ -1,9 +1,10 @@
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Add, Launch, Remove } from '@mui/icons-material'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, Paper, TextField, Typography } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, InputAdornment, LinearProgress, Paper, TextField, Typography } from '@mui/material'
+import { useRef, useState } from 'react'
 import { createPoll, requestStateEnum } from '../firebase/utils'
 import useTitle from '../hook/useTitle'
+import PageWrapper from '../components/PageWrapper'
 
 import { POLL_DURATION_MINUTES } from '../const/Const'
 
@@ -11,7 +12,7 @@ export default function CreatePoll () {
   const [options, setOptions] = useState([{ index: 0 }, { index: 1 }])
   const idPoll = useRef()
   const [titleError, setTitleError] = useState('')
-  const [,, setMessage] = useOutletContext()
+  const { setMessage } = useOutletContext()
   const [requestState, setRequestState] = useState(requestStateEnum.none)
   const [showSuccess, setShowSuccess] = useState(false)
   const navigate = useNavigate()
@@ -99,53 +100,59 @@ export default function CreatePoll () {
   }
 
   return (
-    <Box flex={1} display='flex' alignItems='center' justifyContent='center' p={2}>
-      <Paper elevation={3} sx={{ width: '100%', maxWidth: 'sm', overflow: 'hidden' }}>
+    <PageWrapper>
+      <Paper elevation={3} sx={{ width: '100%', overflow: 'hidden' }}>
         <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requestStateEnum.pending ? 'visible' : 'hidden' }} />
         <Box component='form' display='flex' flexDirection='column' gap={2} p={3} onSubmit={handleSubmit}>
-          <Typography variant='body2' color='text.secondary'>
-            Add a title and at least two options to get started.
-          </Typography>
+          <Box>
+            <Typography variant='h5' fontWeight={600}>Create a Poll</Typography>
+            <Typography variant='body2' color='text.secondary'>
+              Add a title and at least two options to get started.
+            </Typography>
+          </Box>
 
           <TextField
-            variant='filled' label='Title' name='title' required fullWidth
+            variant='outlined' label='Title' name='title' required fullWidth
             error={!!titleError} helperText={titleError}
             inputProps={{ maxLength: 200 }}
             onChange={() => titleError && setTitleError('')}
           />
 
-          <Box ref={optionsRef} display='flex' flexDirection='column' gap={1} sx={{ maxHeight: 300, overflowY: 'auto' }}>
-            {options.map(item => (
-              <Box key={item.index} display='flex' flexDirection='row' alignItems='flex-start' gap={1}>
-                {options.length > 2 && (
-                  <IconButton
-                    aria-label={`Remove option ${item.index + 1}`}
-                    onClick={() => handleRemove(item.index)}
-                    sx={{ mt: 1, border: '1px solid', borderColor: 'divider' }}
-                  >
-                    <Remove />
-                  </IconButton>
-                )}
-                <TextField
-                  fullWidth
-                  error={!!item.error}
-                  helperText={item.error || ''}
-                  onChange={(e) => handleChange(e, item.index)}
-                  variant='filled' label={`Option ${item.index + 1}`} autoComplete='off'
-                  name={`option ${item.index}`} value={item.value || ''}
-                  inputProps={{ maxLength: 200 }}
-                />
-              </Box>
-            ))}
-            <Button
-              startIcon={<Add />} onClick={() => { handleAddOption(); requestAnimationFrame(() => optionsRef.current?.scrollTo({ top: optionsRef.current.scrollHeight, behavior: 'smooth' })) }}
-              sx={{ alignSelf: 'flex-start' }}
-            >
-              Add Option
-            </Button>
-          </Box>
+          <Divider />
 
-          <Box display='flex' justifyContent='space-between' alignItems='center'>
+          <Box ref={optionsRef} display='flex' flexDirection='column' gap={1} sx={{ maxHeight: '40vh', pt:1,overflowY: 'auto' }}>
+            {options.map(item => (
+              <TextField
+                key={item.index}
+                fullWidth size='small'
+                error={!!item.error}
+                helperText={item.error || ''}
+                onChange={(e) => handleChange(e, item.index)}
+                variant='outlined' label={`Option ${item.index + 1}`} autoComplete='off'
+                name={`option ${item.index}`} value={item.value || ''}
+                inputProps={{ maxLength: 200 }}
+                InputProps={options.length > 2 ? {
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton edge='end' aria-label={`Remove option ${item.index + 1}`} onClick={() => handleRemove(item.index)} size='small'>
+                        <Remove fontSize='small' />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                } : undefined}
+              />
+            ))}
+          </Box>
+          <Button
+            startIcon={<Add />} onClick={() => { handleAddOption(); requestAnimationFrame(() => optionsRef.current?.scrollTo({ top: optionsRef.current.scrollHeight, behavior: 'smooth' })) }}
+            sx={{ alignSelf: 'flex-start' }}
+          >
+            Add Option
+          </Button>
+
+          <Divider />
+
+          <Box display='flex' justifyContent='space-between' alignItems='center' flexWrap='wrap' gap={1}>
             <Typography variant='caption' color='text.secondary'>
               Voting open for <b>{POLL_DURATION_MINUTES} min</b> after creation.
             </Typography>
@@ -168,6 +175,6 @@ export default function CreatePoll () {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageWrapper>
   )
 }

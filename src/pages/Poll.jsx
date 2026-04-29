@@ -1,7 +1,9 @@
 import { useLoaderData, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 import { Alert, alpha, Box, Button, FormControlLabel, IconButton, LinearProgress, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Radio, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { memo, useMemo, useEffect, useRef, useState } from 'react'
-import { getResults, getSubscribeOption, setVote, requestStateEnum } from '../firebase/utils'
+import { getResults, setVote, requestStateEnum } from '../firebase/utils'
+import { collection, query, onSnapshot } from 'firebase/firestore'
+import { getFirestore } from 'firebase/firestore'
 import { BarChart as BarChartIcon, BallotOutlined, PieChart as PieChartIcon, Share } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
@@ -152,14 +154,56 @@ ShareMenu.propTypes = {
   setMessage: PropTypes.func
 }
 
+const DEBOUNCE_MS = 300
+
+function useVoteCounts(pollId, options) {
+  const [voteCounts, setVoteCounts] = useState({})
+  const bufferRef = useRef({})
+  const timerRef = useRef(null)
+  const unsubscribesRef = useRef([])
+
+  useEffect(() => {
+    unsubscribesRef.current.forEach(unsub => unsub())
+    unsubscribesRef.current = []
+    bufferRef.current = {}
+
+    const flush = () => {
+      const pending = { ...bufferRef.current }
+      setVoteCounts(prev => {
+        const hasChanges = Object.keys(pending).some(k => prev[k] !== pending[k])
+        return hasChanges ? { ...prev, ...pending } : prev
+      })
+    }
+
+    const unsubs = options.map(opt => {
+      const q = query(collection(getFirestore(), 'polls', pollId, 'options', opt.id, 'votes'))
+      return onSnapshot(q, (snap) => {
+        bufferRef.current[opt.id] = snap.docs.length
+        clearTimeout(timerRef.current)
+        timerRef.current = setTimeout(flush, DEBOUNCE_MS)
+      }, (error) => {
+        console.error('Snapshot listener error:', error)
+      })
+    })
+    unsubscribesRef.current = unsubs
+
+    return () => {
+      clearTimeout(timerRef.current)
+      unsubs.forEach(unsub => unsub())
+    }
+  }, [pollId, options])
+
+  return voteCounts
+}
+
 const OptionsList = ({ poll, handleChange, option, options }) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const paramView = searchParams.get('resultsOnly')?.toLowerCase()
   const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : 'vote')
-  const [tempOpt, setTempOpt] = useState({})
-  const total = tempOpt ? Object.values(tempOpt).reduce((a, b) => a + b, 0) : 0
+  const voteCounts = useVoteCounts(poll.id, options)
+  const total = useMemo(() => Object.values(voteCounts).reduce((a, b) => a + b, 0), [voteCounts])
   const showResult = options.some(option => option.voted) || poll.closed
-  const dataReady = Object.keys(tempOpt).length === options.length
+  const dataReady = Object.keys(voteCounts).length === options.length
 
   const handleViewChange = (_, v) => {
     if (!v) return
@@ -182,24 +226,17 @@ const OptionsList = ({ poll, handleChange, option, options }) => {
       {viewMode === 'vote' && (
         <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 300, overflowY: 'auto' }}>
           {
-            options.map((option) => (
-              <Option key={option.id} poll={poll} option={option} totalOpt={setTempOpt} total={total} showResult={showResult} />
+            options.map((opt) => (
+              <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} />
             ))
           }
         </RadioGroup>
       )}
-      {viewMode !== 'vote' && (
-        <Box sx={{ display: 'none' }}>
-          {options.map((option) => (
-            <Option key={option.id} poll={poll} option={option} totalOpt={setTempOpt} total={total} showResult={showResult} />
-          ))}
-        </Box>
-      )}
       {viewMode === 'pie' && dataReady && (
-        <PieChartView options={options} voteCounts={tempOpt} />
+        <PieChartView options={options} voteCounts={voteCounts} />
       )}
       {viewMode === 'bars' && dataReady && (
-        <BarChartView options={options} voteCounts={tempOpt} />
+        <BarChartView options={options} voteCounts={voteCounts} />
       )}
     </>
   )
@@ -264,29 +301,12 @@ BarChartView.propTypes = {
   voteCounts: PropTypes.object
 }
 
-const Option = ({ poll, option, showResult, totalOpt, total }) => {
-  const unsuscribe = useRef()
+const Option = memo(({ poll, option, showResult, voteCount, total }) => {
   const optionColor = useRef(generateColorBySeed(option.id))
-  const [voteCounter, setVoteCounter] = useState()
-  const [percentage, setPercentage] = useState(0)
+  const percentage = total > 0 && showResult ? (voteCount / total) * 100 : 0
   const sprig = useSpring(
-    { number: voteCounter || 0, from: { number: 0 }, config: { duration: 500 } }
+    { number: voteCount, from: { number: 0 }, config: { duration: 500 } }
   )
-  useEffect(() => {
-    if (!unsuscribe.current) {
-      unsuscribe.current = getSubscribeOption(poll, option, voteCounter, setVoteCounter, totalOpt)
-    }
-    return () => {
-      if (unsuscribe.current) unsuscribe.current()
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    if (total > 0 && voteCounter >= 0 && showResult) {
-      setPercentage((voteCounter / total) * 100)
-    }
-  }, [voteCounter, total, showResult])
 
   return (
     <Box position='relative' display='flex' gap={1} alignItems='center' borderRadius='5rem' overflow='hidden' height='3rem'>
@@ -307,14 +327,15 @@ const Option = ({ poll, option, showResult, totalOpt, total }) => {
         />
         <Typography variant='caption' sx={{ display: 'flex', flexDirection: 'row', gap: 1, alignItems: 'center' }} fontSize={14}>
           {(showResult) && <animated.p>{sprig.number.to(x => x.toFixed(0))}</animated.p>}
-          {(showResult && voteCounter) && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
+          {(showResult && voteCount > 0) && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
         </Typography>
       </Stack>
-      {/* <Box position='absolute' left={0} top={0} flex={1} height='100%' zIndex={0} borderRadius='5rem' bgcolor={alpha(optionColor.current, 0.2)} sx={{ transition: 'width .75s' }} width={porcentage} /> */}
       <PercentageBar percentage={percentage} color={optionColor.current} />
     </Box>
   )
-}
+})
+
+Option.displayName = 'Option'
 
 const PercentageBar = ({ percentage, color }) => {
   return (
@@ -333,7 +354,7 @@ Option.propTypes = {
   option: PropTypes.object,
   poll: PropTypes.object,
   showResult: PropTypes.bool,
-  totalOpt: PropTypes.func,
+  voteCount: PropTypes.number,
   total: PropTypes.number
 }
 

@@ -64,7 +64,7 @@ try { if (!import.meta.env.VITE_ENV) getAnalytics(app) } catch (_) {}
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <RouterProvider router={router} />
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
     </ErrorBoundary>
   </React.StrictMode>
 )

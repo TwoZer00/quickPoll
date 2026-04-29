@@ -1,10 +1,11 @@
-import { useLoaderData, useOutletContext, useParams, Link as RouterLink } from 'react-router-dom'
-import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Link, Paper, Radio, RadioGroup, Skeleton, Stack, Typography } from '@mui/material'
-import React, { useEffect, useRef, useState } from 'react'
+import { useLoaderData, useOutletContext, useParams, useSearchParams, Link as RouterLink } from 'react-router-dom'
+import { Alert, alpha, Box, Button, CssBaseline, FormControlLabel, IconButton, LinearProgress, Link, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Radio, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import React, { memo, useMemo, useEffect, useRef, useState } from 'react'
 import { getResults, getSuscribeOption, setVote, requuestStateEnum } from '../firebase/utils'
-import { Share } from '@mui/icons-material'
+import { BarChart as BarChartIcon, BallotOutlined, PieChart as PieChartIcon, Share } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import ERRORS from '../const/Const'
 import dayjs from 'dayjs'
 import GoogleAd from '../components/GoogleAd'
@@ -78,19 +79,7 @@ export default function Poll () {
           <Box flex={1} component='form' onSubmit={handleSubmit} display='flex' alignItems='center' justifyContent='center' width='100%' maxWidth='md'>
             <Box component={Paper} width='100%' variant='elevation' elevation={3} sx={{ overflow: 'hidden' }}>
               <Box p={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Box display='flex' alignSelf='end' flexDirection='row'>
-                  <IconButton
-                    size='small' onClick={() => {
-                      navigator.clipboard.writeText(window.location.href).then(() => setMessage({ message: 'link paste in clipboard' }))
-                    }}
-                  >
-                    <Share fontSize='inherit' />
-                  </IconButton>
-                  {/*
-              <IconButton size='small'>
-                <Flag fontSize='inherit' />
-              </IconButton> */}
-                </Box>
+                <ShareMenu pollId={id} setMessage={setMessage} />
                 {
                 data?.title
                   ? <Typography variant='h4' component='h1' fontWeight={500} maxWidth='30ch' title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{data?.title}</Typography>
@@ -122,18 +111,153 @@ export default function Poll () {
   )
 }
 
-const OptionsList = ({ poll, handleChange, option, options }) => {
-  const [tempOpt, setTempOpt] = useState()
-  const total = tempOpt ? Object.values(tempOpt).reduce((a, b) => a + b, 0) : 0
+const VALID_VIEWS = ['vote', 'pie', 'bars']
+
+const SHARE_OPTIONS = [
+  { label: 'Share poll', param: null, icon: <BallotOutlined fontSize='small' /> },
+  { label: 'Share as pie chart', param: 'pie', icon: <PieChartIcon fontSize='small' /> },
+  { label: 'Share as bar chart', param: 'bars', icon: <BarChartIcon fontSize='small' /> }
+]
+
+const ShareMenu = ({ pollId, setMessage }) => {
+  const [anchorEl, setAnchorEl] = useState(null)
+
+  const handleShare = (param) => {
+    const url = new URL(window.location.href)
+    url.search = ''
+    if (param) url.searchParams.set('resultsOnly', param)
+    navigator.clipboard.writeText(url.toString()).then(() => setMessage({ message: 'link copied to clipboard' }))
+    setAnchorEl(null)
+  }
+
   return (
-    <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 300, overflowY: 'auto' }}>
-      {
-        options.map((option) => (
-          <Option key={option.id} poll={poll} option={option} totalOpt={setTempOpt} total={total} showResult={options.some(option => option.voted) || poll.closed} />
-        ))
-      }
-    </RadioGroup>
+    <Box display='flex' alignSelf='end'>
+      <IconButton size='small' onClick={(e) => setAnchorEl(e.currentTarget)}>
+        <Share fontSize='inherit' />
+      </IconButton>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+        {SHARE_OPTIONS.map(({ label, param, icon }) => (
+          <MenuItem key={label} onClick={() => handleShare(param)}>
+            <ListItemIcon>{icon}</ListItemIcon>
+            <ListItemText>{label}</ListItemText>
+          </MenuItem>
+        ))}
+      </Menu>
+    </Box>
   )
+}
+
+ShareMenu.propTypes = {
+  pollId: PropTypes.string,
+  setMessage: PropTypes.func
+}
+
+const OptionsList = ({ poll, handleChange, option, options }) => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const paramView = searchParams.get('resultsOnly')?.toLowerCase()
+  const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : 'vote')
+  const [tempOpt, setTempOpt] = useState({})
+  const total = tempOpt ? Object.values(tempOpt).reduce((a, b) => a + b, 0) : 0
+  const showResult = options.some(option => option.voted) || poll.closed
+  const dataReady = Object.keys(tempOpt).length === options.length
+
+  const handleViewChange = (_, v) => {
+    if (!v) return
+    setViewMode(v)
+    setSearchParams(prev => {
+      if (v === 'vote') { prev.delete('resultsOnly') } else { prev.set('resultsOnly', v) }
+      return prev
+    }, { replace: true })
+  }
+
+  return (
+    <>
+      {showResult && total > 0 && (
+        <ToggleButtonGroup size='small' value={viewMode} exclusive onChange={handleViewChange} sx={{ alignSelf: 'center' }}>
+          <ToggleButton value='vote'><BallotOutlined fontSize='small' /></ToggleButton>
+          <ToggleButton value='pie'><PieChartIcon fontSize='small' /></ToggleButton>
+          <ToggleButton value='bars'><BarChartIcon fontSize='small' /></ToggleButton>
+        </ToggleButtonGroup>
+      )}
+      {viewMode === 'vote' && (
+        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 300, overflowY: 'auto' }}>
+          {
+            options.map((option) => (
+              <Option key={option.id} poll={poll} option={option} totalOpt={setTempOpt} total={total} showResult={showResult} />
+            ))
+          }
+        </RadioGroup>
+      )}
+      {viewMode !== 'vote' && (
+        <Box sx={{ display: 'none' }}>
+          {options.map((option) => (
+            <Option key={option.id} poll={poll} option={option} totalOpt={setTempOpt} total={total} showResult={showResult} />
+          ))}
+        </Box>
+      )}
+      {viewMode === 'pie' && dataReady && (
+        <PieChartView options={options} voteCounts={tempOpt} />
+      )}
+      {viewMode === 'bars' && dataReady && (
+        <BarChartView options={options} voteCounts={tempOpt} />
+      )}
+    </>
+  )
+}
+
+const PieChartView = memo(({ options, voteCounts }) => {
+  const data = useMemo(() => options
+    .map(opt => ({ name: opt.title, value: voteCounts[opt.id] || 0, color: generateColorBySeed(opt.id) }))
+    .filter(d => d.value > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(voteCounts)]
+  )
+
+  const total = useMemo(() => data.reduce((sum, d) => sum + d.value, 0), [data])
+
+  return (
+    <ResponsiveContainer width='100%' height={250}>
+      <PieChart>
+        <Pie data={data} dataKey='value' nameKey='name' cx='50%' cy='50%' innerRadius={40} outerRadius={80} animationDuration={500}>
+          {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+        </Pie>
+        <Tooltip formatter={(value, name) => [`${value} votes`, name]} />
+        <Legend formatter={(value, entry) => `${value} ${total > 0 ? Math.round((entry.payload.value / total) * 100) : 0}%`} />
+      </PieChart>
+    </ResponsiveContainer>
+  )
+})
+
+PieChartView.propTypes = {
+  options: PropTypes.array,
+  voteCounts: PropTypes.object
+}
+
+const BarChartView = memo(({ options, voteCounts }) => {
+  const data = useMemo(() => options
+    .map(opt => ({ name: opt.title, votes: voteCounts[opt.id] || 0, fill: generateColorBySeed(opt.id) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(voteCounts)]
+  )
+
+  return (
+    <ResponsiveContainer width='100%' height={250}>
+      <BarChart data={data}>
+        <CartesianGrid strokeDasharray='3 3' />
+        <XAxis dataKey='name' />
+        <YAxis allowDecimals={false} />
+        <Tooltip formatter={(value) => [`${value} votes`, '']} />
+        <Bar dataKey='votes' animationDuration={500}>
+          {data.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  )
+})
+
+BarChartView.propTypes = {
+  options: PropTypes.array,
+  voteCounts: PropTypes.object
 }
 
 const Option = ({ poll, option, showResult, totalOpt, total }) => {

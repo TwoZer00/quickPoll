@@ -14,7 +14,9 @@ import { getAuth } from 'firebase/auth'
 import InitAuth from './pages/InitAuth'
 import { getOptions, getPoll } from './firebase/utils'
 import Error from './pages/Error'
+import ErrorBoundary from './components/ErrorBoundary'
 import { isPollClosed } from './utils/utils'
+import CError from './error/Error'
 
 const router = createBrowserRouter([
   {
@@ -37,21 +39,26 @@ const router = createBrowserRouter([
         path: 'poll/:id',
         element: <Poll />,
         loader: async ({ params }) => {
-          return Promise.all([getPoll(params.id), getOptions(params.id)]).then((values) => {
-            const poll = { ...values[0], options: values[1] }
+          try {
+            const [pollData, optionsData] = await Promise.all([getPoll(params.id), getOptions(params.id)])
+            const poll = { ...pollData, options: optionsData }
             poll.closed = isPollClosed(poll.createdAt.seconds * 1000)
             return poll
-          })
+          } catch (error) {
+            throw error instanceof CError ? error : CError.fromCode(17, error.message)
+          }
         }
       }
     ],
     errorElement: <Error />
   }
 ])
-if (!import.meta.env.VITE_ENV) getAnalytics(app)
+try { if (!import.meta.env.VITE_ENV) getAnalytics(app) } catch (_) {}
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
   </React.StrictMode>
 )

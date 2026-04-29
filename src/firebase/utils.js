@@ -18,8 +18,8 @@ async function createPoll({ title, options }) {
       transaction.set(optionRef, optionsTemp[option])
     }
   })
-  const analytics = getAnalytics()
-  logEvent(analytics, 'poll_created', { pollId: poll.id, author: getAuth().currentUser?.uid })
+  const analytics = !import.meta.env.VITE_ENV ? getAnalytics() : null
+  if (analytics) logEvent(analytics, 'poll_created', { pollId: poll.id, author: getAuth().currentUser?.uid })
   const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
   lastPolls.push({ ...pollData, id: poll.id, author: getAuth().currentUser?.uid })
   sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
@@ -36,16 +36,17 @@ async function setVote({ lastVote, voteId, pollId }) {
   const optionRef = doc(pollRef, 'options', voteId)
   const votesRef = collection(optionRef, 'votes')
   const voterRef = doc(votesRef, getAuth().currentUser?.uid)
-  const analytics = getAnalytics()
   try {
     if (lastVote) {
       const lastVoteRef = doc(collection(pollRef, 'options', lastVote.id, 'votes'), getAuth().currentUser.uid)
       await deleteDoc(lastVoteRef)
     }
     await setDoc(voterRef, { id: getAuth().currentUser.uid, votedAt: new Date() })
-    logEvent(analytics, 'poll_voted', { pollId, voteId, voterId: getAuth().currentUser?.uid })
+    const analytics = !import.meta.env.VITE_ENV ? getAnalytics() : null
+    if (analytics) logEvent(analytics, 'poll_voted', { pollId, voteId, voterId: getAuth().currentUser?.uid })
   } catch (error) {
     if (error.code === 'permission-denied') throw CError.fromCode(16)
+    throw CError.fromError(error)
   }
 }
 
@@ -91,6 +92,9 @@ function getSuscribeOption(poll, option, votes, setVotes, totalOpt) {
       temp[option.id] = querySnapshot.docs.length
       return temp
     })
+  }, (error) => {
+    console.error('Snapshot listener error:', error)
+    setVotes(0)
   })
 }
 

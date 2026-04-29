@@ -15,8 +15,14 @@ import InitAuth from './pages/InitAuth'
 import { getOptions, getPoll } from './firebase/utils'
 import Error from './pages/Error'
 import ErrorBoundary from './components/ErrorBoundary'
+import { useParams } from 'react-router-dom'
 import { isPollClosed } from './utils/utils'
 import CError from './error/Error'
+
+function PollWrapper () {
+  const { id } = useParams()
+  return <Poll key={id} />
+}
 
 const router = createBrowserRouter([
   {
@@ -37,7 +43,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'poll/:id',
-        element: <Poll />,
+        element: <PollWrapper />,
         loader: async ({ params }) => {
           try {
             const [pollData, optionsData] = await Promise.all([getPoll(params.id), getOptions(params.id)])

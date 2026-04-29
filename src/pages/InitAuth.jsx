@@ -54,7 +54,7 @@ export default function InitAuth () {
             <Link color='inherit' underline='hover' href='/pp.md'>Privacy Policy</Link> | <Link href='/tos.md' color='inherit' underline='hover'>Terms of Service</Link>
           </Typography>
         </Box>
-        <LastPollsListModal data={getLastPolls()} open={openModal} onClose={handleCloseModal} />
+        <LastPollsListModal open={openModal} onClose={handleCloseModal} />
         <Snackbar
           open={open}
           TransitionComponent={SlideTransition}
@@ -79,16 +79,16 @@ function SlideTransition (props) {
   return <Slide {...props} direction='up' />
 }
 
-const LastPollsListModal = (props) => {
-  const { onClose, open } = props
+const LastPollsListModal = ({ onClose, open }) => {
   const navigate = useNavigate()
+  const polls = open ? getLastPolls() : []
 
   return (
     <Dialog onClose={onClose} open={open} TransitionComponent={Transition}>
       <DialogTitle>Last polls</DialogTitle>
       <Divider />
       <List sx={{ pt: 0, minWidth: 280 }}>
-        {props.data?.map((poll) => (
+        {polls.map((poll) => (
           <PollListItem key={poll.id} poll={poll} onClick={() => { navigate(`/poll/${poll.id}`); onClose() }} />
         ))}
       </List>
@@ -98,8 +98,7 @@ const LastPollsListModal = (props) => {
 
 LastPollsListModal.propTypes = {
   onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  data: PropTypes.array.isRequired
+  open: PropTypes.bool.isRequired
 }
 
 const Transition = React.forwardRef(function Transition (props, ref) {

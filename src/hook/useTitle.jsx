@@ -12,6 +12,8 @@ export default function useTitle ({ title, description }) {
     document.title = fullTitle
     setMeta('og:title', fullTitle)
     setMeta('twitter:title', fullTitle)
+    setMeta('og:url', window.location.href)
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', window.location.href)
     if (description) {
       setMeta('description', description)
       setMeta('og:description', description)

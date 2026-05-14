@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /poll/
+
+Sitemap: https://quickpoll.twozer00.dev/sitemap.xml

@@ -1,7 +1,7 @@
 import { useLoaderData, useOutletContext, useParams } from 'react-router-dom'
 import { Box, Button, LinearProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { getResults, setVote, requestStateEnum } from '../firebase/utils'
+import { getResults, setVote, requestStateEnum } from '../supabase/utils'
 import ERRORS from '../const/Const'
 import dayjs from 'dayjs'
 import GoogleAd from '../components/GoogleAd'
@@ -20,7 +20,7 @@ export default function Poll () {
   const [results, setResults] = useState()
   const [duration, setDuration] = useState()
   const { id } = useParams()
-  const voteCounts = useVoteCounts(id, options)
+  const { voteCounts, applyOptimistic, revertOptimistic } = useVoteCounts(id, options)
   useTitle({ title: `QuickPoll - ${data?.title}` || 'QuickPoll - Poll', description: `Vote on: ${data?.title}` })
 
   useEffect(() => {
@@ -39,7 +39,9 @@ export default function Poll () {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const selectedOption = data.get('radio-buttons-group')
-    setVote({ lastVote: options.find(option => option.voted), voteId: selectedOption, pollId: id })
+    const lastVote = options.find(option => option.voted)
+    applyOptimistic(lastVote?.id, selectedOption)
+    setVote({ lastVote, voteId: selectedOption, pollId: id })
       .then(() => {
         const tempOptions = options.map(option => ({ ...option, voted: false }))
         setOptions(tempOptions)
@@ -48,6 +50,7 @@ export default function Poll () {
         setMessage({ message: 'vote sent', severity: 'success' })
         setState(requestStateEnum.success)
       }).catch((error) => {
+        revertOptimistic(lastVote?.id, selectedOption)
         setMessage({ message: ERRORS[error.code], severity: 'error' })
         setState(requestStateEnum.error)
       })

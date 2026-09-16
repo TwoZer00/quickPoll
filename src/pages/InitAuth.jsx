@@ -1,6 +1,6 @@
 import { Alert, Box, createTheme, CssBaseline, Dialog, DialogTitle, Divider, LinearProgress, Link, List, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
 import React, { Suspense, useEffect, useMemo, useState } from 'react'
-import { Outlet, useNavigate, useNavigation } from 'react-router-dom'
+import { Outlet, useNavigate, useNavigation, useLocation } from 'react-router-dom'
 import Menu, { PollListItem } from '../components/Menu'
 import { amber, deepOrange } from '@mui/material/colors'
 import { PropTypes } from 'prop-types'
@@ -76,6 +76,11 @@ function InitAuthInner () {
 
   const navigation = useNavigation()
   const isLoading = navigation.state === 'loading'
+  const location = useLocation()
+
+  useEffect(() => {
+    window.umami?.track({ url: location.pathname, referrer: document.referrer })
+  }, [location.pathname])
 
   return (
     <>

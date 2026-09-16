@@ -5,14 +5,11 @@ import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import { getAnalytics } from 'firebase/analytics'
-import { app } from './firebase/init'
 const Home = React.lazy(() => import('./pages/Home'))
 const CreatePoll = React.lazy(() => import('./pages/CreatePoll'))
 const Poll = React.lazy(() => import('./pages/Poll'))
-import { getAuth } from 'firebase/auth'
 import InitAuth from './pages/InitAuth'
-import { getOptions, getPoll } from './firebase/utils'
+import { getOptions, getPoll } from './supabase/utils'
 import Error from './pages/Error'
 import ErrorBoundary from './components/ErrorBoundary'
 import { useParams } from 'react-router-dom'
@@ -28,10 +25,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <InitAuth />,
-    loader: () => {
-      const auth = getAuth()
-      return auth
-    },
+    loader: () => null,
     children: [
       {
         path: '',
@@ -44,6 +38,7 @@ const router = createBrowserRouter([
       {
         path: 'poll/:id',
         element: <PollWrapper />,
+        shouldRevalidate: ({ currentParams, nextParams }) => currentParams.id !== nextParams.id,
         loader: async ({ params }) => {
           try {
             const [pollData, optionsData] = await Promise.all([getPoll(params.id), getOptions(params.id)])
@@ -59,8 +54,6 @@ const router = createBrowserRouter([
     errorElement: <Error />
   }
 ])
-try { if (!import.meta.env.VITE_ENV) getAnalytics(app) } catch (_) {}
-
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>

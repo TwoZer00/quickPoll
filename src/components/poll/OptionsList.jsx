@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Box, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { BarChart as BarChartIcon, BallotOutlined, PieChart as PieChartIcon } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
-import { collection, query, onSnapshot, getFirestore } from 'firebase/firestore'
+import { supabase } from '../../supabase/init'
 import { generateColorBySeed } from '../../utils/color'
 import Option from './Option'
 import PieChartView from '../charts/PieChartView'
@@ -16,12 +16,26 @@ export function useVoteCounts (pollId, options) {
   const [voteCounts, setVoteCounts] = useState({})
   const bufferRef = useRef({})
   const timerRef = useRef(null)
-  const unsubscribesRef = useRef([])
+  const optionsRef = useRef(options)
+  const localDeltaRef = useRef({})
+
+  useEffect(() => { optionsRef.current = options }, [options])
 
   useEffect(() => {
-    unsubscribesRef.current.forEach(unsub => unsub())
-    unsubscribesRef.current = []
-    bufferRef.current = {}
+    if (!pollId || !options.length) return
+    supabase.from('votes').select('option_id').eq('poll_id', pollId).then(({ data }) => {
+      if (!data) return
+      const counts = {}
+      optionsRef.current.forEach(o => { counts[o.id] = 0 })
+      data.forEach(v => { if (counts[v.option_id] !== undefined) counts[v.option_id]++ })
+      setVoteCounts(counts)
+      bufferRef.current = counts
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pollId])
+
+  useEffect(() => {
+    if (!pollId) return
 
     const flush = () => {
       const pending = { ...bufferRef.current }
@@ -31,25 +45,58 @@ export function useVoteCounts (pollId, options) {
       })
     }
 
-    const unsubs = options.map(opt => {
-      const q = query(collection(getFirestore(), 'polls', pollId, 'options', opt.id, 'votes'))
-      return onSnapshot(q, (snap) => {
-        bufferRef.current[opt.id] = snap.docs.length
+    const channel = supabase.channel(`votes:${pollId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'votes', filter: `poll_id=eq.${pollId}` }, (payload) => {
+        const newOptId = payload.new?.option_id
+        const oldOptId = payload.old?.option_id
+
+        // skip if this event matches a pending local optimistic update
+        if (payload.eventType === 'UPDATE' && localDeltaRef.current[newOptId]) {
+          delete localDeltaRef.current[newOptId]
+          return
+        }
+        if (payload.eventType === 'INSERT' && localDeltaRef.current[newOptId]) {
+          delete localDeltaRef.current[newOptId]
+          return
+        }
+
+        if (payload.eventType === 'UPDATE') {
+          bufferRef.current[oldOptId] = (bufferRef.current[oldOptId] ?? 1) - 1
+          bufferRef.current[newOptId] = (bufferRef.current[newOptId] ?? 0) + 1
+        } else if (payload.eventType === 'INSERT') {
+          bufferRef.current[newOptId] = (bufferRef.current[newOptId] ?? 0) + 1
+        } else if (payload.eventType === 'DELETE') {
+          bufferRef.current[oldOptId] = (bufferRef.current[oldOptId] ?? 1) - 1
+        }
         clearTimeout(timerRef.current)
         timerRef.current = setTimeout(flush, DEBOUNCE_MS)
-      }, (error) => {
-        console.error('Snapshot listener error:', error)
       })
-    })
-    unsubscribesRef.current = unsubs
+      .subscribe()
 
     return () => {
       clearTimeout(timerRef.current)
-      unsubs.forEach(unsub => unsub())
+      supabase.removeChannel(channel)
     }
-  }, [pollId, options])
+  }, [pollId])
 
-  return voteCounts
+  const applyOptimistic = (oldId, newId) => {
+    // mark as pending so realtime event for this vote is ignored
+    localDeltaRef.current[newId] = true
+    bufferRef.current = { ...bufferRef.current }
+    if (oldId) bufferRef.current[oldId] = (bufferRef.current[oldId] ?? 1) - 1
+    bufferRef.current[newId] = (bufferRef.current[newId] ?? 0) + 1
+    setVoteCounts({ ...bufferRef.current })
+  }
+
+  const revertOptimistic = (oldId, newId) => {
+    delete localDeltaRef.current[newId]
+    bufferRef.current = { ...bufferRef.current }
+    if (oldId) bufferRef.current[oldId] = (bufferRef.current[oldId] ?? 0) + 1
+    bufferRef.current[newId] = (bufferRef.current[newId] ?? 1) - 1
+    setVoteCounts({ ...bufferRef.current })
+  }
+
+  return { voteCounts, applyOptimistic, revertOptimistic }
 }
 
 const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {

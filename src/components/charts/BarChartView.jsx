@@ -1,7 +1,9 @@
-import { memo } from 'react'
-import { useSpring, animated } from '@react-spring/web'
+import { memo, useState } from 'react'
+import { useSpring, animated, useTransition } from '@react-spring/web'
 import { PropTypes } from 'prop-types'
-import { alpha } from '@mui/material'
+import { alpha, IconButton, Tooltip } from '@mui/material'
+import { SortByAlpha } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 
 function Bar ({ option, value, total, color, hasImages }) {
   const pct = total > 0 ? (value / total) * 100 : 0
@@ -39,15 +41,44 @@ function Bar ({ option, value, total, color, hasImages }) {
 }
 
 const BarChartView = memo(({ options, voteCounts }) => {
+  const { t } = useTranslation()
+  const [asc, setAsc] = useState(false)
   const total = Object.values(voteCounts).reduce((a, b) => a + b, 0)
-  const sorted = [...options].sort((a, b) => (voteCounts[b.id] || 0) - (voteCounts[a.id] || 0))
+  const sorted = [...options].sort((a, b) => asc
+    ? (voteCounts[a.id] || 0) - (voteCounts[b.id] || 0)
+    : (voteCounts[b.id] || 0) - (voteCounts[a.id] || 0)
+  )
   const hasImages = options.some(o => o.image)
 
+  const gap = hasImages ? 20 : 14
+  const itemHeight = hasImages ? 98 : 46
+  const rowHeight = itemHeight + gap
+  const containerHeight = sorted.length * rowHeight - gap
+
+  const transitions = useTransition(sorted, {
+    keys: opt => opt.id,
+    from: { opacity: 0 },
+    enter: (_, i) => ({ opacity: 1, y: i * rowHeight }),
+    update: (_, i) => ({ y: i * rowHeight }),
+    config: { tension: 200, friction: 26 }
+  })
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: hasImages ? 20 : 14, padding: '4px 0' }}>
-      {sorted.map(opt => (
-        <Bar key={opt.id} option={opt} value={voteCounts[opt.id] || 0} total={total} color={opt.color} hasImages={hasImages} />
-      ))}
+    <div style={{ padding: '4px 0' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Tooltip title={t('chart.sortAsc')}>
+          <IconButton size='small' onClick={() => setAsc(v => !v)} color={asc ? 'primary' : 'default'}>
+            <SortByAlpha fontSize='small' />
+          </IconButton>
+        </Tooltip>
+      </div>
+      <div style={{ position: 'relative', height: containerHeight }}>
+        {transitions((style, opt) => (
+          <animated.div key={opt.id} style={{ position: 'absolute', width: '100%', ...style }}>
+            <Bar option={opt} value={voteCounts[opt.id] || 0} total={total} color={opt.color} hasImages={hasImages} />
+          </animated.div>
+        ))}
+      </div>
     </div>
   )
 })

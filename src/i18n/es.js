@@ -72,7 +72,8 @@ export default {
     voted: 'votado'
   },
   chart: {
-    votes: 'votos'
+    votes: 'votos',
+    sortAsc: 'Ordenar ascendente'
   },
   mock: {
     title: '¿Cuál es el mejor lenguaje de programación?',

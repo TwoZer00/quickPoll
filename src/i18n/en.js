@@ -72,7 +72,8 @@ export default {
     voted: 'voted'
   },
   chart: {
-    votes: 'votes'
+    votes: 'votes',
+    sortAsc: 'Sort ascending'
   },
   mock: {
     title: 'Best programming language?',

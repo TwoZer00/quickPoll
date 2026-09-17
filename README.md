@@ -86,6 +86,7 @@ src/
 - [x] Internationalization (English & Spanish)
 - [x] Privacy Policy & Terms of Service pages
 - [ ] User accounts & poll history
+- [ ] Organizations — private polls for teams (OAuth via Google/Microsoft, optional SAML SSO per domain)
 
 ## License
 

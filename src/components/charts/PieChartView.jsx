@@ -5,6 +5,23 @@ import { useTranslation } from 'react-i18next'
 
 const DEFAULT_SIZE = 220
 
+function LegendItem ({ seg, index, animated: didAnimate, t }) {
+  const spring = useSpring({
+    from: { opacity: 0, x: 16 },
+    to: { opacity: 1, x: 0 },
+    delay: didAnimate ? 0 : index * 80,
+    config: { tension: 60, friction: 18 }
+  })
+  return (
+    <animated.div style={{ ...spring, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: seg.color, flexShrink: 0 }} />
+      {seg.image && <img src={seg.image} alt={seg.title} style={{ width: 28, height: 28, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }} />}
+      <span style={{ fontSize: 12, flex: 1 }}>{seg.title}</span>
+      <span style={{ fontSize: 12, color: '#888', whiteSpace: 'nowrap' }}>{Math.round(seg.fraction * 100)}% · {seg.value} {t('chart.votes')}</span>
+    </animated.div>
+  )
+}
+
 function DonutSegment ({ color, startAngle, fraction, entryDelay, animated: didAnimate, circumference, r, center, stroke }) {
   const dash = fraction * circumference
   const rotation = startAngle * 360 - 90
@@ -47,12 +64,10 @@ const toData = (options, counts) => {
 }
 
 const PieChartView = memo(({ options, voteCounts }) => {
-  const hasImages = options.some(o => o.image)
-  const SIZE = hasImages ? 300 : DEFAULT_SIZE
-  const STROKE = hasImages ? 40 : 32
-  const R = (SIZE - STROKE) / 2
+  const STROKE = 32
+  const R = (DEFAULT_SIZE - STROKE) / 2
   const CIRCUMFERENCE = 2 * Math.PI * R
-  const CENTER = SIZE / 2
+  const CENTER = DEFAULT_SIZE / 2
   const { t } = useTranslation()
   const [hovered, setHovered] = useState(null)
   const [animated, setAnimated] = useState(false)
@@ -71,10 +86,12 @@ const PieChartView = memo(({ options, voteCounts }) => {
   const total = useMemo(() => data.reduce((s, d) => s + d.value, 0), [data])
   const h = hovered != null ? data[hovered] : null
 
+  const sorted = useMemo(() => [...data].sort((a, b) => b.value - a.value), [data])
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-      <div style={{ position: 'relative', width: SIZE, height: SIZE }}>
-        <svg width={SIZE} height={SIZE}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+      <div style={{ position: 'relative', width: DEFAULT_SIZE, height: DEFAULT_SIZE }}>
+        <svg width={DEFAULT_SIZE} height={DEFAULT_SIZE}>
           {data.map((seg, i) => (
             <DonutSegment key={seg.id} color={seg.color} startAngle={seg.offset} fraction={seg.fraction} entryDelay={i * 80} animated={animated} circumference={CIRCUMFERENCE} r={R} center={CENTER} stroke={STROKE} />
           ))}
@@ -101,11 +118,11 @@ const PieChartView = memo(({ options, voteCounts }) => {
           {h
             ? <>
               {h.image
-                ? <img src={h.image} alt={h.title} style={{ width: SIZE * 0.35, height: SIZE * 0.35, borderRadius: 8, objectFit: 'cover', marginBottom: 4 }} />
+                ? <img src={h.image} alt={h.title} style={{ width: DEFAULT_SIZE * 0.35, height: DEFAULT_SIZE * 0.35, borderRadius: 8, objectFit: 'cover', marginBottom: 4 }} />
                 : <span style={{ fontSize: 22, fontWeight: 700, color: h.color }}>{Math.round(h.fraction * 100)}%</span>
               }
               {h.image && <span style={{ fontSize: 13, fontWeight: 600, color: h.color }}>{Math.round(h.fraction * 100)}%</span>}
-              <span style={{ fontSize: 12, color: '#888', maxWidth: SIZE * 0.4, textAlign: 'center', lineHeight: 1.2 }}>{h.title}</span>
+              <span style={{ fontSize: 12, color: '#888', maxWidth: DEFAULT_SIZE * 0.4, textAlign: 'center', lineHeight: 1.2 }}>{h.title}</span>
             </>
             : <>
               <span style={{ fontSize: 26, fontWeight: 700 }}>{total}</span>
@@ -113,14 +130,9 @@ const PieChartView = memo(({ options, voteCounts }) => {
             </>}
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
-        {data.map(seg => (
-          <div key={seg.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {seg.image
-              ? <img src={seg.image} alt={seg.title} style={{ width: 32, height: 32, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }} />
-              : <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: seg.color, display: 'inline-block', flexShrink: 0 }} />}
-            <span style={{ fontSize: 12 }}>{seg.title}</span>
-          </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 140, maxWidth: 200 }}>
+        {sorted.map((seg, i) => (
+          <LegendItem key={seg.id} seg={seg} index={i} animated={animated} t={t} />
         ))}
       </div>
     </div>

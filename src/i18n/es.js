@@ -80,7 +80,8 @@ export default {
     title: '¿Cuál es el mejor lenguaje de programación?',
     images: 'Imágenes',
     voteTooltip: '¡Pruébalo! Emite tu voto',
-    tryIt: 'Pruébalo'
+    tryIt: 'Pruébalo',
+    reset: 'Reiniciar'
   },
   error: {
     tryAgain: 'Intenta volver atrás o recargar la página.',

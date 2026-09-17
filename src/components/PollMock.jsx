@@ -11,12 +11,13 @@ function loadStorage () {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? {} } catch { return {} }
 }
 
-const _stored = loadStorage()
-const CREATED_AT_SECONDS = _stored.createdAt ?? (() => {
+function initCreatedAt () {
+  const stored = loadStorage()
+  if (stored.createdAt) return stored.createdAt
   const t = Date.now() / 1000
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...loadStorage(), createdAt: t }))
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...stored, createdAt: t }))
   return t
-})()
+}
 const OPTIONS_WITH_IMAGES = [
   { id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', title: 'JavaScript', voted: false, image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
   { id: 'b2c3d4e5-f6a7-8901-bcde-f12345678901', title: 'Python', voted: false, image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
@@ -29,15 +30,20 @@ const VOTE_INTERVAL_MS = 1200
 // Standalone hook for mock vote counts (no Supabase)
 const INITIAL_COUNTS = { 'a1b2c3d4-e5f6-7890-abcd-ef1234567890': 3, 'b2c3d4e5-f6a7-8901-bcde-f12345678901': 5, 'c3d4e5f6-a7b8-9012-cdef-123456789012': 1, 'd4e5f6a7-b8c9-0123-defa-234567890123': 2 }
 // Weights based on Stack Overflow Developer Survey 2024 popularity
-const WEIGHTS = { 'a1b2c3d4-e5f6-7890-abcd-ef1234567890': 62, 'b2c3d4e5-f6a7-8901-bcde-f12345678901': 51, 'c3d4e5f6-a7b8-9012-cdef-123456789012': 13, 'd4e5f6a7-b8c9-0123-defa-234567890123': 13 }
+const WEIGHTS = { 'a1b2c3d4-e5f6-7890-abcd-ef1234567890': 30, 'b2c3d4e5-f6a7-8901-bcde-f12345678901': 28, 'c3d4e5f6-a7b8-9012-cdef-123456789012': 22, 'd4e5f6a7-b8c9-0123-defa-234567890123': 20 }
 
 function saveCounts (counts) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...loadStorage(), counts }))
 }
 
-function useMockVoteCounts (options) {
+function useMockVoteCounts (options, resetKey) {
   const [voteCounts, setVoteCounts] = useState(() => ({ ...INITIAL_COUNTS, ...loadStorage().counts }))
   const bufferRef = useRef({ ...INITIAL_COUNTS, ...loadStorage().counts })
+
+  useEffect(() => {
+    bufferRef.current = { ...INITIAL_COUNTS }
+    setVoteCounts({ ...INITIAL_COUNTS })
+  }, [resetKey])
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -67,10 +73,22 @@ export default function PollMock () {
   const [voted, setVoted] = useState(() => loadStorage().voted ?? null)
   const [viewMode, setViewMode] = useState(() => 'bars')
   const [withImages, setWithImages] = useState(false)
+  const [createdAt, setCreatedAt] = useState(initCreatedAt)
+  const [resetKey, setResetKey] = useState(0)
   const BASE_OPTIONS = withImages ? OPTIONS_WITH_IMAGES : OPTIONS_NO_IMAGES
-  const { voteCounts, applyOptimistic } = useMockVoteCounts(BASE_OPTIONS)
+  const { voteCounts, applyOptimistic } = useMockVoteCounts(BASE_OPTIONS, resetKey)
 
-  const poll = { id: POLL_ID, title: t('mock.title'), createdAt: { seconds: CREATED_AT_SECONDS }, closed: false }
+  const handleReset = () => {
+    localStorage.removeItem(STORAGE_KEY)
+    const t = initCreatedAt()
+    setCreatedAt(t)
+    setVoted(null)
+    setOption(null)
+    setViewMode('bars')
+    setResetKey(k => k + 1)
+  }
+
+  const poll = { id: POLL_ID, title: t('mock.title'), createdAt: { seconds: createdAt }, closed: false }
   const options = BASE_OPTIONS.map(o => ({ ...o, voted: o.id === voted }))
 
   const handleVote = () => {
@@ -94,7 +112,7 @@ export default function PollMock () {
             sx={{ m: 0, gap: 0.5 }}
           />
         </Box>
-        <TimeRemain duration={duration} setDuration={setDuration} date={CREATED_AT_SECONDS * 1000} />
+        <TimeRemain duration={duration} setDuration={setDuration} date={createdAt * 1000} />
         <OptionsList
           poll={poll}
           options={options}
@@ -111,11 +129,18 @@ export default function PollMock () {
           isVoted={!!voted}
           onViewChange={(v) => setViewMode(v)}
         />
-        {viewMode === 'vote' && (
-          <Button variant='contained' color='primary' size='large' sx={{ alignSelf: 'end', px: 4 }} disabled={!option || option === voted} onClick={handleVote}>
-            {t('poll.vote')}
-          </Button>
-        )}
+        <Box display='flex' justifyContent='space-between' alignItems='center'>
+          {import.meta.env.DEV && (
+            <Button size='small' color='inherit' sx={{ opacity: 0.5, fontSize: 12 }} onClick={handleReset}>
+              {t('mock.reset')}
+            </Button>
+          )}
+          {viewMode === 'vote' && (
+            <Button variant='contained' color='primary' size='large' sx={{ px: 4 }} disabled={!option || option === voted} onClick={handleVote}>
+              {t('poll.vote')}
+            </Button>
+          )}
+        </Box>
       </Box>
     </Paper>
   )

@@ -80,7 +80,8 @@ export default {
     title: 'Best programming language?',
     images: 'Images',
     voteTooltip: 'Try it! Cast your vote',
-    tryIt: 'Try it out'
+    tryIt: 'Try it out',
+    reset: 'Reset'
   },
   error: {
     tryAgain: 'Try going back or refreshing the page.',

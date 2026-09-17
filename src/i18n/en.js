@@ -7,6 +7,7 @@ export default {
     darkMode: 'Dark mode'
   },
   home: {
+    title: 'Quick and easy polls',
     subtitle: 'Create polls in seconds, share a link, and watch votes come in live.',
     createBtn: 'Create a Poll',
     features: {
@@ -16,6 +17,7 @@ export default {
     }
   },
   create: {
+    pageTitle: 'Create Poll',
     title: 'Create a Poll',
     subtitle: 'Add a title and at least two options to get started.',
     titleLabel: 'Title',
@@ -44,6 +46,7 @@ export default {
     }
   },
   poll: {
+    voteOn: 'Vote on: {{title}}',
     by: 'by {{name}}',
     vote: 'Vote',
     closed: 'Poll closed',

@@ -22,7 +22,7 @@ export default function CreatePoll () {
   const [showConfirm, setShowConfirm] = useState(false)
   const [pendingData, setPendingData] = useState(null)
   const navigate = useNavigate()
-  useTitle({ title: 'Create Poll', description: 'Create a new poll and share it with others.' })
+  useTitle({ title: t('create.pageTitle'), description: t('create.subtitle') })
 
   const optionsRef = useRef()
   const MAX_OPTIONS = 20

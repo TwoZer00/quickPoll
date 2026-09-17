@@ -9,7 +9,7 @@ import PollMock from '../components/PollMock'
 export default function Home () {
   const { t } = useTranslation()
   const { lang } = useParams()
-  useTitle({ title: 'Quick and easy polls', description: 'Create quick polls, share them and see results in real time.' })
+  useTitle({ title: t('home.title'), description: t('home.subtitle') })
 
   const features = [
     { icon: <BoltRounded />, label: t('home.features.instant.label'), desc: t('home.features.instant.desc') },

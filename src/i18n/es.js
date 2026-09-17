@@ -7,6 +7,7 @@ export default {
     darkMode: 'Modo oscuro'
   },
   home: {
+    title: 'Encuestas rápidas y fáciles',
     subtitle: 'Crea encuestas en segundos, comparte un enlace y mira los votos en tiempo real.',
     createBtn: 'Crear encuesta',
     features: {
@@ -16,6 +17,7 @@ export default {
     }
   },
   create: {
+    pageTitle: 'Crear encuesta',
     title: 'Crear encuesta',
     subtitle: 'Agrega un título y al menos dos opciones para comenzar.',
     titleLabel: 'Título',
@@ -44,6 +46,7 @@ export default {
     }
   },
   poll: {
+    voteOn: 'Vota en: {{title}}',
     by: 'por {{name}}',
     vote: 'Votar',
     closed: 'Encuesta cerrada',

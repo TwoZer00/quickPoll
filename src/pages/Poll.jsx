@@ -23,7 +23,7 @@ export default function Poll () {
   const [duration, setDuration] = useState()
   const { id } = useParams()
   const { voteCounts, applyOptimistic, revertOptimistic } = useVoteCounts(id, options)
-  useTitle({ title: `QuickPoll - ${data?.title}` || 'QuickPoll - Poll', description: `Vote on: ${data?.title}` })
+  useTitle({ title: data?.title || 'Poll', description: t('poll.voteOn', { title: data?.title || '' }) })
 
   useEffect(() => {
     const getData = async () => {

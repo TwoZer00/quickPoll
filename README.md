@@ -2,7 +2,7 @@
 
 Create and share real-time polls that auto-close after 30 minutes. No sign-up required — anonymous by default.
 
-<!-- ![QuickPoll Screenshot](screenshot.png) -->
+![QuickPoll Screenshot](screenshots/screenshot.png)
 
 ## Features
 
@@ -26,6 +26,8 @@ Create and share real-time polls that auto-close after 30 minutes. No sign-up re
 | Animations | [React Spring](https://www.react-spring.dev/) |
 | Images | [Cloudinary](https://cloudinary.com/) |
 | Dates | [dayjs](https://day.js.org/) |
+| i18n | [i18next](https://www.i18next.com/) + [react-i18next](https://react.i18next.com/) |
+| Markdown | [react-markdown](https://github.com/remarkjs/react-markdown) |
 | Hosting | [Netlify](https://www.netlify.com/) |
 
 ## Getting Started
@@ -66,7 +68,8 @@ src/
 ├── error/          # Error handling
 ├── supabase/       # Supabase client, schema and services
 ├── hook/           # Custom React hooks
-├── pages/          # Route pages (Home, CreatePoll, Poll)
+├── i18n/           # Internationalization (en, es)
+├── pages/          # Route pages (Home, CreatePoll, Poll, Privacy, Terms)
 ├── utils/          # Utility functions
 └── main.jsx        # App entry point
 ```
@@ -80,6 +83,8 @@ src/
 - [x] Export results as CSV
 - [x] Social sharing (X, WhatsApp)
 - [x] PWA support (installable, offline shell)
+- [x] Internationalization (English & Spanish)
+- [x] Privacy Policy & Terms of Service pages
 - [ ] User accounts & poll history
 
 ## License

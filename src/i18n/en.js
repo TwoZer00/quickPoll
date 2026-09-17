@@ -49,6 +49,7 @@ export default {
     voteOn: 'Vote on: {{title}}',
     by: 'by {{name}}',
     vote: 'Vote',
+    voteHint: 'Select an option and cast your vote!',
     closed: 'Poll closed',
     created: 'Created {{date}}'
   },
@@ -77,7 +78,9 @@ export default {
   },
   mock: {
     title: 'Best programming language?',
-    images: 'Images'
+    images: 'Images',
+    voteTooltip: 'Try it! Cast your vote',
+    tryIt: 'Try it out'
   },
   error: {
     tryAgain: 'Try going back or refreshing the page.',

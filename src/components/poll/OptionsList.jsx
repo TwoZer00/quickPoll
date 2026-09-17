@@ -1,8 +1,9 @@
 import { useMemo, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Box, Chip, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { Box, Chip, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material'
 import { BallotOutlined, DonutLarge, BarChart as BarChartIcon, HowToVote } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../../supabase/init'
 import { assignColors } from '../../utils/color'
 import Option from './Option'
@@ -99,13 +100,14 @@ export function useVoteCounts (pollId, options) {
   return { voteCounts, applyOptimistic, revertOptimistic }
 }
 
-const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableUrlSync = false }) => {
+const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableUrlSync = false, initialView, forceShowResult = false, isVoted = false, onViewChange }) => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { t } = useTranslation()
   const paramView = searchParams.get('resultsOnly')?.toLowerCase()
-  const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : poll.closed ? 'bars' : 'vote')
+  const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : initialView ?? (poll.closed ? 'bars' : 'vote'))
   const total = useMemo(() => Object.values(voteCounts).reduce((a, b) => a + b, 0), [voteCounts])
   const coloredOptions = useMemo(() => assignColors(options), [options])
-  const showResult = coloredOptions.some(option => option.voted) || poll.closed
+  const showResult = forceShowResult || coloredOptions.some(option => option.voted) || poll.closed
   const dataReady = Object.keys(voteCounts).length === coloredOptions.length
   const hasImages = coloredOptions.some(opt => opt.image)
   const cols = options.length <= 2 ? 2 : options.length === 3 ? 3 : options.length <= 6 ? 3 : 4
@@ -132,6 +134,7 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableU
   const handleViewChange = (_, v) => {
     if (!v) return
     setViewMode(v)
+    onViewChange?.(v)
     if (!disableUrlSync) {
       setSearchParams(prev => {
         if (v === 'vote') { prev.delete('resultsOnly') } else { prev.set('resultsOnly', v) }
@@ -150,7 +153,35 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableU
             sx={{ gap: 1, '& .MuiToggleButton-root': { borderRadius: '20px !important', px: 2, minWidth: 48, minHeight: 48, border: '1px solid', borderColor: 'divider' } }}
             aria-label='Results view'
           >
-            {!poll.closed && <ToggleButton value='vote' aria-label='Vote view'><BallotOutlined fontSize='small' /></ToggleButton>}
+            {!poll.closed && (
+              <Tooltip
+                title={!isVoted ? t('mock.voteTooltip') : ''}
+                open={!isVoted}
+                placement='top'
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      bgcolor: 'primary.main',
+                      color: 'primary.contrastText',
+                      fontWeight: 700,
+                      fontSize: '0.75rem',
+                      px: 1.5, py: 0.75,
+                      borderRadius: 2,
+                      boxShadow: '0 4px 12px rgba(57,73,171,0.4)',
+                      animation: 'tooltipPulse 2s ease-in-out infinite',
+                      '@keyframes tooltipPulse': {
+                        '0%,100%': { boxShadow: '0 4px 12px rgba(57,73,171,0.4)' },
+                        '50%': { boxShadow: '0 4px 20px rgba(57,73,171,0.7)' }
+                      }
+                    }
+                  },
+                  arrow: { sx: { color: 'primary.main' } }
+                }}
+              >
+                <ToggleButton value='vote' aria-label='Vote view'><BallotOutlined fontSize='small' /></ToggleButton>
+              </Tooltip>
+            )}
             <ToggleButton value='bars' aria-label='Bar chart'><BarChartIcon fontSize='small' /></ToggleButton>
             <ToggleButton value='pie' aria-label='Pie chart'><DonutLarge fontSize='small' /></ToggleButton>
           </ToggleButtonGroup>

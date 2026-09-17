@@ -101,7 +101,7 @@ export default function Poll () {
                 {!data?.closed && (
                   <Button
                     type='submit' variant='contained' color='primary' size='large'
-                    sx={{ alignSelf: 'end', px: 4 }}
+                    sx={{ alignSelf: 'end', px: 4, ...(!isVoted && { animation: 'pulse 2s ease-in-out infinite', '@keyframes pulse': { '0%,100%': { boxShadow: '0 0 0 0 rgba(57,73,171,0.5)' }, '50%': { boxShadow: '0 0 0 8px rgba(57,73,171,0)' } } }) }}
                     disabled={!data || (options.find(option => option.voted)?.id === option || state === requestStateEnum.pending)}
                   >
                     {t('poll.vote')}

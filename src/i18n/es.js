@@ -49,6 +49,7 @@ export default {
     voteOn: 'Vota en: {{title}}',
     by: 'por {{name}}',
     vote: 'Votar',
+    voteHint: '¡Selecciona una opción y emite tu voto!',
     closed: 'Encuesta cerrada',
     created: 'Creada el {{date}}'
   },
@@ -77,7 +78,9 @@ export default {
   },
   mock: {
     title: '¿Cuál es el mejor lenguaje de programación?',
-    images: 'Imágenes'
+    images: 'Imágenes',
+    voteTooltip: '¡Pruébalo! Emite tu voto',
+    tryIt: 'Pruébalo'
   },
   error: {
     tryAgain: 'Intenta volver atrás o recargar la página.',

@@ -106,7 +106,7 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
   const showResult = options.some(option => option.voted) || poll.closed
   const dataReady = Object.keys(voteCounts).length === options.length
   const hasImages = options.some(opt => opt.image)
-  const cols = Math.min(options.length, 4)
+  const cols = options.length <= 2 ? 2 : options.length === 3 ? 3 : options.length <= 6 ? 3 : 4
 
   const [pieMounted, setPieMounted] = useState(false)
   const [barsMounted, setBarsMounted] = useState(false)
@@ -152,7 +152,7 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
         </Stack>
       )}
       <Box sx={{ display: viewMode === 'vote' ? 'block' : 'none' }}>
-        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: '1fr', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 'none' : 300, overflowY: 'auto' }}>
+        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: 'repeat(2, 1fr)', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 480 : 300, overflowY: 'auto' }}>
           {options.map((opt) => (
             <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} cardMode={hasImages} selected={option} />
           ))}

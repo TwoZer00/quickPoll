@@ -21,6 +21,7 @@ export default {
     titleLabel: 'Title',
     optionLabel: 'Option {{n}}',
     addOption: 'Add Option',
+    addImage: 'Add image',
     durationNote: 'Voting open for <b>{{min}} min</b> after creation.',
     createBtn: 'Create Poll',
     confirmTitle: 'Publish poll?',
@@ -55,7 +56,9 @@ export default {
     shareX: 'Share on X',
     shareWhatsApp: 'Share on WhatsApp',
     copied: 'link copied to clipboard',
-    voteText: 'Vote on this poll!'
+    copiedEmbed: 'embed code copied to clipboard',
+    voteText: 'Vote on this poll!',
+    embedPoll: 'Embed poll'
   },
   time: {
     minLeft: '{{n}} min left',

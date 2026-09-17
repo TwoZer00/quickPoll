@@ -1,6 +1,6 @@
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { Add, Launch, Remove, AddPhotoAlternate, Close } from '@mui/icons-material'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, InputAdornment, LinearProgress, Paper, TextField, Typography, Avatar } from '@mui/material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, InputAdornment, LinearProgress, Paper, TextField, Typography } from '@mui/material'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createPoll, requestStateEnum } from '../supabase/utils'
@@ -24,8 +24,8 @@ export default function CreatePoll () {
   useTitle({ title: 'Create Poll', description: 'Create a new poll and share it with others.' })
 
   const optionsRef = useRef()
-
   const MAX_OPTIONS = 20
+
   const handleAddOption = () => setOptions(prev => prev.length >= MAX_OPTIONS ? prev : [...prev, { index: prev[prev.length - 1].index + 1 }])
 
   const handleRemove = (index) => setOptions(prev =>
@@ -151,9 +151,7 @@ export default function CreatePoll () {
         <Box component='form' display='flex' flexDirection='column' gap={2.5} p={3} onSubmit={handleSubmit}>
           <Box>
             <Typography variant='h5' fontWeight={700}>{t('create.title')}</Typography>
-            <Typography variant='body2' color='text.secondary'>
-              {t('create.subtitle')}
-            </Typography>
+            <Typography variant='body2' color='text.secondary'>{t('create.subtitle')}</Typography>
           </Box>
 
           <TextField
@@ -165,24 +163,31 @@ export default function CreatePoll () {
 
           <Divider />
 
-          <Box ref={optionsRef} display='flex' flexDirection='column' gap={1.5} sx={{ maxHeight: 250, pt: 1, overflowY: 'auto' }}>
+          <Box ref={optionsRef} display='flex' flexDirection='column' gap={2} sx={{ maxHeight: 500, pt: 1, overflowY: 'auto' }}>
             {options.map(item => (
-              <Box key={item.index} display='flex' gap={1} alignItems='center'>
+              <Box key={item.index} display='flex' flexDirection='column' gap={0.75}>
                 {item.imagePreview
                   ? (
-                    <Box position='relative'>
-                      <Avatar src={item.imagePreview} variant='rounded' sx={{ width: 40, height: 40, borderRadius: 2 }} />
-                      <IconButton onClick={() => handleRemoveImage(item.index)} aria-label={t('create.optionLabel', { n: item.index + 1 })} sx={{ position: 'absolute', top: -8, right: -8, bgcolor: 'background.paper', minWidth: 44, minHeight: 44, p: 0.5 }}>
-                        <Close sx={{ fontSize: 14 }} />
-                      </IconButton>
+                    <Box position='relative' sx={{ width: '100%', height: 140, borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
+                      <Box component='img' src={item.imagePreview} sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <Box
+                        onClick={() => handleRemoveImage(item.index)}
+                        sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', opacity: 0, cursor: 'pointer', transition: 'opacity .15s', '&:hover': { opacity: 1 } }}
+                      >
+                        <Close sx={{ fontSize: 20, color: '#fff' }} />
+                      </Box>
                     </Box>
-                    )
+                  )
                   : (
-                    <IconButton component='label' aria-label={t('create.optionLabel', { n: item.index + 1 })} sx={{ minWidth: 48, minHeight: 48 }}>
+                    <Box
+                      component='label'
+                      sx={{ width: '100%', height: 80, borderRadius: 2, border: '1px dashed', borderColor: 'divider', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.5, cursor: 'pointer', color: 'text.disabled', transition: 'border-color .15s, color .15s', '&:hover': { borderColor: 'primary.main', color: 'primary.main' } }}
+                    >
                       <AddPhotoAlternate fontSize='small' />
+                      <Typography variant='caption'>{t('create.addImage')}</Typography>
                       <input type='file' hidden accept='image/*' onChange={(e) => handleImageChange(e, item.index)} />
-                    </IconButton>
-                    )}
+                    </Box>
+                  )}
                 <TextField
                   fullWidth size='small'
                   error={!!item.error}
@@ -204,8 +209,10 @@ export default function CreatePoll () {
               </Box>
             ))}
           </Box>
+
           <Button
-            startIcon={<Add />} onClick={() => { handleAddOption(); requestAnimationFrame(() => optionsRef.current?.scrollTo({ top: optionsRef.current.scrollHeight, behavior: 'smooth' })) }}
+            startIcon={<Add />}
+            onClick={() => { handleAddOption(); requestAnimationFrame(() => optionsRef.current?.scrollTo({ top: optionsRef.current.scrollHeight, behavior: 'smooth' })) }}
             sx={{ alignSelf: 'flex-start' }}
           >
             {t('create.addOption')}

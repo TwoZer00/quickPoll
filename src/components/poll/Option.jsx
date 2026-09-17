@@ -30,39 +30,53 @@ const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, sel
         component='label'
         position='relative' overflow='hidden' borderRadius={3}
         border={1}
-        borderColor={isSelected ? optionColor.current : 'divider'}
+        borderColor={isVoted ? optionColor.current : isSelected ? alpha(optionColor.current, 0.6) : 'divider'}
         sx={{
           cursor: poll.closed ? 'default' : 'pointer',
           transition: 'all .2s ease',
           display: 'flex', flexDirection: 'column',
-          bgcolor: isSelected ? alpha(optionColor.current, 0.06) : 'background.paper',
-          outline: isSelected ? `2px solid ${optionColor.current}` : 'none',
-          outlineOffset: -1,
           userSelect: 'none',
           aspectRatio: { xs: '3/2', sm: '4/3' },
-          boxShadow: isSelected ? `0 2px 8px ${alpha(optionColor.current, 0.25)}` : '0 1px 3px rgba(0,0,0,0.08)',
-          '&:hover': poll.closed ? {} : { borderColor: optionColor.current, boxShadow: `0 3px 12px ${alpha(optionColor.current, 0.18)}`, transform: 'translateY(-1px)' }
+          outline: isVoted ? `2px solid ${optionColor.current}` : isSelected ? `2px solid ${alpha(optionColor.current, 0.6)}` : 'none',
+          outlineOffset: -1,
+          boxShadow: isVoted ? `0 2px 12px ${alpha(optionColor.current, 0.3)}` : '0 1px 3px rgba(0,0,0,0.08)',
+          '&:hover': poll.closed ? {} : { borderColor: optionColor.current, transform: 'translateY(-2px)', boxShadow: `0 4px 16px ${alpha(optionColor.current, 0.2)}` }
         }}
         role='option' aria-selected={!!option.voted}
         aria-label={`${option.title}${total > 0 && showResult ? `, ${voteCount} votes, ${pct}%` : ''}`}
       >
         <Radio value={option.id} disabled={poll.closed} sx={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }} />
+
+        {/* image or placeholder */}
         {option.image
-          ? <CardMedia component='img' image={option.image} alt={option.title} onError={(e) => { e.target.style.display = 'none' }} sx={{ flex: 1, objectFit: 'cover', pointerEvents: 'none', minHeight: 0 }} />
-          : <Box display='flex' alignItems='center' justifyContent='center' flex={1} bgcolor='action.hover' sx={{ pointerEvents: 'none', minHeight: 0 }}><ImageIcon sx={{ fontSize: 40, color: 'text.disabled' }} /></Box>
+          ? <CardMedia component='img' image={option.image} alt={option.title} onError={(e) => { e.target.style.display = 'none' }} sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
+          : <Box display='flex' alignItems='center' justifyContent='center' sx={{ position: 'absolute', inset: 0, bgcolor: 'action.hover', pointerEvents: 'none' }}><ImageIcon sx={{ fontSize: 40, color: 'text.disabled' }} /></Box>
         }
-        <Box position='relative' overflow='hidden' mt='auto'>
-          <Stack direction='row' alignItems='center' justifyContent='space-between' zIndex={1} position='relative' px={1.5} py={1.2}>
-            <Typography variant='body2' fontWeight={isSelected ? 600 : 400} sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{option.title}</Typography>
+
+        {/* voted checkmark badge */}
+        {isVoted && (
+          <Box sx={{ position: 'absolute', top: 8, right: 8, bgcolor: optionColor.current, borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.3)', zIndex: 2 }}>
+            <CheckCircle sx={{ fontSize: 16, color: '#fff' }} />
+          </Box>
+        )}
+
+        {/* footer with gradient overlay */}
+        <Box position='absolute' bottom={0} left={0} right={0} zIndex={1} sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0) 100%)', pt: '40px' }}>
+          <Stack direction='row' alignItems='flex-end' justifyContent='space-between' px={1.5} pb={1.2} pt={0.5}>
+            <Typography variant='body2' fontWeight={isVoted ? 700 : 500} sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+              {option.title}
+            </Typography>
             {showResult && (
-              <Typography variant='caption' fontWeight={500} color='text.secondary' sx={{ display: 'flex', gap: 0.3, alignItems: 'center', flexShrink: 0, ml: 1 }}>
+              <Typography variant='caption' fontWeight={600} sx={{ color: 'rgba(255,255,255,0.9)', flexShrink: 0, ml: 1 }}>
                 <animated.span>{countSpring.number.to(x => Math.round(x))}</animated.span>
-                {voteCount > 0 && <span>·</span>}
-                {voteCount > 0 && <><span>{pct}</span>%</>}
+                {total > 0 && ` · ${pct}%`}
               </Typography>
             )}
           </Stack>
-          <animated.div style={{ height: '100%', position: 'absolute', left: 0, top: 0, zIndex: 0, width: widthSpring.width, backgroundColor: alpha(optionColor.current, 0.18) }} />
+          {/* progress bar at bottom */}
+          {showResult && (
+            <animated.div style={{ height: 3, backgroundColor: optionColor.current, width: widthSpring.width, position: 'absolute', bottom: 0, left: 0 }} />
+          )}
         </Box>
       </Box>
     )

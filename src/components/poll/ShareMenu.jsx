@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Box, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material'
-import { DonutLarge, BarChart as BarChartIcon, Share, ContentCopy, Download } from '@mui/icons-material'
+import { Box, Dialog, DialogContent, DialogTitle, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, TextField } from '@mui/material'
+import { DonutLarge, BarChart as BarChartIcon, Share, ContentCopy, Download, Code } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { exportCSV } from '../../utils/export'
@@ -40,6 +40,14 @@ const ShareMenu = ({ setMessage, poll, options, voteCounts }) => {
     setAnchorEl(null)
   }
 
+  const [embedOpen, setEmbedOpen] = useState(false)
+  const embedCode = `<iframe src="${getUrl()}?embed=true" width="100%" height="420" frameborder="0" allowtransparency="true"></iframe>`
+
+  const handleCopyEmbed = () => {
+    navigator.clipboard.writeText(embedCode).then(() => setMessage({ message: t('share.copiedEmbed') }))
+    setEmbedOpen(false)
+  }
+
   const handleSocial = (platform) => {
     const url = getUrl()
     const text = t('share.voteText')
@@ -77,7 +85,23 @@ const ShareMenu = ({ setMessage, poll, options, voteCounts }) => {
           <ListItemIcon><WhatsAppIcon /></ListItemIcon>
           <ListItemText>{t('share.shareWhatsApp')}</ListItemText>
         </MenuItem>
+        <Divider />
+        <MenuItem onClick={() => { setEmbedOpen(true); setAnchorEl(null) }} sx={{ borderRadius: 2, mx: 0.5 }}>
+          <ListItemIcon><Code fontSize='small' /></ListItemIcon>
+          <ListItemText>{t('share.embedPoll')}</ListItemText>
+        </MenuItem>
       </Menu>
+      <Dialog open={embedOpen} onClose={() => setEmbedOpen(false)} fullWidth maxWidth='sm'>
+        <DialogTitle>{t('share.embedPoll')}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ position: 'relative' }}>
+            <TextField fullWidth multiline rows={3} value={embedCode} slotProps={{ input: { readOnly: true } }} />
+            <IconButton onClick={handleCopyEmbed} size='small' sx={{ position: 'absolute', top: 6, right: 6 }}>
+              <ContentCopy fontSize='small' />
+            </IconButton>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   )
 }

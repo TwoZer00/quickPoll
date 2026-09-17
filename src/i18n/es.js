@@ -21,6 +21,7 @@ export default {
     titleLabel: 'Título',
     optionLabel: 'Opción {{n}}',
     addOption: 'Agregar opción',
+    addImage: 'Agregar imagen',
     durationNote: 'Votación abierta por <b>{{min}} min</b> después de la creación.',
     createBtn: 'Crear encuesta',
     confirmTitle: '¿Publicar encuesta?',
@@ -55,7 +56,9 @@ export default {
     shareX: 'Compartir en X',
     shareWhatsApp: 'Compartir en WhatsApp',
     copied: 'enlace copiado al portapapeles',
-    voteText: '¡Vota en esta encuesta!'
+    copiedEmbed: 'código de inserción copiado al portapapeles',
+    voteText: '¡Vota en esta encuesta!',
+    embedPoll: 'Insertar encuesta'
   },
   time: {
     minLeft: '{{n}} min restantes',

@@ -32,7 +32,7 @@ async function createPoll({ title, options }) {
   const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
   lastPolls.push({ id: poll.id, title, createdAt: { seconds: Date.now() / 1000 }, author: user.id })
   sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
-  window.umami?.track('poll_created', { pollId: poll.id })
+  if (import.meta.env.PROD) window.umami?.track('poll_created', { pollId: poll.id })
 
   return poll.id
 }
@@ -44,7 +44,16 @@ async function getPoll(id) {
     .eq('id', id)
     .single()
   if (error || !data) throw CError.fromCode(15)
-  return { ...data, createdAt: { seconds: new Date(data.created_at).getTime() / 1000 } }
+  const poll = { ...data, createdAt: { seconds: new Date(data.created_at).getTime() / 1000 } }
+
+  const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
+  const idx = lastPolls.findIndex(p => p.id === id)
+  if (idx !== -1) {
+    lastPolls[idx] = { ...lastPolls[idx], createdAt: poll.createdAt }
+    sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
+  }
+
+  return poll
 }
 
 async function getOptions(id) {
@@ -63,7 +72,18 @@ async function getOptions(id) {
     .eq('user_id', user.id)
 
   const votedId = userVotes?.[0]?.option_id
-  return opts.map(o => ({ ...o, voted: o.id === votedId }))
+  const result = opts.map(o => ({ ...o, voted: o.id === votedId }))
+
+  if (votedId) {
+    const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
+    const idx = lastPolls.findIndex(p => p.id === id)
+    if (idx !== -1 && !lastPolls[idx].voted) {
+      lastPolls[idx] = { ...lastPolls[idx], voted: true }
+      sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
+    }
+  }
+
+  return result
 }
 
 async function setVote({ voteId, pollId }) {
@@ -77,7 +97,15 @@ async function setVote({ voteId, pollId }) {
     if (error.code === '42501') throw CError.fromCode(16)
     throw CError.fromError(error)
   }
-  window.umami?.track('poll_voted', { pollId, optionId: voteId })
+
+  const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
+  const idx = lastPolls.findIndex(p => p.id === pollId)
+  if (idx !== -1) {
+    lastPolls[idx] = { ...lastPolls[idx], voted: true }
+    sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
+  }
+
+  if (import.meta.env.PROD) window.umami?.track('poll_voted', { pollId, optionId: voteId })
 }
 
 async function getResults(id) {

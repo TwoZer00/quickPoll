@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react'
 import { BarChart, Bar, Cell, Tooltip, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 import { PropTypes } from 'prop-types'
+import { useTranslation } from 'react-i18next'
 import { generateColorBySeed } from '../../utils/color'
 
 const CustomXAxisTick = ({ x, y, payload, data }) => {
@@ -23,6 +24,7 @@ const CustomXAxisTick = ({ x, y, payload, data }) => {
 }
 
 const BarChartView = memo(({ options, voteCounts }) => {
+  const { t } = useTranslation()
   const data = useMemo(() => options
     .map(opt => ({ name: opt.title, votes: voteCounts[opt.id] || 0, fill: generateColorBySeed(opt.id), image: opt.image, id: opt.id })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -41,7 +43,7 @@ const BarChartView = memo(({ options, voteCounts }) => {
         </defs>
         <XAxis dataKey='name' tick={<CustomXAxisTick data={data} />} />
         <YAxis allowDecimals={false} />
-        <Tooltip formatter={(value) => [`${value} votes`, '']} />
+        <Tooltip formatter={(value) => [`${value} ${t('chart.votes')}`, '']} />
         <Bar dataKey='votes' animationDuration={500}>
           {data.map((entry, i) => <Cell key={i} fill={entry.image ? `url(#bar-img-${entry.id})` : entry.fill} stroke={entry.fill} strokeWidth={1} />)}
         </Bar>

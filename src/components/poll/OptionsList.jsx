@@ -1,15 +1,13 @@
 import { useMemo, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Box, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
-import { BarChart as BarChartIcon, BallotOutlined, PieChart as PieChartIcon } from '@mui/icons-material'
+import { Box, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { BallotOutlined, DonutLarge } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { supabase } from '../../supabase/init'
-import { generateColorBySeed } from '../../utils/color'
 import Option from './Option'
 import PieChartView from '../charts/PieChartView'
-import BarChartView from '../charts/BarChartView'
 
-const VALID_VIEWS = ['vote', 'pie', 'bars']
+const VALID_VIEWS = ['vote', 'pie']
 const DEBOUNCE_MS = 300
 
 export function useVoteCounts (pollId, options) {
@@ -109,6 +107,16 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
   const hasImages = options.some(opt => opt.image)
   const cols = Math.min(options.length, 4)
 
+  const [pieMounted, setPieMounted] = useState(false)
+
+  useEffect(() => {
+    if (viewMode === 'pie' && !pieMounted) {
+      const raf = requestAnimationFrame(() => setPieMounted(true))
+      return () => cancelAnimationFrame(raf)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode])
+
   const handleViewChange = (_, v) => {
     if (!v) return
     setViewMode(v)
@@ -128,8 +136,7 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
             aria-label='Results view'
           >
             {!poll.closed && <ToggleButton value='vote' aria-label='Vote view'><BallotOutlined fontSize='small' /></ToggleButton>}
-            <ToggleButton value='pie' aria-label='Pie chart'><PieChartIcon fontSize='small' /></ToggleButton>
-            <ToggleButton value='bars' aria-label='Bar chart'><BarChartIcon fontSize='small' /></ToggleButton>
+            <ToggleButton value='pie' aria-label='Pie chart'><DonutLarge fontSize='small' /></ToggleButton>
           </ToggleButtonGroup>
         </Stack>
       )}
@@ -140,45 +147,13 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
           ))}
         </RadioGroup>
       </Box>
-      {showResult && dataReady && viewMode !== 'vote' && (
-        <Stack gap={0.5}>
-          {options.map(opt => {
-            const count = voteCounts[opt.id] || 0
-            const pct = total > 0 ? Math.round((count / total) * 100) : 0
-            return (
-              <Stack key={opt.id} direction='row' justifyContent='space-between' alignItems='center' px={1} py={0.5} borderRadius={2} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
-                <Stack direction='row' alignItems='center' gap={1}>
-                  {opt.image
-                    ? <Box component='img' src={opt.image} alt={opt.title} sx={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                    : <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: generateColorBySeed(opt.id), flexShrink: 0 }} />}
-                  <Typography variant='body2'>{opt.title}</Typography>
-                </Stack>
-                <Typography variant='body2' fontWeight={600} color='text.secondary'>{count} · {pct}%</Typography>
-              </Stack>
-            )
-          })}
-        </Stack>
+      {!dataReady && viewMode === 'pie' && (
+        <Box display='flex' justifyContent='center' alignItems='center' height={200}><Skeleton variant='circular' width={160} height={160} /></Box>
       )}
-      {!dataReady && viewMode !== 'vote' && (
-        viewMode === 'pie'
-          ? <Box display='flex' justifyContent='center' alignItems='center' height={200}><Skeleton variant='circular' width={160} height={160} /></Box>
-          : <Box display='flex' alignItems='end' justifyContent='center' gap={1} height={200} pb={3}>{[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (<Skeleton key={i} variant='rounded' width={32} height={`${h * 70}%`} />))}</Box>
-      )}
-      {showResult && dataReady && (
-        <>
-          {viewMode === 'pie' && (
-            <Box>
-              <Typography variant='caption' align='center' display='block' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
-              <PieChartView options={options} voteCounts={voteCounts} />
-            </Box>
-          )}
-          {viewMode === 'bars' && (
-            <Box>
-              <Typography variant='caption' align='center' display='block' aria-live='polite'>{total} vote{total !== 1 ? 's' : ''}</Typography>
-              <BarChartView options={options} voteCounts={voteCounts} />
-            </Box>
-          )}
-        </>
+      {showResult && dataReady && pieMounted && (
+        <Box sx={{ display: viewMode === 'pie' ? 'block' : 'none' }}>
+          <PieChartView options={options} voteCounts={voteCounts} />
+        </Box>
       )}
     </>
   )

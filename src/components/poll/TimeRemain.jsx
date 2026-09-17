@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Chip, Skeleton } from '@mui/material'
 import { TimerOutlined } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
+import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
 import { POLL_DURATION_SECONDS } from '../../const/Const'
 
 export default function TimeRemain ({ date, setDuration }) {
+  const { t } = useTranslation()
   const [time, setTime] = useState()
   const [diff, setDiff] = useState()
 
@@ -26,8 +28,8 @@ export default function TimeRemain ({ date, setDuration }) {
   }, [diff, setDuration])
 
   useEffect(() => {
-    if (diff > 60) setTime(`${(diff / 60).toFixed(0)} min left`)
-    if (diff <= 60) setTime(`${diff}s left`)
+    if (diff > 60) setTime(t('time.minLeft', { n: (diff / 60).toFixed(0) }))
+    if (diff <= 60) setTime(t('time.secLeft', { n: diff }))
   }, [diff])
 
   if (date && diff != null && diff >= 0) {

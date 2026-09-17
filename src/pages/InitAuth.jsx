@@ -1,9 +1,11 @@
-import { Alert, Box, createTheme, CssBaseline, Dialog, DialogTitle, Divider, LinearProgress, Link, List, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
+import { Alert, Box, createTheme, CssBaseline, Dialog, DialogTitle, Divider, LinearProgress, Link as MuiLink, List, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
+import { Link } from 'react-router-dom'
 import React, { Suspense, useEffect, useMemo, useState } from 'react'
-import { Outlet, useNavigate, useNavigation, useLocation } from 'react-router-dom'
+import { Outlet, useNavigate, useNavigation, useLocation, useParams } from 'react-router-dom'
 import Menu, { PollListItem } from '../components/Menu'
-import { amber, deepOrange } from '@mui/material/colors'
+import { indigo } from '@mui/material/colors'
 import { PropTypes } from 'prop-types'
+import { useTranslation } from 'react-i18next'
 import { getLastPolls } from '../utils/storage'
 import { ColorModeProvider } from '../hook/useColorMode'
 import useColorMode from '../hook/useColorMode'
@@ -13,35 +15,48 @@ function buildTheme (mode) {
   return responsiveFontSizes(createTheme({
     palette: {
       mode,
-      primary: { main: amber[700] },
-      secondary: deepOrange,
-      background: { default: dark ? '#121212' : '#fafafa', paper: dark ? '#1e1e1e' : '#fff' }
+      primary: { main: indigo[600] },
+      secondary: { main: indigo[400] },
+      background: { default: dark ? '#0a0a0a' : '#f5f5f5', paper: dark ? '#111111' : '#ffffff' }
     },
-    shape: { borderRadius: 12 },
+    shape: { borderRadius: 8 },
+    typography: {
+      fontFamily: '"Inter", "Roboto", sans-serif',
+      h2: { fontWeight: 700, letterSpacing: -1 },
+      h4: { fontWeight: 600, letterSpacing: -0.5 },
+      h5: { fontWeight: 600 },
+      button: { fontWeight: 500 }
+    },
     components: {
       MuiButton: {
         styleOverrides: {
-          root: { textTransform: 'none', fontWeight: 600, borderRadius: 24 }
+          root: { textTransform: 'none', fontWeight: 500, borderRadius: 6, boxShadow: 'none', '&:hover': { boxShadow: 'none' } }
         }
       },
       MuiPaper: {
         styleOverrides: {
-          rounded: { borderRadius: 16 }
+          root: { backgroundImage: 'none' },
+          rounded: { borderRadius: 8 }
         }
       },
       MuiDialog: {
         styleOverrides: {
-          paper: { borderRadius: 20, backgroundColor: dark ? 'rgba(30,30,30,0.9)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)' }
+          paper: { borderRadius: 10, backgroundImage: 'none' }
         }
       },
       MuiOutlinedInput: {
         styleOverrides: {
-          root: { borderRadius: 12 }
+          root: { borderRadius: 6 }
         }
       },
       MuiChip: {
         styleOverrides: {
-          root: { fontWeight: 600 }
+          root: { fontWeight: 500, borderRadius: 6 }
+        }
+      },
+      MuiLinearProgress: {
+        styleOverrides: {
+          root: { borderRadius: 0 }
         }
       }
     }
@@ -57,9 +72,10 @@ export default function InitAuth () {
 }
 
 function InitAuthInner () {
+  const { t } = useTranslation()
+  const { lang } = useParams()
   const { mode } = useColorMode()
   const theme = useMemo(() => buildTheme(mode), [mode])
-  const dark = mode === 'dark'
   const [open, setOpen] = useState(false)
   const [openModal, setOpenModal] = useState(false)
   const [message, setMessage] = useState()
@@ -79,7 +95,7 @@ function InitAuthInner () {
   const location = useLocation()
 
   useEffect(() => {
-    window.umami?.track({ url: location.pathname, referrer: document.referrer })
+    if (import.meta.env.PROD) window.umami?.track({ url: location.pathname, referrer: document.referrer })
   }, [location.pathname])
 
   return (
@@ -89,10 +105,7 @@ function InitAuthInner () {
         <Box sx={{
           display: 'flex', flexDirection: 'column', flex: 'none',
           width: '100dvw', maxWidth: '100dvw', height: '100dvh', maxHeight: '100dvh',
-          background: dark
-            ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
-            : 'linear-gradient(135deg, #fff8e1 0%, #fff3e0 50%, #fce4ec 100%)',
-          backgroundAttachment: 'fixed'
+          bgcolor: 'background.default'
         }}>
           <Menu openModal={setOpenModal} />
           <a href='#main-content' style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden', zIndex: 9999 }} onFocus={(e) => { e.target.style.position = 'static'; e.target.style.width = 'auto'; e.target.style.height = 'auto' }} onBlur={(e) => { e.target.style.position = 'absolute'; e.target.style.left = '-9999px'; e.target.style.width = '1px'; e.target.style.height = '1px' }}>Skip to main content</a>
@@ -104,11 +117,11 @@ function InitAuthInner () {
           </Suspense>
           <Box component='footer' sx={{ py: 1.5, px: 2, textAlign: 'center' }}>
             <Typography variant='caption' color='text.secondary'>
-              Made by <Link color='inherit' fontWeight={600} target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</Link>
+              Made by <MuiLink color='inherit' fontWeight={600} target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</MuiLink>
               {' · '}
-              <Link color='inherit' underline='hover' href='/pp.md'>Privacy</Link>
+              <MuiLink component={Link} to={`/${lang}/privacy`} color='inherit' underline='hover'>{t('privacy.pageTitle')}</MuiLink>
               {' · '}
-              <Link href='/tos.md' color='inherit' underline='hover'>Terms</Link>
+              <MuiLink component={Link} to={`/${lang}/terms`} color='inherit' underline='hover'>{t('terms.pageTitle')}</MuiLink>
             </Typography>
           </Box>
         </Box>
@@ -145,16 +158,18 @@ function SlideTransition (props) {
 }
 
 const LastPollsListModal = ({ onClose, open }) => {
+  const { t } = useTranslation()
+  const { lang } = useParams()
   const navigate = useNavigate()
   const polls = open ? getLastPolls() : []
 
   return (
     <Dialog onClose={onClose} open={open} TransitionComponent={Transition}>
-      <DialogTitle fontWeight={700}>Last polls</DialogTitle>
+      <DialogTitle fontWeight={700}>{t('nav.lastPolls')}</DialogTitle>
       <Divider />
       <List sx={{ pt: 0, minWidth: 280 }}>
         {polls.map((poll) => (
-          <PollListItem key={poll.id} poll={poll} onClick={() => { navigate(`/poll/${poll.id}`); onClose() }} />
+          <PollListItem key={poll.id} poll={poll} onClick={() => { navigate('/' + lang + '/poll/' + poll.id); onClose() }} />
         ))}
       </List>
     </Dialog>

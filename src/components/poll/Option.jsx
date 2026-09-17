@@ -1,17 +1,28 @@
 import { memo, useRef } from 'react'
 import { alpha, Box, CardMedia, FormControlLabel, Radio, Stack, Typography } from '@mui/material'
-import { Image as ImageIcon } from '@mui/icons-material'
+import { CheckCircle, Image as ImageIcon } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
 import { generateColorBySeed } from '../../utils/color'
 
 const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, selected }) => {
   const optionColor = useRef(generateColorBySeed(option.id))
+  const pct = total > 0 ? Math.round((voteCount / total) * 100) : 0
   const percentage = total > 0 && showResult ? (voteCount / total) * 100 : 0
-  const isSelected = cardMode && selected === option.id
-  const sprig = useSpring(
-    { number: voteCount, from: { number: 0 }, config: { duration: 500 } }
-  )
+  const isSelected = selected === option.id
+  const isVoted = option.voted
+
+  const widthSpring = useSpring({
+    width: `${percentage}%`,
+    from: { width: '0%' },
+    config: { tension: 60, friction: 18 }
+  })
+
+  const countSpring = useSpring({
+    number: showResult ? voteCount : 0,
+    from: { number: 0 },
+    config: { duration: 500 }
+  })
 
   if (cardMode) {
     return (
@@ -33,7 +44,7 @@ const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, sel
           '&:hover': poll.closed ? {} : { borderColor: optionColor.current, boxShadow: `0 3px 12px ${alpha(optionColor.current, 0.18)}`, transform: 'translateY(-1px)' }
         }}
         role='option' aria-selected={!!option.voted}
-        aria-label={`${option.title}${total > 0 && showResult ? `, ${voteCount} votes, ${Math.round((voteCount / total) * 100)}%` : ''}`}
+        aria-label={`${option.title}${total > 0 && showResult ? `, ${voteCount} votes, ${pct}%` : ''}`}
       >
         <Radio value={option.id} disabled={poll.closed} sx={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }} />
         {option.image
@@ -45,45 +56,64 @@ const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, sel
             <Typography variant='body2' fontWeight={isSelected ? 600 : 400} sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{option.title}</Typography>
             {showResult && (
               <Typography variant='caption' fontWeight={500} color='text.secondary' sx={{ display: 'flex', gap: 0.3, alignItems: 'center', flexShrink: 0, ml: 1 }}>
-                <animated.span>{sprig.number.to(x => x.toFixed(0))}</animated.span>
+                <animated.span>{countSpring.number.to(x => Math.round(x))}</animated.span>
                 {voteCount > 0 && <span>·</span>}
-                {voteCount > 0 && <><animated.span>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.span>%</>}
+                {voteCount > 0 && <><span>{pct}</span>%</>}
               </Typography>
             )}
           </Stack>
-          <Box height='100%' position='absolute' left={0} top={0} zIndex={0} width={`${percentage}%`} sx={{ transition: 'width .75s' }}>
-            <Box height='100%' bgcolor={alpha(optionColor.current, 0.18)} />
-          </Box>
+          <animated.div style={{ height: '100%', position: 'absolute', left: 0, top: 0, zIndex: 0, width: widthSpring.width, backgroundColor: alpha(optionColor.current, 0.18) }} />
         </Box>
       </Box>
     )
   }
 
   return (
-    <Box position='relative' display='flex' gap={1} alignItems='center' borderRadius='5rem' overflow='hidden' height='3rem' role='option' aria-selected={!!option.voted} aria-label={`${option.title}${total > 0 && showResult ? `, ${voteCount} votes, ${Math.round((voteCount / total) * 100)}%` : ''}`}>
-      <Stack direction='row' flex={1} zIndex={1} px={1}>
+    <Box
+      position='relative' borderRadius={1.5} overflow='hidden'
+      border={1}
+      borderColor={isVoted ? optionColor.current : isSelected ? alpha(optionColor.current, 0.5) : 'divider'}
+      sx={{
+        transition: 'border-color .2s',
+        bgcolor: isVoted ? alpha(optionColor.current, 0.06) : 'transparent'
+      }}
+      role='option' aria-selected={!!option.voted}
+      aria-label={`${option.title}${total > 0 && showResult ? `, ${voteCount} votes, ${pct}%` : ''}`}
+    >
+      {/* progress bar */}
+      {showResult && (
+        <animated.div style={{
+          position: 'absolute', left: 0, top: 0, height: '100%', zIndex: 0,
+          width: widthSpring.width,
+          backgroundColor: alpha(optionColor.current, isVoted ? 0.18 : 0.1),
+          borderRadius: 'inherit'
+        }} />
+      )}
+
+      <Stack direction='row' alignItems='center' zIndex={1} position='relative' px={1} height='3rem'>
         <FormControlLabel
           disabled={poll.closed}
-          sx={{ flex: 1 }} value={option.id} label={`${option.title} `}
+          sx={{ flex: 1, m: 0 }}
+          value={option.id}
+          label={
+            <Stack direction='row' alignItems='center' gap={0.5}>
+              <Typography variant='body2' fontWeight={isVoted ? 600 : 400}>
+                {option.title}
+              </Typography>
+              {isVoted && <CheckCircle sx={{ fontSize: 14, color: optionColor.current }} />}
+            </Stack>
+          }
           control={
-            <Radio
-              sx={{
-                color: `${optionColor.current}`,
-                '&.Mui-checked': {
-                  color: `${optionColor.current}`
-                }
-              }}
-            />
+            <Radio size='small' sx={{ color: optionColor.current, '&.Mui-checked': { color: optionColor.current } }} />
           }
         />
-        <Typography variant='caption' sx={{ display: 'flex', flexDirection: 'row', gap: 1, alignItems: 'center' }} fontSize={14}>
-          {(showResult) && <animated.p>{sprig.number.to(x => x.toFixed(0))}</animated.p>}
-          {(showResult && voteCount > 0) && (<><animated.p style={{ fontStyle: 'inherit' }}>{sprig.number.to(x => Math.round((x.toFixed(0) / total) * 100))}</animated.p>%</>)}
-        </Typography>
+        {showResult && (
+          <Typography variant='caption' fontWeight={isVoted ? 700 : 400} color='text.secondary' sx={{ flexShrink: 0, minWidth: 48, textAlign: 'right' }}>
+            <animated.span>{countSpring.number.to(x => Math.round(x))}</animated.span>
+            {total > 0 && ` · ${pct}%`}
+          </Typography>
+        )}
       </Stack>
-      <Box height='100%' position='absolute' flex={1} left={0} top={0} zIndex={0} borderRadius='5rem' width={`${percentage}%`} overflow='hidden' sx={{ transition: 'width .75s' }}>
-        <Box height='100%' bgcolor={alpha(optionColor.current, 0.2)} />
-      </Box>
     </Box>
   )
 })

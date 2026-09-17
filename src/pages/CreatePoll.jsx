@@ -2,20 +2,23 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Add, Launch, Remove, AddPhotoAlternate, Close } from '@mui/icons-material'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, InputAdornment, LinearProgress, Paper, TextField, Typography, Avatar } from '@mui/material'
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createPoll, requestStateEnum } from '../supabase/utils'
 import { uploadImage } from '../utils/cloudinary'
 import useTitle from '../hook/useTitle'
 import PageWrapper from '../components/PageWrapper'
-
 import { POLL_DURATION_MINUTES } from '../const/Const'
 
 export default function CreatePoll () {
+  const { t } = useTranslation()
   const [options, setOptions] = useState([{ index: 0 }, { index: 1 }])
   const idPoll = useRef()
   const [titleError, setTitleError] = useState('')
   const { setMessage } = useOutletContext()
   const [requestState, setRequestState] = useState(requestStateEnum.none)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [pendingData, setPendingData] = useState(null)
   const navigate = useNavigate()
   useTitle({ title: 'Create Poll', description: 'Create a new poll and share it with others.' })
 
@@ -38,8 +41,8 @@ export default function CreatePoll () {
   const handleImageChange = (e, index) => {
     const file = e.target.files[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) { setMessage({ message: 'Only image files are allowed', severity: 'error' }); return }
-    if (file.size > 5 * 1024 * 1024) { setMessage({ message: 'Image must be under 5MB', severity: 'error' }); return }
+    if (!file.type.startsWith('image/')) { setMessage({ message: t('create.errors.imageType'), severity: 'error' }); return }
+    if (file.size > 5 * 1024 * 1024) { setMessage({ message: t('create.errors.imageSize'), severity: 'error' }); return }
     const preview = URL.createObjectURL(file)
     setOptions(prev => prev.map(item =>
       item.index === index ? { ...item, imageFile: file, imagePreview: preview } : item
@@ -55,10 +58,10 @@ export default function CreatePoll () {
   const handleValidations = (optionValues, title) => {
     let valid = true
     if (title.length < 3) {
-      setTitleError('Title must be at least 3 characters')
+      setTitleError(t('create.errors.titleMin'))
       valid = false
     } else if (title.length > 200) {
-      setTitleError('Title must be at most 200 characters')
+      setTitleError(t('create.errors.titleMax'))
       valid = false
     } else {
       setTitleError('')
@@ -68,7 +71,7 @@ export default function CreatePoll () {
     if (filledOptions.length < 2) {
       setOptions(prev => prev.map(item => ({
         ...item,
-        error: (!item.value || item.value.trim().length === 0) ? 'Option cannot be empty' : ''
+        error: (!item.value || item.value.trim().length === 0) ? t('create.errors.optionEmpty') : ''
       })))
       valid = false
     }
@@ -83,12 +86,12 @@ export default function CreatePoll () {
     if (dupeValues.length > 0) {
       setOptions(prev => prev.map(item => ({
         ...item,
-        error: item.value && duplicates.has(item.value.trim().toLowerCase()) && dupeValues.includes(item.value.trim().toLowerCase()) ? 'Duplicate option' : item.error
+        error: item.value && duplicates.has(item.value.trim().toLowerCase()) && dupeValues.includes(item.value.trim().toLowerCase()) ? t('create.errors.duplicate') : item.error
       })))
       valid = false
     }
 
-    if (!valid) throw new Error('Please fix the errors above')
+    if (!valid) throw new Error(t('create.errors.fixErrors'))
   }
 
   const handleSubmit = async (e) => {
@@ -101,6 +104,17 @@ export default function CreatePoll () {
 
     try {
       handleValidations(optionsData, title)
+      setPendingData({ title, optionsData })
+      setShowConfirm(true)
+    } catch (err) {
+      setMessage({ message: err.message, severity: 'error' })
+    }
+  }
+
+  const handleConfirm = async () => {
+    const { title, optionsData } = pendingData
+    setShowConfirm(false)
+    try {
       setRequestState(requestStateEnum.pending)
 
       const filledOptions = options.filter(o => o.value && o.value.trim().length > 0)
@@ -120,7 +134,7 @@ export default function CreatePoll () {
         setShowSuccess(true)
       }).catch(() => {
         setRequestState(requestStateEnum.error)
-        setMessage({ message: 'Failed to create poll', severity: 'error' })
+        setMessage({ message: t('create.errors.createFailed'), severity: 'error' })
       }).finally(() => {
         setTimeout(() => setRequestState(requestStateEnum.none), 2000)
       })
@@ -131,18 +145,18 @@ export default function CreatePoll () {
 
   return (
     <PageWrapper>
-      <Paper elevation={0} sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(30,30,30,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)' }}>
+      <Paper elevation={0} variant='outlined' sx={{ width: '100%', overflow: 'hidden' }}>
         <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requestStateEnum.pending ? 'visible' : 'hidden' }} />
         <Box component='form' display='flex' flexDirection='column' gap={2.5} p={3} onSubmit={handleSubmit}>
           <Box>
-            <Typography variant='h5' fontWeight={700}>Create a Poll</Typography>
+            <Typography variant='h5' fontWeight={700}>{t('create.title')}</Typography>
             <Typography variant='body2' color='text.secondary'>
-              Add a title and at least two options to get started.
+              {t('create.subtitle')}
             </Typography>
           </Box>
 
           <TextField
-            variant='outlined' label='Title' name='title' required fullWidth
+            variant='outlined' label={t('create.titleLabel')} name='title' required fullWidth
             error={!!titleError} helperText={titleError}
             inputProps={{ maxLength: 200 }}
             onChange={() => titleError && setTitleError('')}
@@ -157,13 +171,13 @@ export default function CreatePoll () {
                   ? (
                     <Box position='relative'>
                       <Avatar src={item.imagePreview} variant='rounded' sx={{ width: 40, height: 40, borderRadius: 2 }} />
-                      <IconButton onClick={() => handleRemoveImage(item.index)} aria-label={`Remove image from option ${item.index + 1}`} sx={{ position: 'absolute', top: -8, right: -8, bgcolor: 'background.paper', minWidth: 44, minHeight: 44, p: 0.5 }}>
+                      <IconButton onClick={() => handleRemoveImage(item.index)} aria-label={t('create.optionLabel', { n: item.index + 1 })} sx={{ position: 'absolute', top: -8, right: -8, bgcolor: 'background.paper', minWidth: 44, minHeight: 44, p: 0.5 }}>
                         <Close sx={{ fontSize: 14 }} />
                       </IconButton>
                     </Box>
                     )
                   : (
-                    <IconButton component='label' aria-label={`Add image to option ${item.index + 1}`} sx={{ minWidth: 48, minHeight: 48 }}>
+                    <IconButton component='label' aria-label={t('create.optionLabel', { n: item.index + 1 })} sx={{ minWidth: 48, minHeight: 48 }}>
                       <AddPhotoAlternate fontSize='small' />
                       <input type='file' hidden accept='image/*' onChange={(e) => handleImageChange(e, item.index)} />
                     </IconButton>
@@ -173,13 +187,13 @@ export default function CreatePoll () {
                   error={!!item.error}
                   helperText={item.error || ''}
                   onChange={(e) => handleChange(e, item.index)}
-                  variant='outlined' label={`Option ${item.index + 1}`} autoComplete='off'
+                  variant='outlined' label={t('create.optionLabel', { n: item.index + 1 })} autoComplete='off'
                   name={`option ${item.index}`} value={item.value || ''}
                   inputProps={{ maxLength: 200 }}
                   InputProps={options.length > 2 ? {
                     endAdornment: (
                       <InputAdornment position='end'>
-                        <IconButton edge='end' aria-label={`Remove option ${item.index + 1}`} onClick={() => handleRemove(item.index)} sx={{ minWidth: 48, minHeight: 48 }}>
+                        <IconButton edge='end' aria-label={t('create.optionLabel', { n: item.index + 1 })} onClick={() => handleRemove(item.index)} sx={{ minWidth: 48, minHeight: 48 }}>
                           <Remove fontSize='small' />
                         </IconButton>
                       </InputAdornment>
@@ -193,31 +207,49 @@ export default function CreatePoll () {
             startIcon={<Add />} onClick={() => { handleAddOption(); requestAnimationFrame(() => optionsRef.current?.scrollTo({ top: optionsRef.current.scrollHeight, behavior: 'smooth' })) }}
             sx={{ alignSelf: 'flex-start' }}
           >
-            Add Option
+            {t('create.addOption')}
           </Button>
 
           <Divider />
 
           <Box display='flex' justifyContent='space-between' alignItems='center' flexWrap='wrap' gap={1}>
-            <Typography variant='caption' color='text.secondary'>
-              Voting open for <b>{POLL_DURATION_MINUTES} min</b> after creation.
-            </Typography>
-            <Button type='submit' variant='contained' color='secondary' size='large' sx={{ px: 4 }} disabled={requestState === requestStateEnum.pending}>
-              Create Poll
+            <Typography
+              variant='caption' color='text.secondary'
+              dangerouslySetInnerHTML={{ __html: t('create.durationNote', { min: POLL_DURATION_MINUTES }) }}
+            />
+            <Button type='submit' variant='contained' color='primary' size='large' sx={{ px: 4 }} disabled={requestState === requestStateEnum.pending}>
+              {t('create.createBtn')}
             </Button>
           </Box>
         </Box>
       </Paper>
 
-      <Dialog open={showSuccess} onClose={() => setShowSuccess(false)}>
-        <DialogTitle fontWeight={700}>Poll Created</DialogTitle>
-        <DialogContent>
-          <Typography>Your poll is ready. Share it with others to start collecting votes.</Typography>
+      <Dialog open={showConfirm} onClose={() => setShowConfirm(false)}>
+        <DialogTitle fontWeight={700}>{t('create.confirmTitle')}</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, minWidth: 300 }}>
+          <Typography variant='body2' color='text.secondary'>{t('create.confirmBody')}</Typography>
+          <Typography fontWeight={600}>{pendingData?.title}</Typography>
+          <Box component='ul' sx={{ m: 0, pl: 2.5, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            {pendingData?.optionsData.map((opt, i) => (
+              <Typography key={i} component='li' variant='body2'>{opt}</Typography>
+            ))}
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setShowSuccess(false)}>Close</Button>
+          <Button onClick={() => setShowConfirm(false)}>{t('create.edit')}</Button>
+          <Button variant='contained' onClick={handleConfirm}>{t('create.publish')}</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={showSuccess} onClose={() => setShowSuccess(false)}>
+        <DialogTitle fontWeight={700}>{t('create.successTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography>{t('create.successBody')}</Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setShowSuccess(false)}>{t('create.close')}</Button>
           <Button variant='contained' startIcon={<Launch />} onClick={() => navigate(`/poll/${idPoll.current}`)}>
-            View Poll
+            {t('create.viewPoll')}
           </Button>
         </DialogActions>
       </Dialog>

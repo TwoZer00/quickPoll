@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Box, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material'
-import { BallotOutlined, BarChart as BarChartIcon, PieChart as PieChartIcon, Share, ContentCopy, Download } from '@mui/icons-material'
+import { DonutLarge, Share, ContentCopy, Download } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
+import { useTranslation } from 'react-i18next'
 import { exportCSV } from '../../utils/export'
 
 const XIcon = () => (
@@ -17,12 +18,12 @@ const WhatsAppIcon = () => (
 )
 
 const COPY_OPTIONS = [
-  { label: 'Copy poll link', param: null, icon: <ContentCopy fontSize='small' /> },
-  { label: 'Copy as pie chart', param: 'pie', icon: <PieChartIcon fontSize='small' /> },
-  { label: 'Copy as bar chart', param: 'bars', icon: <BarChartIcon fontSize='small' /> }
+  { labelKey: 'share.copyLink', param: null, icon: <ContentCopy fontSize='small' /> },
+  { labelKey: 'share.copyPie', param: 'pie', icon: <DonutLarge fontSize='small' /> }
 ]
 
 const ShareMenu = ({ setMessage, poll, options, voteCounts }) => {
+  const { t } = useTranslation()
   const [anchorEl, setAnchorEl] = useState(null)
   const dataReady = Object.keys(voteCounts).length === options.length && Object.values(voteCounts).reduce((a, b) => a + b, 0) > 0
 
@@ -34,13 +35,13 @@ const ShareMenu = ({ setMessage, poll, options, voteCounts }) => {
   }
 
   const handleCopy = (param) => {
-    navigator.clipboard.writeText(getUrl(param)).then(() => setMessage({ message: 'link copied to clipboard' }))
+    navigator.clipboard.writeText(getUrl(param)).then(() => setMessage({ message: t('share.copied') }))
     setAnchorEl(null)
   }
 
   const handleSocial = (platform) => {
     const url = getUrl()
-    const text = 'Vote on this poll!'
+    const text = t('share.voteText')
     const links = {
       x: `https://x.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
       whatsapp: `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`
@@ -60,20 +61,20 @@ const ShareMenu = ({ setMessage, poll, options, voteCounts }) => {
         <Share fontSize='inherit' />
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
-        {COPY_OPTIONS.map(({ label, param, icon }) => (
-          <MenuItem key={label} onClick={() => handleCopy(param)} sx={{ borderRadius: 2, mx: 0.5 }}>
+        {COPY_OPTIONS.map(({ labelKey, param, icon }) => (
+          <MenuItem key={labelKey} onClick={() => handleCopy(param)} sx={{ borderRadius: 2, mx: 0.5 }}>
             <ListItemIcon>{icon}</ListItemIcon>
-            <ListItemText>{label}</ListItemText>
+            <ListItemText>{t(labelKey)}</ListItemText>
           </MenuItem>
         ))}
         <Divider />
         <MenuItem onClick={() => handleSocial('x')} sx={{ borderRadius: 2, mx: 0.5 }}>
           <ListItemIcon><XIcon /></ListItemIcon>
-          <ListItemText>Share on X</ListItemText>
+          <ListItemText>{t('share.shareX')}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleSocial('whatsapp')} sx={{ borderRadius: 2, mx: 0.5 }}>
           <ListItemIcon><WhatsAppIcon /></ListItemIcon>
-          <ListItemText>Share on WhatsApp</ListItemText>
+          <ListItemText>{t('share.shareWhatsApp')}</ListItemText>
         </MenuItem>
       </Menu>
     </Box>

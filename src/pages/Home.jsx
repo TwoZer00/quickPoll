@@ -1,62 +1,59 @@
-import { alpha, Box, Button, Paper, Stack, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { Link } from 'react-router-dom'
 import { Add, BoltRounded, ShareRounded, BarChartRounded } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import useTitle from '../hook/useTitle'
 import PageWrapper from '../components/PageWrapper'
-
-const features = [
-  { icon: <BoltRounded />, label: 'Instant creation', desc: 'No sign-up needed' },
-  { icon: <ShareRounded />, label: 'Easy sharing', desc: 'One link to share' },
-  { icon: <BarChartRounded />, label: 'Real-time results', desc: 'Watch votes live' }
-]
+import PollMock from '../components/PollMock'
 
 export default function Home () {
+  const { t } = useTranslation()
   useTitle({ title: 'Quick and easy polls', description: 'Create quick polls, share them and see results in real time.' })
+
+  const features = [
+    { icon: <BoltRounded />, label: t('home.features.instant.label'), desc: t('home.features.instant.desc') },
+    { icon: <ShareRounded />, label: t('home.features.sharing.label'), desc: t('home.features.sharing.desc') },
+    { icon: <BarChartRounded />, label: t('home.features.results.label'), desc: t('home.features.results.desc') }
+  ]
+
   return (
-    <PageWrapper sx={{ alignItems: 'center' }}>
-      <Stack component='main' alignItems='center' gap={4}>
-        <Typography
-          variant='h2' fontWeight={800} align='center'
-          sx={{
-            background: 'linear-gradient(135deg, #ff6d00 0%, #ffa000 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            overflowWrap: 'break-word'
-          }}
-        >
-          QuickPoll
-        </Typography>
-        <Typography variant='h6' align='center' color='text.secondary' fontWeight={400} maxWidth='36ch'>
-          Create polls in seconds, share a link, and watch votes come in live.
-        </Typography>
-        <Stack direction='row' gap={2} flexWrap='wrap' justifyContent='center'>
-          {features.map(f => (
-            <Paper
-              key={f.label} elevation={0}
-              sx={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5,
-                px: 3, py: 2, borderRadius: 3,
-                bgcolor: alpha('#ffa000', 0.06),
-                border: '1px solid', borderColor: alpha('#ffa000', 0.15),
-                transition: 'transform .2s, box-shadow .2s',
-                '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 4px 16px ${alpha('#ffa000', 0.15)}` },
-                '&:active': { transform: 'scale(0.97)' }
-              }}
+    <PageWrapper maxWidth='md' sx={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', gap: { xs: 5, md: 8 }, width: '100%' }}>
+        <Stack component='main' gap={3} flex={1}>
+          <Stack gap={1.5}>
+            <Typography variant='h2' fontWeight={700} letterSpacing={-1} color='text.primary'>
+              QuickPoll
+            </Typography>
+            <Typography variant='body1' color='text.secondary' maxWidth='38ch'>
+              {t('home.subtitle')}
+            </Typography>
+          </Stack>
+          <Box>
+            <Button
+              variant='contained' size='large' startIcon={<Add />}
+              component={Link} to='/create'
+              sx={{ px: 3, py: 1 }}
             >
-              <Box sx={{ color: 'primary.main', fontSize: 28, display: 'flex' }}>{f.icon}</Box>
-              <Typography variant='body2' fontWeight={600}>{f.label}</Typography>
-              <Typography variant='caption' color='text.secondary'>{f.desc}</Typography>
-            </Paper>
-          ))}
+              {t('home.createBtn')}
+            </Button>
+          </Box>
+          <Divider />
+          <Stack direction='row' gap={3} flexWrap='wrap'>
+            {features.map(f => (
+              <Stack key={f.label} direction='row' alignItems='center' gap={1}>
+                <Box sx={{ color: 'primary.main', display: 'flex', fontSize: 18 }}>{f.icon}</Box>
+                <Stack>
+                  <Typography variant='caption' fontWeight={600} color='text.primary' lineHeight={1.2}>{f.label}</Typography>
+                  <Typography variant='caption' color='text.secondary'>{f.desc}</Typography>
+                </Stack>
+              </Stack>
+            ))}
+          </Stack>
         </Stack>
-        <Button
-          variant='contained' color='secondary' size='large' startIcon={<Add />}
-          component={Link} to='/create'
-          sx={{ borderRadius: 3, px: 5, py: 1.5, textTransform: 'none', fontWeight: 700, fontSize: '1rem', boxShadow: '0 4px 20px rgba(255,87,34,0.3)', '&:hover': { boxShadow: '0 6px 28px rgba(255,87,34,0.4)' } }}
-        >
-          Create a Poll
-        </Button>
-      </Stack>
+        <Box sx={{ display: 'flex', justifyContent: 'center', width: { xs: '100%', md: 'auto' } }}>
+          <PollMock />
+        </Box>
+      </Box>
     </PageWrapper>
   )
 }

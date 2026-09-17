@@ -7,8 +7,8 @@ import { POLL_DURATION_MINUTES } from '../const/Const'
  * @description Checks if the poll is closed. A poll is considered closed if it was created more than POLL_DURATION_MINUTES ago.
  */
 function isPollClosed (date) {
-  const result = dayjs().diff(dayjs(date), 'm') >= POLL_DURATION_MINUTES
-  // console.log(`isPollClosed: ${result} for date ${date} (${dayjs(date).format('YYYY-MM-DD HH:mm:ss')})`)
+  const ms = date?.seconds ? date.seconds * 1000 : date
+  const result = dayjs().diff(dayjs(ms), 'm') >= POLL_DURATION_MINUTES
   return result
 }
 

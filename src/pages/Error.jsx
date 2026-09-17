@@ -1,19 +1,21 @@
 import { Box, Button, CssBaseline, Typography } from '@mui/material'
 import { useEffect } from 'react'
 import { useRouteError, Link as RouterLink, isRouteErrorResponse } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import ERRORS from '../const/Const'
 
-function getErrorMessage (error) {
+function getErrorMessage (error, t) {
   if (isRouteErrorResponse(error)) {
-    if (error.status === 404) return 'page not found'
-    return error.statusText || 'something went wrong'
+    if (error.status === 404) return t('errors.not-found')
+    return error.statusText || t('errors.17')
   }
-  return ERRORS[error?.code] || error?.message || 'something went wrong'
+  return ERRORS[error?.code] || error?.message || t('errors.17')
 }
 
 export default function Error () {
+  const { t } = useTranslation()
   const error = useRouteError()
-  const message = getErrorMessage(error)
+  const message = getErrorMessage(error, t)
 
   useEffect(() => {
     document.title = 'Error'
@@ -30,10 +32,10 @@ export default function Error () {
           {message}
         </Typography>
         <Typography variant='body2' color='text.secondary' textAlign='center'>
-          Try going back or refreshing the page.
+          {t('error.tryAgain')}
         </Typography>
         <Button variant='contained' component={RouterLink} to='/' sx={{ borderRadius: 3, px: 4, textTransform: 'none', fontWeight: 600, bgcolor: '#ffa000', '&:hover': { bgcolor: '#ff8f00' } }}>
-          Go home
+          {t('error.goHome')}
         </Button>
       </Box>
     </>

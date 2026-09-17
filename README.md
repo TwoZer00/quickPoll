@@ -19,7 +19,7 @@ Create and share real-time polls that auto-close after 30 minutes. No sign-up re
 |----------|------------|
 | Framework | [React 18](https://react.dev/) (JavaScript) |
 | Build Tool | [Vite](https://vitejs.dev/) |
-| Backend | [Firebase](https://firebase.google.com/) — Firestore, Analytics, Anonymous Auth |
+| Backend | [Supabase](https://supabase.com/) — Postgres, Realtime, Anonymous Auth |
 | UI | [Material UI 5](https://mui.com/material-ui/) |
 | Routing | [React Router DOM](https://reactrouter.com/en/main) |
 | Charts | [Recharts](https://recharts.org/) |
@@ -39,16 +39,11 @@ npm install
 npm run dev
 ```
 
-Create a `.env` file with your Firebase config:
+Create a `.env` file with your config:
 
 ```env
-VITE_API_KEY=<your-api-key>
-VITE_AUTH_DOMAIN=<your-auth-domain>
-VITE_PROJECT_ID=<your-project-id>
-VITE_STORAGE_BUCKET=<your-storage-bucket>
-VITE_MESSAGING_SENDER_ID=<your-sender-id>
-VITE_APP_ID=<your-app-id>
-VITE_MEASUREMENT_ID=<your-measurement-id>
+VITE_SUPABASE_URL=<your-supabase-url>
+VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
 VITE_CLOUDINARY_CLOUD_NAME=<your-cloud-name>
 VITE_CLOUDINARY_UPLOAD_PRESET=<your-upload-preset>
 ```
@@ -69,7 +64,7 @@ src/
 ├── components/     # Reusable UI components (charts, poll, menu)
 ├── const/          # Constants
 ├── error/          # Error handling
-├── firebase/       # Firebase config and services
+├── supabase/       # Supabase client, schema and services
 ├── hook/           # Custom React hooks
 ├── pages/          # Route pages (Home, CreatePoll, Poll)
 ├── utils/          # Utility functions

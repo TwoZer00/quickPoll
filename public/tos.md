@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Last Updated:** October 22, 2025
+**Last Updated:** September 2026
 
 ## 1. Acceptance of Terms
 
@@ -27,7 +27,7 @@ You are responsible for the content you create through the app.
 
 ## 4. Anonymous Usage
 
-We use anonymous sign-in through Firebase. You will not be personally identified unless you voluntarily share information within poll content (which we strongly advise against).
+We use anonymous sign-in through Supabase. You will not be personally identified unless you voluntarily share information within poll content (which we strongly advise against).
 
 ## 5. Public Content
 
@@ -47,9 +47,9 @@ QuickPoll is provided **"as is"** without warranties of any kind. We are not lia
 
 ## 9. Third-Party Services
 
-QuickPoll relies on third-party services to operate, including **Firebase** (Google LLC) and **Cloudinary** (Cloudinary Ltd.). Your use of QuickPoll is also subject to their respective terms of service:
+QuickPoll relies on third-party services to operate, including **Supabase** (Supabase Inc.) and **Cloudinary** (Cloudinary Ltd.). Your use of QuickPoll is also subject to their respective terms of service:
 
-- [Google Terms of Service](https://policies.google.com/terms)
+- [Supabase Terms of Service](https://supabase.com/terms)
 - [Cloudinary Terms of Use](https://cloudinary.com/tos)
 
 ## 10. Governing Law

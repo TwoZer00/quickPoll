@@ -1,8 +1,8 @@
 import { useLoaderData, useOutletContext, useParams } from 'react-router-dom'
 import { Box, Button, LinearProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getResults, setVote, requestStateEnum } from '../supabase/utils'
-import ERRORS from '../const/Const'
 import dayjs from 'dayjs'
 import GoogleAd from '../components/GoogleAd'
 import useTitle from '../hook/useTitle'
@@ -13,6 +13,7 @@ import PageWrapper from '../components/PageWrapper'
 
 export default function Poll () {
   const [data, setData] = useState((useLoaderData()))
+  const { t } = useTranslation()
   const { setMessage } = useOutletContext()
   const [state, setState] = useState()
   const [options, setOptions] = useState(data.options)
@@ -37,21 +38,19 @@ export default function Poll () {
   const handleSubmit = (event) => {
     setState(requestStateEnum.pending)
     event.preventDefault()
-    const data = new FormData(event.currentTarget)
-    const selectedOption = data.get('radio-buttons-group')
+    const formData = new FormData(event.currentTarget)
+    const selectedOption = formData.get('radio-buttons-group')
     const lastVote = options.find(option => option.voted)
     applyOptimistic(lastVote?.id, selectedOption)
     setVote({ lastVote, voteId: selectedOption, pollId: id })
       .then(() => {
-        const tempOptions = options.map(option => ({ ...option, voted: false }))
-        setOptions(tempOptions)
-        setOptions(tempOptions.map(option => option.id === selectedOption ? { ...option, voted: true } : option))
+        setOptions(options.map(o => ({ ...o, voted: o.id === selectedOption })))
         setOption(selectedOption)
-        setMessage({ message: 'vote sent', severity: 'success' })
+        setMessage({ message: t('poll.vote'), severity: 'success' })
         setState(requestStateEnum.success)
       }).catch((error) => {
         revertOptimistic(lastVote?.id, selectedOption)
-        setMessage({ message: ERRORS[error.code], severity: 'error' })
+        setMessage({ message: t(`errors.${error.code}`) || error.message, severity: 'error' })
         setState(requestStateEnum.error)
       })
   }
@@ -62,14 +61,12 @@ export default function Poll () {
   }, [duration])
   useEffect(() => {
     if (data?.closed) {
-      !isVoted() && setOption('-1')
+      !isVoted && setOption('-1')
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
-  const isVoted = () => {
-    return options.some(option => option.voted)
-  }
+  const isVoted = useMemo(() => options.some(o => o.voted), [options])
 
   return (
     <>
@@ -80,7 +77,7 @@ export default function Poll () {
           </Box>
           <PageWrapper maxWidth='md' sx={{ p: 0 }}>
             <Box component='form' onSubmit={handleSubmit} width='100%'>
-              <Box component={Paper} width='100%' variant='elevation' elevation={0} sx={{ overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(30,30,30,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)' }}>
+              <Box component={Paper} width='100%' variant='outlined' elevation={0} sx={{ overflow: 'hidden' }}>
               <Box component='main' p={2.5} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                 <ShareMenu setMessage={setMessage} poll={data} options={options} voteCounts={voteCounts} />
                 {
@@ -88,27 +85,27 @@ export default function Poll () {
                   ? <Typography variant='h4' component='h1' fontWeight={700} title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis', wordBreak: 'break-word' }}>{data?.title}</Typography>
                   : <Skeleton variant='text' height={32} width='12ch' />
               }
-                {data?.user && <Typography variant='body2' color='text.secondary'>by {data?.user?.name}</Typography>}
+                {data?.user && <Typography variant='body2' color='text.secondary'>{t('poll.by', { name: data.user.name })}</Typography>}
                 {!data?.closed
                   ? (
                     <TimeRemain duration={duration} setDuration={setDuration} date={data && data?.createdAt?.seconds * 1000} />
                     )
                   : (
                     <Typography variant='caption' color='text.secondary'>
-                      Created {dayjs(data.createdAt.seconds * 1000).format('DD/MM/YYYY HH:mm')}
+                      {t('poll.created', { date: dayjs(data.createdAt.seconds * 1000).format('DD/MM/YYYY HH:mm') })}
                     </Typography>
                     )}
                 <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} voteCounts={voteCounts} />
                 {!data?.closed && (
                   <Button
-                    type='submit' variant='contained' color='secondary' size='large'
+                    type='submit' variant='contained' color='primary' size='large'
                     sx={{ alignSelf: 'end', px: 4 }}
                     disabled={!data || (options.find(option => option.voted)?.id === option || state === requestStateEnum.pending)}
                   >
-                    Vote
+                    {t('poll.vote')}
                   </Button>
                 )}
-                {data?.closed && <Typography variant='body2' color='text.secondary' align='center'>Poll closed</Typography>}
+                {data?.closed && <Typography variant='body2' color='text.secondary' align='center'>{t('poll.closed')}</Typography>}
               </Box>
               <LinearProgress variant='indeterminate' sx={{ visibility: state === requestStateEnum.pending ? 'visible' : 'hidden' }} />
             </Box>

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated:** October 22, 2025
+**Last Updated:** September 2026
 
 ## 1. Overview
 
@@ -14,9 +14,10 @@ We minimize data collection and only use information necessary to provide our se
 
 When you use QuickPoll:
 
-- We use **Firebase** for authentication, analytics, and data storage.
+- We use **Supabase** for authentication and data storage.
 - We use **anonymous sign-in**, so we do not collect personally identifiable information such as your name, email address, or contact details.
-- Firebase automatically collects some technical data (such as device type, operating system, and usage events) to help us maintain and improve the app.
+- We use **Cloudinary** to host images attached to poll options.
+- We use **Umami Analytics** for privacy-friendly usage analytics — no cookies, no personal data, no cross-site tracking.
 
 ## 3. How We Use Information
 
@@ -24,19 +25,19 @@ We use collected data to:
 
 - Operate and maintain the poll platform.
 - Prevent spam or abuse.
-- Analyze app performance and usage patterns (in aggregated form).
+- Analyze app performance and usage patterns (in aggregated, anonymous form).
 
 We do **not** sell, rent, or trade your information to any third parties.
 
 ## 4. Cookies and Local Storage
 
-QuickPoll may use cookies or browser local storage to maintain your anonymous session. These are essential for the service to function and are not used for tracking or advertising.
+QuickPoll uses `sessionStorage` to remember polls you created or voted on during your browser session. No tracking cookies are used.
 
 ## 5. Data Storage and Security
 
-- Your data is stored securely using Google Firebase infrastructure.
-- We rely on Firebase's built-in security and encryption to protect poll data.
-- Poll responses are retained only as long as necessary for the service to function.
+- Your data is stored securely using Supabase infrastructure (PostgreSQL on AWS).
+- We rely on Supabase's built-in security, RLS policies, and encryption to protect poll data.
+- Poll responses are retained as long as necessary for the service to function.
 
 ## 6. Public Data
 
@@ -50,8 +51,10 @@ QuickPoll is not directed at children under 13. We do not knowingly collect info
 
 Our app uses the following third-party services:
 
-- **Firebase** (Google LLC) — Authentication, database, and analytics. [Google Privacy Policy](https://policies.google.com/privacy)
+- **Supabase** (Supabase Inc.) — Authentication, database, and realtime. [Supabase Privacy Policy](https://supabase.com/privacy)
 - **Cloudinary** (Cloudinary Ltd.) — Image hosting and optimization for poll images. [Cloudinary Privacy Policy](https://cloudinary.com/privacy)
+- **Umami** — Privacy-friendly analytics, no cookies, no personal data. [Umami Privacy](https://umami.is/privacy)
+- **Netlify** — Hosting. [Netlify Privacy Policy](https://www.netlify.com/privacy/)
 
 ## 9. Changes to This Policy
 

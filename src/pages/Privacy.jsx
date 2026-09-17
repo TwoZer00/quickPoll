@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Box, CircularProgress } from '@mui/material'
-import ReactMarkdown from 'react-markdown'
+import { SimpleMarkdown } from '../utils/markdown.jsx'
 import PageWrapper from '../components/PageWrapper'
 import useTitle from '../hook/useTitle'
 import { useTranslation } from 'react-i18next'
-import { markdownComponents } from '../utils/markdown.jsx'
 
 export default function Privacy () {
   const { t, i18n } = useTranslation()
@@ -19,7 +18,7 @@ export default function Privacy () {
   return (
     <PageWrapper maxWidth='md' sx={{ justifyContent: 'flex-start', py: 4 }}>
       {content
-        ? <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
+        ? <SimpleMarkdown content={content} />
         : <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>}
     </PageWrapper>
   )

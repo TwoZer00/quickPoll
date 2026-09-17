@@ -1,5 +1,4 @@
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
-import QuickPollLogo from '../components/QuickPollLogo'
 import { Link, useParams } from 'react-router-dom'
 import { Add, BoltRounded, ShareRounded, BarChartRounded } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
@@ -22,8 +21,8 @@ export default function Home () {
     <PageWrapper maxWidth='md' sx={{ alignItems: 'center', justifyContent: 'center' }}>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', gap: { xs: 5, md: 8 }, width: '100%' }}>
         <Stack component='main' gap={3} flex={1}>
-          <Stack gap={1.5}>
-            <QuickPollLogo size='xl' />
+          <Stack gap={1}>
+            <Typography variant='h4' fontWeight={700}>{t('home.title')}</Typography>
             <Typography variant='body1' color='text.secondary' maxWidth='38ch'>
               {t('home.subtitle')}
             </Typography>

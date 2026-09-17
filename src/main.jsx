@@ -30,6 +30,12 @@ function detectLang () {
   return SUPPORTED_LANGS.includes(browser) ? browser : 'en'
 }
 
+function detectTarget () {
+  const lang = detectLang()
+  const isPwa = window.matchMedia('(display-mode: standalone)').matches
+  return isPwa ? `/${lang}/create` : `/${lang}`
+}
+
 function PollLoader () {
   return (
     <Box sx={{ display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -57,7 +63,7 @@ const pollLoader = async ({ params }) => {
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to={`/${detectLang()}`} replace />,
+    element: <Navigate to={detectTarget()} replace />,
     errorElement: <Error />
   },
   {

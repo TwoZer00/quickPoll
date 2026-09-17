@@ -105,9 +105,9 @@ export default {
     15: 'encuesta no encontrada',
     16: 'encuesta cerrada',
     17: 'error al cargar la encuesta',
+    'not-found': 'página no encontrada',
     'permission-denied': 'no tienes permiso para hacer eso',
     unavailable: 'el servicio no está disponible, intenta de nuevo',
-    'not-found': 'el recurso solicitado no fue encontrado',
     unauthenticated: 'autenticación fallida, recarga la página'
   }
 }

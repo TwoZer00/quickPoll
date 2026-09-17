@@ -3,6 +3,7 @@ import { Box, Button, Paper, Switch, FormControlLabel, Typography } from '@mui/m
 import { useTranslation } from 'react-i18next'
 import TimeRemain from './poll/TimeRemain'
 import OptionsList, { useVoteCounts } from './poll/OptionsList'
+import { POLL_DURATION_SECONDS } from '../const/Const'
 
 const STORAGE_KEY = 'quickpoll_mock'
 const POLL_ID = 'mock'
@@ -13,10 +14,10 @@ function loadStorage () {
 
 function initCreatedAt () {
   const stored = loadStorage()
-  if (stored.createdAt) return stored.createdAt
-  const t = Date.now() / 1000
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...stored, createdAt: t }))
-  return t
+  const now = Date.now() / 1000
+  if (stored.createdAt && (now - stored.createdAt) < POLL_DURATION_SECONDS) return stored.createdAt
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...stored, createdAt: now }))
+  return now
 }
 const OPTIONS_WITH_IMAGES = [
   { id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', title: 'JavaScript', voted: false, image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },

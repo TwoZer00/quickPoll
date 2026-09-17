@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Box, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material'
-import { BallotOutlined, DonutLarge, BarChart as BarChartIcon } from '@mui/icons-material'
+import { Box, Chip, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { BallotOutlined, DonutLarge, BarChart as BarChartIcon, HowToVote } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { supabase } from '../../supabase/init'
 import { assignColors } from '../../utils/color'
@@ -141,7 +141,8 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
   return (
     <>
       {showResult && total > 0 && (
-        <Stack direction='row' alignItems='center' justifyContent='center' gap={1} flexWrap='wrap'>
+        <Stack direction='row' alignItems='center' justifyContent='space-between' gap={1} flexWrap='wrap'>
+          <Chip icon={<HowToVote fontSize='small' />} label={<Typography variant='caption' fontWeight={600}>{total}</Typography>} size='small' variant='outlined' />
           <ToggleButtonGroup
             size='small' value={viewMode} exclusive onChange={handleViewChange}
             sx={{ gap: 1, '& .MuiToggleButton-root': { borderRadius: '20px !important', px: 2, minWidth: 48, minHeight: 48, border: '1px solid', borderColor: 'divider' } }}
@@ -156,7 +157,7 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
       <Box sx={{ display: viewMode === 'vote' ? 'block' : 'none' }}>
         <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: 'repeat(2, 1fr)', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 640 : 300, overflowY: 'clip', px: hasImages ? 1 : 0, mx: hasImages ? -1 : 0, py: hasImages ? 2.5 : 0, my: hasImages ? 0.5 : 0 }}>
           {coloredOptions.map((opt) => (
-            <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} cardMode={hasImages} selected={option} />
+            <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} cardMode={hasImages} compact={cols >= 3} selected={option} />
           ))}
         </RadioGroup>
       </Box>

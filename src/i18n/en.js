@@ -75,7 +75,8 @@ export default {
     votes: 'votes'
   },
   mock: {
-    title: 'Best programming language?'
+    title: 'Best programming language?',
+    images: 'Images'
   },
   error: {
     tryAgain: 'Try going back or refreshing the page.',

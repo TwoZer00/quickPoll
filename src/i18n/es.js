@@ -75,7 +75,8 @@ export default {
     votes: 'votos'
   },
   mock: {
-    title: '¿Cuál es el mejor lenguaje de programación?'
+    title: '¿Cuál es el mejor lenguaje de programación?',
+    images: 'Imágenes'
   },
   error: {
     tryAgain: 'Intenta volver atrás o recargar la página.',

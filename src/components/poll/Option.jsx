@@ -4,7 +4,7 @@ import { CheckCircle } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
 
-const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, selected }) => {
+const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, compact, selected }) => {
   const optionColor = option.color || '#888888'
   const pct = total > 0 ? Math.round((voteCount / total) * 100) : 0
   const percentage = total > 0 && showResult ? (voteCount / total) * 100 : 0
@@ -39,7 +39,7 @@ const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, sel
 
   if (cardMode) {
     return (
-      <animated.div style={{ scale: bounceSpring.scale, display: 'flex', flexDirection: 'column' }}>
+      <animated.div style={{ scale: bounceSpring.scale, display: 'flex', flexDirection: 'column', containerType: 'inline-size' }}>
         <Box
           component='label'
           position='relative' overflow='hidden' borderRadius={3}
@@ -92,29 +92,43 @@ const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, sel
 
           {/* voted checkmark badge */}
           {isVoted && (
-            <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: optionColor, borderRadius: '50%', width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.4)', zIndex: 2 }}>
-              <CheckCircle sx={{ fontSize: 32, color: '#fff' }} />
+            <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: optionColor, borderRadius: '50%', width: '18%', height: 0, paddingBottom: '18%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.4)', zIndex: 2 }}>
+              <CheckCircle sx={{ fontSize: '60%', color: '#fff', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
             </Box>
           )}
 
           {/* footer */}
-          <Box position='absolute' bottom={0} left={0} right={0} zIndex={2} sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%)', pt: '48px' }}>
+          <Box position='absolute' bottom={0} left={0} right={0} zIndex={2} sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%)', pt: '25%' }}>
             {showResult && (
-              <Box sx={{ height: 3, bgcolor: alpha(optionColor, 0.35), mx: 1.5, mb: 0.75, borderRadius: 2, overflow: 'hidden' }}>
+              <Box sx={{ height: '1.5%', bgcolor: alpha(optionColor, 0.35), mx: '4%', mb: '2%', borderRadius: 2, overflow: 'hidden' }}>
                 <animated.div style={{ height: '100%', borderRadius: 8, backgroundColor: optionColor, width: widthSpring.width }} />
               </Box>
             )}
-            <Stack direction='row' alignItems='flex-end' justifyContent='space-between' px={1.5} pb={1.2} pt={0}>
-              <Typography variant='body2' fontWeight={isVoted ? 700 : 600} sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.6)', letterSpacing: 0.1 }}>
-                {option.title}
-              </Typography>
-              {showResult && (
-                <Typography variant='caption' fontWeight={700} sx={{ color: optionColor, flexShrink: 0, ml: 1, textShadow: '0 1px 3px rgba(0,0,0,0.5)', filter: 'brightness(1.4)' }}>
-                  <animated.span>{countSpring.number.to(x => Math.round(x))}</animated.span>
-                  {total > 0 && ` · ${pct}%`}
-                </Typography>
-              )}
-            </Stack>
+            {compact
+              ? (
+                <Stack direction='row' alignItems='center' justifyContent='center' pb='4%'>
+                  {showResult && (
+                    <Typography variant='caption' fontWeight={700} sx={{ color: optionColor, textShadow: '0 1px 3px rgba(0,0,0,0.5)', filter: 'brightness(1.4)', fontSize: 'clamp(9px, 2cqw, 12px)' }}>
+                      <animated.span>{countSpring.number.to(x => Math.round(x))}</animated.span>
+                      {total > 0 && ` · ${pct}%`}
+                    </Typography>
+                  )}
+                </Stack>
+              )
+              : (
+                <Stack direction='row' alignItems='flex-end' justifyContent='space-between' px='4%' pb='4%' pt={0}>
+                  <Typography variant='body2' fontWeight={isVoted ? 700 : 600} sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.6)', letterSpacing: 0.1, fontSize: 'clamp(10px, 2.5cqw, 14px)' }}>
+                    {option.title}
+                  </Typography>
+                  {showResult && (
+                    <Typography variant='caption' fontWeight={700} sx={{ color: optionColor, flexShrink: 0, ml: 1, textShadow: '0 1px 3px rgba(0,0,0,0.5)', filter: 'brightness(1.4)', fontSize: 'clamp(9px, 2cqw, 12px)' }}>
+                      <animated.span>{countSpring.number.to(x => Math.round(x))}</animated.span>
+                      {total > 0 && ` · ${pct}%`}
+                    </Typography>
+                  )}
+                </Stack>
+              )
+            }
           </Box>
         </Box>
       </animated.div>
@@ -180,6 +194,7 @@ Option.propTypes = {
   voteCount: PropTypes.number.isRequired,
   total: PropTypes.number.isRequired,
   cardMode: PropTypes.bool,
+  compact: PropTypes.bool,
   selected: PropTypes.string
 }
 

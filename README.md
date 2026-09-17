@@ -6,12 +6,15 @@ Create and share real-time polls that auto-close after 30 minutes. No sign-up re
 
 ## Features
 
-- 🗳️ Create polls with multiple options
+- 🗳️ Create polls with multiple options and optional images
 - ⏱️ Polls auto-close after 30 minutes and results go public
 - 📊 Live results with bar and pie chart views
-- 🔗 Share polls via link
+- 🔗 Share polls via link, X or WhatsApp
 - 🔒 Anonymous authentication — no personal data required
-- 📱 Responsive Material UI design
+- 📱 Responsive Material UI design with dark mode
+- 📥 Export results as CSV
+- 🌐 English & Spanish support
+- 📲 Installable PWA — opens directly to create a poll
 
 ## Tech Stack
 
@@ -27,7 +30,6 @@ Create and share real-time polls that auto-close after 30 minutes. No sign-up re
 | Images | [Cloudinary](https://cloudinary.com/) |
 | Dates | [dayjs](https://day.js.org/) |
 | i18n | [i18next](https://www.i18next.com/) + [react-i18next](https://react.i18next.com/) |
-| Markdown | [react-markdown](https://github.com/remarkjs/react-markdown) |
 | Hosting | [Netlify](https://www.netlify.com/) |
 
 ## Getting Started
@@ -82,7 +84,7 @@ src/
 - [x] Dark mode
 - [x] Export results as CSV
 - [x] Social sharing (X, WhatsApp)
-- [x] PWA support (installable, offline shell)
+- [x] PWA support (installable, opens to create)
 - [x] Internationalization (English & Spanish)
 - [x] Privacy Policy & Terms of Service pages
 - [ ] User accounts & poll history

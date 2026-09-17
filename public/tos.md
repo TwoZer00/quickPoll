@@ -1,10 +1,10 @@
 # Terms of Service
 
-**Last Updated:** September 2026
+**Last Updated:** June 2025
 
 ## 1. Acceptance of Terms
 
-By accessing or using QuickPoll, you agree to these Terms of Service and our [Privacy Policy](/pp.md). If you do not agree, please do not use the app.
+By accessing or using QuickPoll, you agree to these Terms of Service and our [Privacy Policy](/en/privacy). If you do not agree, please do not use the app.
 
 ## 2. Description of Service
 

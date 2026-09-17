@@ -1,6 +1,6 @@
 # Términos de Servicio
 
-**Última actualización:** Septiembre 2026
+**Última actualización:** Junio 2025
 
 ## 1. Aceptación de los términos
 

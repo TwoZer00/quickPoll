@@ -1,6 +1,6 @@
 # Política de Privacidad
 
-**Última actualización:** Septiembre 2026
+**Última actualización:** Junio 2025
 
 ## 1. Descripción general
 
@@ -31,7 +31,7 @@ Usamos los datos recopilados para:
 
 ## 4. Cookies y almacenamiento local
 
-QuickPoll usa `sessionStorage` para recordar las encuestas que creaste o en las que votaste durante tu sesión de navegador. No se usan cookies de rastreo.
+QuickPoll usa `localStorage` para recordar las encuestas que creaste o en las que votaste, tu preferencia de idioma y ajustes de visualización. No se usan cookies de rastreo.
 
 ## 5. Almacenamiento y seguridad de datos
 

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated:** September 2026
+**Last Updated:** June 2025
 
 ## 1. Overview
 
@@ -31,7 +31,7 @@ We do **not** sell, rent, or trade your information to any third parties.
 
 ## 4. Cookies and Local Storage
 
-QuickPoll uses `sessionStorage` to remember polls you created or voted on during your browser session. No tracking cookies are used.
+QuickPoll uses `localStorage` to remember polls you created or voted on, your language preference, and display settings. No tracking cookies are used.
 
 ## 5. Data Storage and Security
 

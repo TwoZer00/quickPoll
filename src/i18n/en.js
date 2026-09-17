@@ -84,8 +84,15 @@ export default {
   privacy: {
     pageTitle: 'Privacy Policy'
   },
+  status: {
+    up: 'Operational',
+    down: 'Degraded',
+    banner: 'Some services may be experiencing issues. We are working to resolve them.'
+  },
+  footer: {
+    madeBy: 'Made by'
+  },
   errors: {
-    15: 'poll not found',
     16: 'poll closed',
     17: 'failed to load poll',
     'permission-denied': "you don't have permission to do that",

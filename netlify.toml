@@ -14,6 +14,12 @@
   pretty_urls = true
 
 [[redirects]]
+  from = "/api/status"
+  to = "https://status.twz00.dev/api/status-page/heartbeat/supabase"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

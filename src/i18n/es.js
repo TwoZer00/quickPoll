@@ -84,6 +84,14 @@ export default {
   privacy: {
     pageTitle: 'Política de Privacidad'
   },
+  status: {
+    up: 'Operacional',
+    down: 'Degradado',
+    banner: 'Algunos servicios pueden estar experimentando problemas. Estamos trabajando para resolverlos.'
+  },
+  footer: {
+    madeBy: 'Hecho por'
+  },
   errors: {
     15: 'encuesta no encontrada',
     16: 'encuesta cerrada',

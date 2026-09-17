@@ -166,6 +166,8 @@ export function PollListItem ({ poll, onClick, sx }) {
   )
 }
 
+
+
 Menu.propTypes = {
   openModal: PropTypes.func.isRequired
 }

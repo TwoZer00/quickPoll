@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { getLastPolls } from '../utils/storage'
 import { ColorModeProvider } from '../hook/useColorMode'
 import useColorMode from '../hook/useColorMode'
+import useServiceStatus from '../hook/useServiceStatus'
 
 function buildTheme (mode) {
   const dark = mode === 'dark'
@@ -108,6 +109,7 @@ function InitAuthInner () {
           bgcolor: 'background.default'
         }}>
           <Menu openModal={setOpenModal} />
+          <StatusBanner />
           <a href='#main-content' style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden', zIndex: 9999 }} onFocus={(e) => { e.target.style.position = 'static'; e.target.style.width = 'auto'; e.target.style.height = 'auto' }} onBlur={(e) => { e.target.style.position = 'absolute'; e.target.style.left = '-9999px'; e.target.style.width = '1px'; e.target.style.height = '1px' }}>Skip to main content</a>
           <LinearProgress sx={{ visibility: isLoading ? 'visible' : 'hidden' }} aria-hidden={!isLoading} />
           <Suspense fallback={<Box flex={1} />}>
@@ -117,7 +119,7 @@ function InitAuthInner () {
           </Suspense>
           <Box component='footer' sx={{ py: 1.5, px: 2, textAlign: 'center' }}>
             <Typography variant='caption' color='text.secondary'>
-              Made by <MuiLink color='inherit' fontWeight={600} target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</MuiLink>
+              {t('footer.madeBy')} <MuiLink color='inherit' fontWeight={600} target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</MuiLink>
               {' · '}
               <MuiLink component={Link} to={`/${lang}/privacy`} color='inherit' underline='hover'>{t('privacy.pageTitle')}</MuiLink>
               {' · '}
@@ -150,6 +152,20 @@ function InitAuthInner () {
         </Snackbar>
       </ThemeProvider>
     </>
+  )
+}
+
+function StatusBanner () {
+  const { t } = useTranslation()
+  const status = useServiceStatus()
+  if (status !== 'down') return null
+  return (
+    <Box sx={{ bgcolor: 'error.main', px: 2, py: 0.75, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+      <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#fff', flexShrink: 0 }} />
+      <Typography variant='caption' sx={{ color: '#fff', fontWeight: 500 }}>
+        {t('status.banner')}
+      </Typography>
+    </Box>
   )
 }
 

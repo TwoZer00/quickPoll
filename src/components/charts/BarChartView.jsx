@@ -22,7 +22,7 @@ function Bar ({ option, value, total, color }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {option.image
-            ? <img src={option.image} alt={option.title} style={{ width: 16, height: 16, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+            ? <img src={option.image} alt={option.title} style={{ width: 64, height: 64, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
             : <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, display: 'inline-block', flexShrink: 0 }} />}
           <span style={{ fontSize: 13, fontWeight: 500 }}>{option.title}</span>
         </div>
@@ -41,9 +41,10 @@ function Bar ({ option, value, total, color }) {
 const BarChartView = memo(({ options, voteCounts }) => {
   const total = Object.values(voteCounts).reduce((a, b) => a + b, 0)
   const sorted = [...options].sort((a, b) => (voteCounts[b.id] || 0) - (voteCounts[a.id] || 0))
+  const hasImages = options.some(o => o.image)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '4px 0' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: hasImages ? 20 : 14, padding: '4px 0' }}>
       {sorted.map(opt => (
         <Bar key={opt.id} option={opt} value={voteCounts[opt.id] || 0} total={total} color={generateColorBySeed(opt.id)} />
       ))}

@@ -8,6 +8,7 @@ import { uploadImage } from '../utils/cloudinary'
 import useTitle from '../hook/useTitle'
 import PageWrapper from '../components/PageWrapper'
 import { POLL_DURATION_MINUTES } from '../const/Const'
+import { track } from '../utils/analytics'
 
 export default function CreatePoll () {
   const { t } = useTranslation()
@@ -133,6 +134,7 @@ export default function CreatePoll () {
         setRequestState(requestStateEnum.success)
         idPoll.current = id
         setShowSuccess(true)
+        track('poll_created', { options: optionsWithImages.length })
       }).catch(() => {
         setRequestState(requestStateEnum.error)
         setMessage({ message: t('create.errors.createFailed'), severity: 'error' })

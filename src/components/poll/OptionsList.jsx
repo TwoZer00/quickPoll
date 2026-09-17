@@ -152,7 +152,7 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
         </Stack>
       )}
       <Box sx={{ display: viewMode === 'vote' ? 'block' : 'none' }}>
-        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: 'repeat(2, 1fr)', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 480 : 300, overflowY: 'auto' }}>
+        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: 'repeat(2, 1fr)', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 640 : 300, overflowY: 'auto' }}>
           {options.map((opt) => (
             <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} cardMode={hasImages} selected={option} />
           ))}

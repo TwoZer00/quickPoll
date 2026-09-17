@@ -18,6 +18,7 @@ import { isPollClosed } from './utils/utils'
 import CError from './error/Error'
 import { Box, Paper, Skeleton, Stack } from '@mui/material'
 import i18n from './i18n/index.js'
+import { track } from './utils/analytics'
 
 const SUPPORTED_LANGS = ['en', 'es']
 
@@ -119,6 +120,8 @@ const router = createBrowserRouter([
     errorElement: <Error />
   }
 ])
+router.subscribe(({ location }) => track({ url: location.pathname + location.search }))
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>

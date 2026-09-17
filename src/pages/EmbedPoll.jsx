@@ -9,6 +9,7 @@ import useTitle from '../hook/useTitle'
 import OptionsList, { useVoteCounts } from '../components/poll/OptionsList'
 import TimeRemain from '../components/poll/TimeRemain'
 import { OpenInNew } from '@mui/icons-material'
+import { track } from '../utils/analytics'
 
 export default function EmbedPoll () {
   const [data, setData] = useState(useLoaderData())
@@ -39,6 +40,7 @@ export default function EmbedPoll () {
       .then(() => {
         setOptions(options.map(o => ({ ...o, voted: o.id === selectedOption })))
         setOption(selectedOption)
+        track('poll_voted', { pollId: id, embed: true })
         setMessage({ text: t('poll.vote'), severity: 'success' })
         setState(requestStateEnum.success)
       }).catch((error) => {

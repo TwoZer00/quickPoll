@@ -4,6 +4,7 @@ import { DonutLarge, BarChart as BarChartIcon, Share, ContentCopy, Download, Cod
 import { PropTypes } from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { exportCSV } from '../../utils/export'
+import { track } from '../../utils/analytics'
 
 const XIcon = () => (
   <svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='currentColor'>
@@ -37,6 +38,7 @@ const ShareMenu = ({ setMessage, poll, options, voteCounts }) => {
 
   const handleCopy = (param) => {
     navigator.clipboard.writeText(getUrl(param)).then(() => setMessage({ message: t('share.copied') }))
+    track('poll_shared', { method: param ? `copy_${param}` : 'copy_link' })
     setAnchorEl(null)
   }
 
@@ -56,13 +58,14 @@ const ShareMenu = ({ setMessage, poll, options, voteCounts }) => {
       whatsapp: `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`
     }
     window.open(links[platform], '_blank', 'noopener,noreferrer')
+    track('poll_shared', { method: platform })
     setAnchorEl(null)
   }
 
   return (
     <Box display='flex' alignSelf='end' gap={0.5}>
       {dataReady && (
-        <IconButton aria-label='Download CSV' onClick={() => exportCSV(poll?.title || 'poll', options, voteCounts)} sx={{ minWidth: 48, minHeight: 48, '&:hover': { bgcolor: 'action.hover' } }}>
+        <IconButton aria-label='Download CSV' onClick={() => { exportCSV(poll?.title || 'poll', options, voteCounts); track('csv_exported') }} sx={{ minWidth: 48, minHeight: 48, '&:hover': { bgcolor: 'action.hover' } }}>
           <Download fontSize='inherit' />
         </IconButton>
       )}

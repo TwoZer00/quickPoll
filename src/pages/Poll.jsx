@@ -10,6 +10,7 @@ import ShareMenu from '../components/poll/ShareMenu'
 import OptionsList, { useVoteCounts } from '../components/poll/OptionsList'
 import TimeRemain from '../components/poll/TimeRemain'
 import PageWrapper from '../components/PageWrapper'
+import { track } from '../utils/analytics'
 
 export default function Poll () {
   const [data, setData] = useState((useLoaderData()))
@@ -46,6 +47,7 @@ export default function Poll () {
       .then(() => {
         setOptions(options.map(o => ({ ...o, voted: o.id === selectedOption })))
         setOption(selectedOption)
+        track('poll_voted', { pollId: id })
         setMessage({ message: t('poll.vote'), severity: 'success' })
         setState(requestStateEnum.success)
       }).catch((error) => {

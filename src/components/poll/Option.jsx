@@ -36,7 +36,7 @@ const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, sel
           transition: 'all .2s ease',
           display: 'flex', flexDirection: 'column',
           userSelect: 'none',
-          aspectRatio: { xs: '3/2', sm: '4/3' },
+          aspectRatio: { xs: '1/1', sm: '4/3' },
           outline: isVoted ? `2px solid ${optionColor.current}` : isSelected ? `2px solid ${alpha(optionColor.current, 0.6)}` : 'none',
           outlineOffset: -1,
           boxShadow: isVoted ? `0 2px 12px ${alpha(optionColor.current, 0.3)}` : '0 1px 3px rgba(0,0,0,0.08)',

@@ -26,7 +26,7 @@ async function createPoll({ title, options }) {
 
   const { error: optError } = await supabase
     .from('options')
-    .insert(unique.map(o => ({ poll_id: poll.id, title: o.title, image: o.image || null })))
+    .insert(unique.map(o => ({ poll_id: poll.id, title: o.title, image: o.image || null, color: o.color || null })))
   if (optError) throw CError.fromError(optError)
 
   const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
@@ -61,7 +61,7 @@ async function getOptions(id) {
 
   const { data: opts, error } = await supabase
     .from('options')
-    .select('id, title, image')
+    .select('id, title, image, color')
     .eq('poll_id', id)
   if (error || !opts?.length) throw CError.fromCode(15)
 
@@ -111,7 +111,7 @@ async function setVote({ voteId, pollId }) {
 async function getResults(id) {
   const { data: opts, error } = await supabase
     .from('options')
-    .select('id, title, image')
+    .select('id, title, image, color')
     .eq('poll_id', id)
   if (error) throw CError.fromError(error)
 

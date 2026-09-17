@@ -4,6 +4,7 @@ import { Box, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup } fro
 import { BallotOutlined, DonutLarge, BarChart as BarChartIcon } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { supabase } from '../../supabase/init'
+import { assignColors } from '../../utils/color'
 import Option from './Option'
 import PieChartView from '../charts/PieChartView'
 import BarChartView from '../charts/BarChartView'
@@ -103,9 +104,10 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
   const paramView = searchParams.get('resultsOnly')?.toLowerCase()
   const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : poll.closed ? 'bars' : 'vote')
   const total = useMemo(() => Object.values(voteCounts).reduce((a, b) => a + b, 0), [voteCounts])
-  const showResult = options.some(option => option.voted) || poll.closed
-  const dataReady = Object.keys(voteCounts).length === options.length
-  const hasImages = options.some(opt => opt.image)
+  const coloredOptions = useMemo(() => assignColors(options), [options])
+  const showResult = coloredOptions.some(option => option.voted) || poll.closed
+  const dataReady = Object.keys(voteCounts).length === coloredOptions.length
+  const hasImages = coloredOptions.some(opt => opt.image)
   const cols = options.length <= 2 ? 2 : options.length === 3 ? 3 : options.length <= 6 ? 3 : 4
 
   const [pieMounted, setPieMounted] = useState(false)
@@ -152,8 +154,8 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
         </Stack>
       )}
       <Box sx={{ display: viewMode === 'vote' ? 'block' : 'none' }}>
-        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: 'repeat(2, 1fr)', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 640 : 300, overflowY: 'auto' }}>
-          {options.map((opt) => (
+        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: 'repeat(2, 1fr)', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 640 : 300, overflowY: 'clip', px: hasImages ? 1 : 0, mx: hasImages ? -1 : 0, py: hasImages ? 2.5 : 0, my: hasImages ? 0.5 : 0 }}>
+          {coloredOptions.map((opt) => (
             <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} cardMode={hasImages} selected={option} />
           ))}
         </RadioGroup>
@@ -163,12 +165,12 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
       )}
       {showResult && dataReady && pieMounted && (
         <Box sx={{ display: viewMode === 'pie' ? 'block' : 'none' }}>
-          <PieChartView options={options} voteCounts={voteCounts} />
+          <PieChartView options={coloredOptions} voteCounts={voteCounts} />
         </Box>
       )}
       {showResult && dataReady && barsMounted && (
         <Box sx={{ display: viewMode === 'bars' ? 'block' : 'none' }}>
-          <BarChartView options={options} voteCounts={voteCounts} />
+          <BarChartView options={coloredOptions} voteCounts={voteCounts} />
         </Box>
       )}
     </>

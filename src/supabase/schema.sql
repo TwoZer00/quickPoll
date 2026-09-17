@@ -14,7 +14,8 @@ create table options (
   id uuid primary key default gen_random_uuid(),
   poll_id uuid not null references polls on delete cascade,
   title text not null check (char_length(title) between 1 and 200),
-  image text
+  image text,
+  color text
 );
 
 -- Votes (one per user per poll)

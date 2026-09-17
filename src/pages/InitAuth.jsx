@@ -1,15 +1,17 @@
-import { Alert, Box, createTheme, CssBaseline, Dialog, DialogTitle, Divider, LinearProgress, Link as MuiLink, List, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
+import { Alert, Box, createTheme, CssBaseline, Dialog, DialogTitle, Divider, Link as MuiLink, List, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
 import { Link } from 'react-router-dom'
 import React, { Suspense, useEffect, useMemo, useState } from 'react'
 import { Outlet, useNavigate, useNavigation, useLocation, useParams } from 'react-router-dom'
 import Menu, { PollListItem } from '../components/Menu'
+import QuickPollLogo from '../components/QuickPollLogo'
 import { indigo } from '@mui/material/colors'
 import { PropTypes } from 'prop-types'
 import { useTranslation } from 'react-i18next'
-import { getLastPolls } from '../utils/storage'
+import { supabase } from '../supabase/init'
 import { ColorModeProvider } from '../hook/useColorMode'
 import useColorMode from '../hook/useColorMode'
 import useServiceStatus from '../hook/useServiceStatus'
+import { getLastPolls } from '../utils/storage'
 
 function buildTheme (mode) {
   const dark = mode === 'dark'
@@ -55,11 +57,6 @@ function buildTheme (mode) {
           root: { fontWeight: 500, borderRadius: 6 }
         }
       },
-      MuiLinearProgress: {
-        styleOverrides: {
-          root: { borderRadius: 0 }
-        }
-      }
     }
   }))
 }
@@ -91,8 +88,21 @@ function InitAuthInner () {
     }
   }, [message])
 
+  const isFirstLoad = !sessionStorage.getItem('app_loaded')
+  const [authReady, setAuthReady] = useState(!isFirstLoad)
   const navigation = useNavigation()
   const isLoading = navigation.state === 'loading'
+
+  useEffect(() => {
+    if (!isFirstLoad) return
+    Promise.all([
+      supabase.auth.getSession(),
+      new Promise(r => setTimeout(r, 4000))
+    ]).then(() => {
+      sessionStorage.setItem('app_loaded', '1')
+      setAuthReady(true)
+    })
+  }, [])
   const location = useLocation()
 
   useEffect(() => {
@@ -111,12 +121,16 @@ function InitAuthInner () {
           <Menu openModal={setOpenModal} />
           <StatusBanner />
           <a href='#main-content' style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden', zIndex: 9999 }} onFocus={(e) => { e.target.style.position = 'static'; e.target.style.width = 'auto'; e.target.style.height = 'auto' }} onBlur={(e) => { e.target.style.position = 'absolute'; e.target.style.left = '-9999px'; e.target.style.width = '1px'; e.target.style.height = '1px' }}>Skip to main content</a>
-          <LinearProgress sx={{ visibility: isLoading ? 'visible' : 'hidden' }} aria-hidden={!isLoading} />
-          <Suspense fallback={<Box flex={1} />}>
-            <Box id='main-content' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              <Outlet context={{ setMessage, setOpenModal }} />
-            </Box>
-          </Suspense>
+          {!authReady
+            ? <Box flex={1} display='flex' alignItems='center' justifyContent='center'><QuickPollLogo size='lg' loading /></Box>
+            : isLoading
+              ? <Box flex={1} display='flex' alignItems='center' justifyContent='center'><QuickPollLogo size='lg' spinner /></Box>
+              : <Suspense fallback={<Box flex={1} />}>
+                <Box id='main-content' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  <Outlet context={{ setMessage, setOpenModal }} />
+                </Box>
+                  </Suspense>
+          }
           <Box component='footer' sx={{ py: 1.5, px: 2, textAlign: 'center' }}>
             <Typography variant='caption' color='text.secondary'>
               {t('footer.madeBy')} <MuiLink color='inherit' fontWeight={600} target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</MuiLink>

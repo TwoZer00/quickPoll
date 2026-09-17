@@ -16,9 +16,10 @@ import ErrorBoundary from './components/ErrorBoundary'
 import { useParams } from 'react-router-dom'
 import { isPollClosed } from './utils/utils'
 import CError from './error/Error'
-import { Box, Paper, Skeleton, Stack } from '@mui/material'
+import { Box } from '@mui/material'
 import i18n from './i18n/index.js'
 import { track } from './utils/analytics'
+import QuickPollLogo from './components/QuickPollLogo'
 
 const SUPPORTED_LANGS = ['en', 'es']
 
@@ -29,26 +30,10 @@ function detectLang () {
   return SUPPORTED_LANGS.includes(browser) ? browser : 'en'
 }
 
-function LangRedirect () {
-  const { lang } = useParams()
-  if (SUPPORTED_LANGS.includes(lang)) return null
-  return <Navigate to={`/${detectLang()}`} replace />
-}
-
-function PollSkeleton () {
+function PollLoader () {
   return (
-    <Box sx={{ display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center', p: 2 }}>
-      <Box sx={{ width: '100%', maxWidth: 672 }}>
-        <Paper elevation={0} sx={{ overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
-          <Box p={2.5}>
-            <Stack gap={1.5}>
-              <Skeleton variant='text' height={40} width='60%' />
-              <Skeleton variant='text' height={20} width='30%' />
-              {[1, 2, 3].map(i => <Skeleton key={i} variant='rounded' height={48} />)}
-            </Stack>
-          </Box>
-        </Paper>
-      </Box>
+    <Box sx={{ display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <QuickPollLogo size='lg' loading />
     </Box>
   )
 }
@@ -56,6 +41,17 @@ function PollSkeleton () {
 function PollWrapper () {
   const { id } = useParams()
   return <Poll key={id} />
+}
+
+const pollLoader = async ({ params }) => {
+  try {
+    const [pollData, optionsData] = await Promise.all([getPoll(params.id), getOptions(params.id)])
+    const poll = { ...pollData, options: optionsData }
+    poll.closed = isPollClosed(poll.createdAt.seconds * 1000)
+    return poll
+  } catch (error) {
+    throw error instanceof CError ? error : CError.fromCode(17, error.message)
+  }
 }
 
 const router = createBrowserRouter([
@@ -72,17 +68,8 @@ const router = createBrowserRouter([
       {
         path: '',
         element: <EmbedPoll />,
-        hydrateFallbackElement: <PollSkeleton />,
-        loader: async ({ params }) => {
-          try {
-            const [pollData, optionsData] = await Promise.all([getPoll(params.id), getOptions(params.id)])
-            const poll = { ...pollData, options: optionsData }
-            poll.closed = isPollClosed(poll.createdAt.seconds * 1000)
-            return poll
-          } catch (error) {
-            throw error instanceof CError ? error : CError.fromCode(17, error.message)
-          }
-        }
+        hydrateFallbackElement: <PollLoader />,
+        loader: pollLoader
       }
     ]
   },
@@ -90,9 +77,7 @@ const router = createBrowserRouter([
     path: '/:lang',
     element: <InitAuth />,
     loader: ({ params }) => {
-      if (SUPPORTED_LANGS.includes(params.lang)) {
-        i18n.changeLanguage(params.lang)
-      }
+      if (SUPPORTED_LANGS.includes(params.lang)) i18n.changeLanguage(params.lang)
       return null
     },
     children: [
@@ -103,18 +88,9 @@ const router = createBrowserRouter([
       {
         path: 'poll/:id',
         element: <PollWrapper />,
-        hydrateFallbackElement: <PollSkeleton />,
+        hydrateFallbackElement: <PollLoader />,
         shouldRevalidate: ({ currentParams, nextParams }) => currentParams.id !== nextParams.id,
-        loader: async ({ params }) => {
-          try {
-            const [pollData, optionsData] = await Promise.all([getPoll(params.id), getOptions(params.id)])
-            const poll = { ...pollData, options: optionsData }
-            poll.closed = isPollClosed(poll.createdAt.seconds * 1000)
-            return poll
-          } catch (error) {
-            throw error instanceof CError ? error : CError.fromCode(17, error.message)
-          }
-        }
+        loader: pollLoader
       }
     ],
     errorElement: <Error />

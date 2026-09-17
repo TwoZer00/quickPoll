@@ -5,6 +5,7 @@ import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createPoll, requestStateEnum } from '../supabase/utils'
 import { uploadImage } from '../utils/cloudinary'
+import { getDominantColor } from '../utils/color'
 import useTitle from '../hook/useTitle'
 import PageWrapper from '../components/PageWrapper'
 import { POLL_DURATION_MINUTES } from '../const/Const'
@@ -46,9 +47,11 @@ export default function CreatePoll () {
     if (!file.type.startsWith('image/')) { setMessage({ message: t('create.errors.imageType'), severity: 'error' }); return }
     if (file.size > 5 * 1024 * 1024) { setMessage({ message: t('create.errors.imageSize'), severity: 'error' }); return }
     const preview = URL.createObjectURL(file)
-    setOptions(prev => prev.map(item =>
-      item.index === index ? { ...item, imageFile: file, imagePreview: preview } : item
-    ))
+    getDominantColor(file).then(color => {
+      setOptions(prev => prev.map(item =>
+        item.index === index ? { ...item, imageFile: file, imagePreview: preview, dominantColor: color } : item
+      ))
+    })
   }
 
   const handleRemoveImage = (index) => {
@@ -127,7 +130,8 @@ export default function CreatePoll () {
       )
       const optionsWithImages = optionsData.map((text, i) => ({
         title: text,
-        ...(imageUploads[i] && { image: imageUploads[i] })
+        ...(imageUploads[i] && { image: imageUploads[i] }),
+        ...(filledOptions[i]?.dominantColor && imageUploads[i] && { color: filledOptions[i].dominantColor })
       }))
 
       createPoll({ title, options: optionsWithImages }).then((id) => {
@@ -168,28 +172,17 @@ export default function CreatePoll () {
           <Box ref={optionsRef} display='flex' flexDirection='column' gap={2} sx={{ maxHeight: 500, pt: 1, overflowY: 'auto' }}>
             {options.map(item => (
               <Box key={item.index} display='flex' flexDirection='column' gap={0.75}>
-                {item.imagePreview
-                  ? (
-                    <Box position='relative' sx={{ width: '100%', height: 140, borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
-                      <Box component='img' src={item.imagePreview} sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      <Box
-                        onClick={() => handleRemoveImage(item.index)}
-                        sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', opacity: 0, cursor: 'pointer', transition: 'opacity .15s', '&:hover': { opacity: 1 } }}
-                      >
-                        <Close sx={{ fontSize: 20, color: '#fff' }} />
-                      </Box>
-                    </Box>
-                  )
-                  : (
+                {item.imagePreview && (
+                  <Box position='relative' sx={{ width: '100%', height: 140, borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
+                    <Box component='img' src={item.imagePreview} sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     <Box
-                      component='label'
-                      sx={{ width: '100%', height: 80, borderRadius: 2, border: '1px dashed', borderColor: 'divider', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.5, cursor: 'pointer', color: 'text.disabled', transition: 'border-color .15s, color .15s', '&:hover': { borderColor: 'primary.main', color: 'primary.main' } }}
+                      onClick={() => handleRemoveImage(item.index)}
+                      sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', opacity: 0, cursor: 'pointer', transition: 'opacity .15s', '&:hover': { opacity: 1 } }}
                     >
-                      <AddPhotoAlternate fontSize='small' />
-                      <Typography variant='caption'>{t('create.addImage')}</Typography>
-                      <input type='file' hidden accept='image/*' onChange={(e) => handleImageChange(e, item.index)} />
+                      <Close sx={{ fontSize: 20, color: '#fff' }} />
                     </Box>
-                  )}
+                  </Box>
+                )}
                 <TextField
                   fullWidth size='small'
                   error={!!item.error}
@@ -198,15 +191,23 @@ export default function CreatePoll () {
                   variant='outlined' label={t('create.optionLabel', { n: item.index + 1 })} autoComplete='off'
                   name={`option ${item.index}`} value={item.value || ''}
                   inputProps={{ maxLength: 200 }}
-                  InputProps={options.length > 2 ? {
-                    endAdornment: (
+                  InputProps={{
+                    startAdornment: !item.imagePreview ? (
+                      <InputAdornment position='start'>
+                        <IconButton component='label' edge='start' size='small' sx={{ color: 'text.disabled' }}>
+                          <AddPhotoAlternate fontSize='small' />
+                          <input type='file' hidden accept='image/*' onChange={(e) => handleImageChange(e, item.index)} />
+                        </IconButton>
+                      </InputAdornment>
+                    ) : undefined,
+                    endAdornment: options.length > 2 ? (
                       <InputAdornment position='end'>
                         <IconButton edge='end' aria-label={t('create.optionLabel', { n: item.index + 1 })} onClick={() => handleRemove(item.index)} sx={{ minWidth: 48, minHeight: 48 }}>
                           <Remove fontSize='small' />
                         </IconButton>
                       </InputAdornment>
-                    )
-                  } : undefined}
+                    ) : undefined
+                  }}
                 />
               </Box>
             ))}

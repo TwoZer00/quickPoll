@@ -1,5 +1,6 @@
 import { AppBar, Box, Button, Collapse, Divider, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Menu as MuiMenu, MenuItem, Toolbar, Typography } from '@mui/material'
-import { Add, Close, DarkMode, ExpandLess, ExpandMore, History, Home as HomeIcon, Language, LightMode, Menu as MenuIcon, PollOutlined } from '@mui/icons-material'
+import { Add, Close, DarkMode, ExpandLess, ExpandMore, History, Home as HomeIcon, Language, LightMode, Menu as MenuIcon } from '@mui/icons-material'
+import QuickPollLogo from './QuickPollLogo'
 import US from 'country-flag-icons/react/3x2/US'
 import MX from 'country-flag-icons/react/3x2/MX'
 import { useState, useMemo } from 'react'
@@ -40,11 +41,8 @@ export default function Menu ({ openModal }) {
     <>
       <AppBar position='sticky' elevation={0} sx={{ bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', color: 'text.primary' }}>
         <Toolbar sx={{ gap: 1, minHeight: { xs: 56, sm: 52 }, px: { xs: 2, sm: 3 } }}>
-          <Box component={Link} to={`/${lang}`} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, textDecoration: 'none', color: 'text.primary', flexGrow: 1 }}>
-            <PollOutlined sx={{ color: 'primary.main', fontSize: 20 }} />
-            <Typography variant='subtitle1' fontWeight={600} letterSpacing={-0.3} color='text.primary'>
-              QuickPoll
-            </Typography>
+          <Box component={Link} to={`/${lang}`} sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexGrow: 1 }}>
+            <QuickPollLogo />
           </Box>
           <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1, alignItems: 'center' }}>
             {hasLastPolls && (
@@ -87,9 +85,8 @@ export default function Menu ({ openModal }) {
       </AppBar>
       <Drawer anchor='right' open={drawerOpen} onClose={() => setDrawerOpen(false)} keepMounted PaperProps={{ sx: { minWidth: 280, maxWidth: '80vw' } }}>
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 56, px: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <PollOutlined sx={{ color: 'primary.main', fontSize: 18 }} />
-            <Typography variant='subtitle1' fontWeight={600} color='text.primary'>QuickPoll</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <QuickPollLogo size='sm' />
           </Box>
           <IconButton aria-label='Close menu' onClick={() => setDrawerOpen(false)} sx={{ minWidth: 48, minHeight: 48 }}>
             <Close />

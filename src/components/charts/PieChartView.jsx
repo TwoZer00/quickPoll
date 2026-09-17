@@ -2,7 +2,6 @@ import { memo, useEffect, useMemo, useState } from 'react'
 import { useSpring, animated } from '@react-spring/web'
 import { PropTypes } from 'prop-types'
 import { useTranslation } from 'react-i18next'
-import { generateColorBySeed } from '../../utils/color'
 
 const DEFAULT_SIZE = 220
 
@@ -37,7 +36,7 @@ const toData = (options, counts) => {
   if (total === 0) return []
   let offset = 0
   return options
-    .map(opt => ({ id: opt.id, title: opt.title, image: opt.image, value: counts[opt.id] || 0, color: generateColorBySeed(opt.id) }))
+    .map(opt => ({ id: opt.id, title: opt.title, image: opt.image, value: counts[opt.id] || 0, color: opt.color }))
     .filter(d => d.value > 0)
     .map(d => {
       const fraction = d.value / total

@@ -79,7 +79,7 @@ export default function Poll () {
           </Box>
           <PageWrapper maxWidth='md' sx={{ p: 0 }}>
             <Box component='form' onSubmit={handleSubmit} width='100%'>
-              <Box component={Paper} width='100%' variant='outlined' elevation={0} sx={{ overflow: 'hidden' }}>
+              <Box component={Paper} width='100%' variant='outlined' elevation={0}>
               <Box component='main' p={2.5} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                 <ShareMenu setMessage={setMessage} poll={data} options={options} voteCounts={voteCounts} />
                 {

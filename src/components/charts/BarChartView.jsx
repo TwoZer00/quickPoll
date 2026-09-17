@@ -1,7 +1,6 @@
 import { memo } from 'react'
 import { useSpring, animated } from '@react-spring/web'
 import { PropTypes } from 'prop-types'
-import { generateColorBySeed } from '../../utils/color'
 import { alpha } from '@mui/material'
 
 function Bar ({ option, value, total, color, hasImages }) {
@@ -47,7 +46,7 @@ const BarChartView = memo(({ options, voteCounts }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: hasImages ? 20 : 14, padding: '4px 0' }}>
       {sorted.map(opt => (
-        <Bar key={opt.id} option={opt} value={voteCounts[opt.id] || 0} total={total} color={generateColorBySeed(opt.id)} hasImages={hasImages} />
+        <Bar key={opt.id} option={opt} value={voteCounts[opt.id] || 0} total={total} color={opt.color} hasImages={hasImages} />
       ))}
     </div>
   )

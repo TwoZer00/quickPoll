@@ -7,7 +7,9 @@ const CreatePoll = React.lazy(() => import('./pages/CreatePoll'))
 const Poll = React.lazy(() => import('./pages/Poll'))
 const Terms = React.lazy(() => import('./pages/Terms'))
 const Privacy = React.lazy(() => import('./pages/Privacy'))
+const EmbedPoll = React.lazy(() => import('./pages/EmbedPoll'))
 import InitAuth from './pages/InitAuth'
+import EmbedLayout from './pages/EmbedLayout'
 import { getOptions, getPoll } from './supabase/utils'
 import Error from './pages/Error'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -60,6 +62,28 @@ const router = createBrowserRouter([
     path: '/',
     element: <Navigate to={`/${detectLang()}`} replace />,
     errorElement: <Error />
+  },
+  {
+    path: '/embed/:id',
+    element: <EmbedLayout />,
+    errorElement: <Error />,
+    children: [
+      {
+        path: '',
+        element: <EmbedPoll />,
+        hydrateFallbackElement: <PollSkeleton />,
+        loader: async ({ params }) => {
+          try {
+            const [pollData, optionsData] = await Promise.all([getPoll(params.id), getOptions(params.id)])
+            const poll = { ...pollData, options: optionsData }
+            poll.closed = isPollClosed(poll.createdAt.seconds * 1000)
+            return poll
+          } catch (error) {
+            throw error instanceof CError ? error : CError.fromCode(17, error.message)
+          }
+        }
+      }
+    ]
   },
   {
     path: '/:lang',

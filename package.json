@@ -20,6 +20,7 @@
     "@mui/material": "^5.15.19",
     "@react-spring/web": "^9.7.4",
     "@supabase/supabase-js": "^2.116.0",
+    "country-flag-icons": "^1.6.20",
     "d3-shape": "^3.2.0",
     "dayjs": "^1.11.13",
     "i18next": "^26.4.2",

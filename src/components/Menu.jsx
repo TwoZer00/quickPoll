@@ -1,5 +1,7 @@
 import { AppBar, Box, Button, Collapse, Divider, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Menu as MuiMenu, MenuItem, Toolbar, Typography } from '@mui/material'
 import { Add, Close, DarkMode, ExpandLess, ExpandMore, History, Home as HomeIcon, Language, LightMode, Menu as MenuIcon, PollOutlined } from '@mui/icons-material'
+import US from 'country-flag-icons/react/3x2/US'
+import MX from 'country-flag-icons/react/3x2/MX'
 import { useState, useMemo } from 'react'
 import { Link, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { PropTypes } from 'prop-types'
@@ -9,9 +11,11 @@ import { getLastPolls } from '../utils/storage'
 import useColorMode from '../hook/useColorMode'
 
 const LANGUAGES = [
-  { code: 'en', label: 'English', flag: '🇺🇸' },
-  { code: 'es', label: 'Español', flag: '🇲🇽' }
+  { code: 'en', label: 'English', Flag: US },
+  { code: 'es', label: 'Español', Flag: MX }
 ]
+
+const flagSx = { width: 20, height: 'auto', borderRadius: '2px', flexShrink: 0 }
 
 export default function Menu ({ openModal }) {
   const { t, i18n } = useTranslation()
@@ -61,13 +65,13 @@ export default function Menu ({ openModal }) {
               </Button>
             )}
             <Button size='small' onClick={(e) => setLangAnchor(e.currentTarget)} endIcon={<ExpandMore fontSize='small' />} sx={{ color: 'text.secondary', fontWeight: 500, gap: 0.5 }}>
-              <Typography variant='body2'>{currentLang.flag}</Typography>
-              <Typography variant='body2'>{currentLang.code.toUpperCase()}</Typography>
+              <currentLang.Flag style={flagSx} />
+              {currentLang.code.toUpperCase()}
             </Button>
             <MuiMenu anchorEl={langAnchor} open={Boolean(langAnchor)} onClose={() => setLangAnchor(null)} slotProps={{ paper: { sx: { borderRadius: 3, minWidth: 140 } } }}>
               {LANGUAGES.map(l => (
                 <MenuItem key={l.code} onClick={() => changeLang(l.code)} selected={currentLang.code === l.code} sx={{ borderRadius: 2, mx: 0.5, gap: 1 }}>
-                  <Typography variant='body2'>{l.flag}</Typography>
+                  <l.Flag style={flagSx} />
                   <Typography variant='body2'>{l.label}</Typography>
                 </MenuItem>
               ))}
@@ -111,7 +115,7 @@ export default function Menu ({ openModal }) {
           {LANGUAGES.map(l => (
             <ListItemButton key={l.code} onClick={() => { changeLang(l.code); setDrawerOpen(false) }} selected={currentLang.code === l.code} sx={{ borderRadius: 2, minHeight: 52, '&:active': { bgcolor: 'action.selected' } }}>
               <ListItemIcon sx={{ minWidth: 40 }}><Language /></ListItemIcon>
-              <ListItemText primary={<Box sx={{ display: 'flex', gap: 1 }}><Typography variant='body2'>{l.flag}</Typography><Typography variant='body2'>{l.label}</Typography></Box>} />
+              <ListItemText primary={<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><l.Flag style={flagSx} /><Typography variant='body2'>{l.label}</Typography></Box>} />
             </ListItemButton>
           ))}
           {hasLastPolls && (

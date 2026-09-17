@@ -130,7 +130,7 @@ export default function CreatePoll () {
       )
       const optionsWithImages = optionsData.map((text, i) => ({
         title: text,
-        ...(imageUploads[i] && { image: imageUploads[i] }),
+        ...(imageUploads[i] && { image: imageUploads[i].url, image_public_id: imageUploads[i].public_id }),
         ...(filledOptions[i]?.dominantColor && imageUploads[i] && { color: filledOptions[i].dominantColor })
       }))
 

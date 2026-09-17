@@ -99,7 +99,7 @@ export function useVoteCounts (pollId, options) {
   return { voteCounts, applyOptimistic, revertOptimistic }
 }
 
-const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
+const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableUrlSync = false }) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const paramView = searchParams.get('resultsOnly')?.toLowerCase()
   const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : poll.closed ? 'bars' : 'vote')
@@ -132,10 +132,12 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
   const handleViewChange = (_, v) => {
     if (!v) return
     setViewMode(v)
-    setSearchParams(prev => {
-      if (v === 'vote') { prev.delete('resultsOnly') } else { prev.set('resultsOnly', v) }
-      return prev
-    }, { replace: true })
+    if (!disableUrlSync) {
+      setSearchParams(prev => {
+        if (v === 'vote') { prev.delete('resultsOnly') } else { prev.set('resultsOnly', v) }
+        return prev
+      }, { replace: true })
+    }
   }
 
   return (

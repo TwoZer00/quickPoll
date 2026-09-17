@@ -1,0 +1,2 @@
+[functions.cleanup-images]
+schedule = "0 3 * * *"

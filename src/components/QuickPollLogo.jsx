@@ -94,7 +94,7 @@ export default function QuickPollLogo ({ size = 'md', loading = false, spinner =
   })
 
   const { clipW } = useSpring({
-    clipW: isHiding ? 0 : isLoader ? barsCenterLeft - fontSize * 0.15 : textPx,
+    clipW: isHiding ? 0 : isLoader ? barsCenterLeft - fontSize * 0.5 : textPx,
     config: { tension: 100, friction: 22 },
     immediate: !isLoader && !isHiding
   })

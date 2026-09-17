@@ -113,34 +113,37 @@ function InitAuthInner () {
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box sx={{
-          display: 'flex', flexDirection: 'column', flex: 'none',
-          width: '100dvw', maxWidth: '100dvw', height: '100dvh', maxHeight: '100dvh',
-          bgcolor: 'background.default'
-        }}>
-          <Menu openModal={setOpenModal} />
-          <StatusBanner />
-          <a href='#main-content' style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden', zIndex: 9999 }} onFocus={(e) => { e.target.style.position = 'static'; e.target.style.width = 'auto'; e.target.style.height = 'auto' }} onBlur={(e) => { e.target.style.position = 'absolute'; e.target.style.left = '-9999px'; e.target.style.width = '1px'; e.target.style.height = '1px' }}>Skip to main content</a>
-          {!authReady
-            ? <Box flex={1} display='flex' alignItems='center' justifyContent='center'><QuickPollLogo size='lg' loading /></Box>
-            : isLoading
-              ? <Box flex={1} display='flex' alignItems='center' justifyContent='center'><QuickPollLogo size='lg' spinner /></Box>
-              : <Suspense fallback={<Box flex={1} />}>
-                <Box id='main-content' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <Outlet context={{ setMessage, setOpenModal }} />
-                </Box>
+        {!authReady
+          ? <Box sx={{ display: 'flex', width: '100dvw', height: '100dvh', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default' }}>
+              <QuickPollLogo size='lg' loading />
+            </Box>
+          : <Box sx={{
+              display: 'flex', flexDirection: 'column', flex: 'none',
+              width: '100dvw', maxWidth: '100dvw', height: '100dvh', maxHeight: '100dvh',
+              bgcolor: 'background.default', overflow: 'hidden'
+            }}>
+              <Menu openModal={setOpenModal} />
+              <StatusBanner />
+              <a href='#main-content' style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden', zIndex: 9999 }} onFocus={(e) => { e.target.style.position = 'static'; e.target.style.width = 'auto'; e.target.style.height = 'auto' }} onBlur={(e) => { e.target.style.position = 'absolute'; e.target.style.left = '-9999px'; e.target.style.width = '1px'; e.target.style.height = '1px' }}>Skip to main content</a>
+              {isLoading
+                ? <Box flex={1} display='flex' alignItems='center' justifyContent='center'><QuickPollLogo size='lg' spinner /></Box>
+                : <Suspense fallback={<Box flex={1} />}>
+                    <Box id='main-content' sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'auto' }}>
+                      <Outlet context={{ setMessage, setOpenModal }} />
+                    </Box>
                   </Suspense>
-          }
-          <Box component='footer' sx={{ py: 1.5, px: 2, textAlign: 'center' }}>
-            <Typography variant='caption' color='text.secondary'>
-              {t('footer.madeBy')} <MuiLink color='inherit' fontWeight={600} target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</MuiLink>
-              {' · '}
-              <MuiLink component={Link} to={`/${lang}/privacy`} color='inherit' underline='hover'>{t('privacy.pageTitle')}</MuiLink>
-              {' · '}
-              <MuiLink component={Link} to={`/${lang}/terms`} color='inherit' underline='hover'>{t('terms.pageTitle')}</MuiLink>
-            </Typography>
-          </Box>
-        </Box>
+              }
+              <Box component='footer' sx={{ py: 1.5, px: 2, textAlign: 'center' }}>
+                <Typography variant='caption' color='text.secondary'>
+                  {t('footer.madeBy')} <MuiLink color='inherit' fontWeight={600} target='_blank' rel='noreferrer' href='https://twozer00.dev'>twozer00</MuiLink>
+                  {' · '}
+                  <MuiLink component={Link} to={`/${lang}/privacy`} color='inherit' underline='hover'>{t('privacy.pageTitle')}</MuiLink>
+                  {' · '}
+                  <MuiLink component={Link} to={`/${lang}/terms`} color='inherit' underline='hover'>{t('terms.pageTitle')}</MuiLink>
+                </Typography>
+              </Box>
+            </Box>
+        }
         <LastPollsListModal open={openModal} onClose={() => setOpenModal(false)} />
         <Snackbar
           open={open}

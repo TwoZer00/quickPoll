@@ -15,6 +15,7 @@ create table options (
   poll_id uuid not null references polls on delete cascade,
   title text not null check (char_length(title) between 1 and 200),
   image text,
+  image_public_id text,
   color text
 );
 
@@ -58,6 +59,21 @@ create policy "votes: auth update own" on votes for update using (
   )
 );
 create policy "votes: auth delete own" on votes for delete using (auth.uid() = user_id);
+
+-- Max 10 polls per user
+create or replace function check_polls_limit()
+returns trigger language plpgsql as $$
+begin
+  if (select count(*) from polls where author_id = NEW.author_id) >= 10 then
+    raise exception 'Poll limit reached';
+  end if;
+  return NEW;
+end;
+$$;
+
+create trigger enforce_polls_limit
+before insert on polls
+for each row execute function check_polls_limit();
 
 -- Max 20 options per poll
 create or replace function check_options_limit()

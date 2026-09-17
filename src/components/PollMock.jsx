@@ -81,6 +81,7 @@ export default function PollMock () {
           id={POLL_ID}
           setResults={() => {}}
           voteCounts={voteCounts}
+          disableUrlSync
         />
         <Button variant='contained' color='primary' size='large' sx={{ alignSelf: 'end', px: 4 }} disabled={!option || option === voted} onClick={handleVote}>
           {t('poll.vote')}

@@ -26,7 +26,7 @@ async function createPoll({ title, options }) {
 
   const { error: optError } = await supabase
     .from('options')
-    .insert(unique.map(o => ({ poll_id: poll.id, title: o.title, image: o.image || null, color: o.color || null })))
+    .insert(unique.map(o => ({ poll_id: poll.id, title: o.title, image: o.image || null, image_public_id: o.image_public_id || null, color: o.color || null })))
   if (optError) throw CError.fromError(optError)
 
   const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')

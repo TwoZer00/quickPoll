@@ -4,8 +4,9 @@ import { PropTypes } from 'prop-types'
 import { generateColorBySeed } from '../../utils/color'
 import { alpha } from '@mui/material'
 
-function Bar ({ option, value, total, color }) {
+function Bar ({ option, value, total, color, hasImages }) {
   const pct = total > 0 ? (value / total) * 100 : 0
+  const barHeight = hasImages ? 14 : 8
 
   const spring = useSpring({
     width: `${pct}%`,
@@ -31,7 +32,7 @@ function Bar ({ option, value, total, color }) {
           {total > 0 && ` · ${Math.round(pct)}%`}
         </span>
       </div>
-      <div style={{ height: 8, borderRadius: 4, backgroundColor: alpha(color, 0.12), overflow: 'hidden' }}>
+      <div style={{ height: barHeight, borderRadius: 4, backgroundColor: alpha(color, 0.12), overflow: 'hidden' }}>
         <animated.div style={{ height: '100%', borderRadius: 4, backgroundColor: color, width: spring.width }} />
       </div>
     </div>
@@ -46,7 +47,7 @@ const BarChartView = memo(({ options, voteCounts }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: hasImages ? 20 : 14, padding: '4px 0' }}>
       {sorted.map(opt => (
-        <Bar key={opt.id} option={opt} value={voteCounts[opt.id] || 0} total={total} color={generateColorBySeed(opt.id)} />
+        <Bar key={opt.id} option={opt} value={voteCounts[opt.id] || 0} total={total} color={generateColorBySeed(opt.id)} hasImages={hasImages} />
       ))}
     </div>
   )

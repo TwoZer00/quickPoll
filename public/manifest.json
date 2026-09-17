@@ -4,19 +4,32 @@
   "description": "Create quick polls, share them and see results in real time.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fafafa",
-  "theme_color": "#ffa000",
-  "icons": [
+  "background_color": "#f5f5f5",
+  "theme_color": "#3949ab",
+  "scope": "/",
+  "orientation": "portrait",
+  "screenshots": [
     {
-      "src": "/quickpoll.webp",
-      "sizes": "192x192",
-      "type": "image/webp"
+      "src": "/screenshots/screenshot-create.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Create a poll"
     },
     {
-      "src": "/quickpoll.webp",
-      "sizes": "512x512",
-      "type": "image/webp",
-      "purpose": "any maskable"
+      "src": "/screenshots/screenshot-results.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Live poll results"
     }
+  ],
+  "icons": [
+    { "src": "/icons/icon-192-light.png", "sizes": "192x192", "type": "image/png", "purpose": "any", "color_scheme": "light" },
+    { "src": "/icons/icon-512-light.png", "sizes": "512x512", "type": "image/png", "purpose": "any", "color_scheme": "light" },
+    { "src": "/icons/icon-512-maskable-light.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable", "color_scheme": "light" },
+    { "src": "/icons/icon-192-dark.png", "sizes": "192x192", "type": "image/png", "purpose": "any", "color_scheme": "dark" },
+    { "src": "/icons/icon-512-dark.png", "sizes": "512x512", "type": "image/png", "purpose": "any", "color_scheme": "dark" },
+    { "src": "/icons/icon-512-maskable-dark.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable", "color_scheme": "dark" }
   ]
 }

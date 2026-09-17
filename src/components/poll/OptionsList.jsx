@@ -104,10 +104,11 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableU
   const [searchParams, setSearchParams] = useSearchParams()
   const { t } = useTranslation()
   const paramView = searchParams.get('resultsOnly')?.toLowerCase()
+  const preview = import.meta.env.DEV && searchParams.get('preview') === '1'
   const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : initialView ?? (poll.closed ? 'bars' : 'vote'))
   const total = useMemo(() => Object.values(voteCounts).reduce((a, b) => a + b, 0), [voteCounts])
   const coloredOptions = useMemo(() => assignColors(options), [options])
-  const showResult = forceShowResult || coloredOptions.some(option => option.voted) || poll.closed
+  const showResult = preview || forceShowResult || coloredOptions.some(option => option.voted) || poll.closed
   const dataReady = Object.keys(voteCounts).length === coloredOptions.length
   const hasImages = coloredOptions.some(opt => opt.image)
   const cols = options.length <= 2 ? 2 : options.length === 3 ? 3 : options.length <= 6 ? 3 : 4
@@ -156,7 +157,7 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableU
             {!poll.closed && (
               <Tooltip
                 title={!isVoted ? t('mock.voteTooltip') : ''}
-                open={!isVoted}
+                open={!isVoted && forceShowResult}
                 placement='top'
                 arrow
                 slotProps={{

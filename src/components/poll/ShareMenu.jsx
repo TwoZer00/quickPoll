@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Box, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material'
-import { DonutLarge, Share, ContentCopy, Download } from '@mui/icons-material'
+import { DonutLarge, BarChart as BarChartIcon, Share, ContentCopy, Download } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { exportCSV } from '../../utils/export'
@@ -19,6 +19,7 @@ const WhatsAppIcon = () => (
 
 const COPY_OPTIONS = [
   { labelKey: 'share.copyLink', param: null, icon: <ContentCopy fontSize='small' /> },
+  { labelKey: 'share.copyBars', param: 'bars', icon: <BarChartIcon fontSize='small' /> },
   { labelKey: 'share.copyPie', param: 'pie', icon: <DonutLarge fontSize='small' /> }
 ]
 

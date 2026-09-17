@@ -50,6 +50,7 @@ export default {
   },
   share: {
     copyLink: 'Copy poll link',
+    copyBars: 'Copy as bar chart',
     copyPie: 'Copy as pie chart',
     shareX: 'Share on X',
     shareWhatsApp: 'Share on WhatsApp',

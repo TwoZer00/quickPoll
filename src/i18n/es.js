@@ -50,6 +50,7 @@ export default {
   },
   share: {
     copyLink: 'Copiar enlace',
+    copyBars: 'Copiar como gráfico de barras',
     copyPie: 'Copiar como gráfico circular',
     shareX: 'Compartir en X',
     shareWhatsApp: 'Compartir en WhatsApp',

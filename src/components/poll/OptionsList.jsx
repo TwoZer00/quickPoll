@@ -1,13 +1,14 @@
 import { useMemo, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Box, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material'
-import { BallotOutlined, DonutLarge } from '@mui/icons-material'
+import { BallotOutlined, DonutLarge, BarChart as BarChartIcon } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { supabase } from '../../supabase/init'
 import Option from './Option'
 import PieChartView from '../charts/PieChartView'
+import BarChartView from '../charts/BarChartView'
 
-const VALID_VIEWS = ['vote', 'pie']
+const VALID_VIEWS = ['vote', 'bars', 'pie']
 const DEBOUNCE_MS = 300
 
 export function useVoteCounts (pollId, options) {
@@ -100,7 +101,7 @@ export function useVoteCounts (pollId, options) {
 const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const paramView = searchParams.get('resultsOnly')?.toLowerCase()
-  const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : poll.closed ? 'pie' : 'vote')
+  const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : poll.closed ? 'bars' : 'vote')
   const total = useMemo(() => Object.values(voteCounts).reduce((a, b) => a + b, 0), [voteCounts])
   const showResult = options.some(option => option.voted) || poll.closed
   const dataReady = Object.keys(voteCounts).length === options.length
@@ -108,10 +109,19 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
   const cols = Math.min(options.length, 4)
 
   const [pieMounted, setPieMounted] = useState(false)
+  const [barsMounted, setBarsMounted] = useState(false)
 
   useEffect(() => {
     if (viewMode === 'pie' && !pieMounted) {
       const raf = requestAnimationFrame(() => setPieMounted(true))
+      return () => cancelAnimationFrame(raf)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode])
+
+  useEffect(() => {
+    if (viewMode === 'bars' && !barsMounted) {
+      const raf = requestAnimationFrame(() => setBarsMounted(true))
       return () => cancelAnimationFrame(raf)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,6 +146,7 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
             aria-label='Results view'
           >
             {!poll.closed && <ToggleButton value='vote' aria-label='Vote view'><BallotOutlined fontSize='small' /></ToggleButton>}
+            <ToggleButton value='bars' aria-label='Bar chart'><BarChartIcon fontSize='small' /></ToggleButton>
             <ToggleButton value='pie' aria-label='Pie chart'><DonutLarge fontSize='small' /></ToggleButton>
           </ToggleButtonGroup>
         </Stack>
@@ -153,6 +164,11 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts }) => {
       {showResult && dataReady && pieMounted && (
         <Box sx={{ display: viewMode === 'pie' ? 'block' : 'none' }}>
           <PieChartView options={options} voteCounts={voteCounts} />
+        </Box>
+      )}
+      {showResult && dataReady && barsMounted && (
+        <Box sx={{ display: viewMode === 'bars' ? 'block' : 'none' }}>
+          <BarChartView options={options} voteCounts={voteCounts} />
         </Box>
       )}
     </>

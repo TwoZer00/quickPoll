@@ -1,4 +1,4 @@
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { Add, Launch, Remove, AddPhotoAlternate, Close } from '@mui/icons-material'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, InputAdornment, LinearProgress, Paper, TextField, Typography, Avatar } from '@mui/material'
 import { useRef, useState } from 'react'
@@ -15,6 +15,7 @@ export default function CreatePoll () {
   const idPoll = useRef()
   const [titleError, setTitleError] = useState('')
   const { setMessage } = useOutletContext()
+  const { lang } = useParams()
   const [requestState, setRequestState] = useState(requestStateEnum.none)
   const [showSuccess, setShowSuccess] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -248,7 +249,7 @@ export default function CreatePoll () {
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setShowSuccess(false)}>{t('create.close')}</Button>
-          <Button variant='contained' startIcon={<Launch />} onClick={() => navigate(`/poll/${idPoll.current}`)}>
+          <Button variant='contained' startIcon={<Launch />} onClick={() => navigate(`/${lang}/poll/${idPoll.current}`)}>
             {t('create.viewPoll')}
           </Button>
         </DialogActions>

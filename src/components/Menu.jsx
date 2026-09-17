@@ -128,6 +128,7 @@ export default function Menu ({ openModal }) {
 
 function DrawerLastPolls ({ onNavigate }) {
   const { t } = useTranslation()
+  const { lang } = useParams()
   const [expanded, setExpanded] = useState(false)
   const navigate = useNavigate()
   const polls = getLastPolls()
@@ -142,7 +143,7 @@ function DrawerLastPolls ({ onNavigate }) {
       <Collapse in={expanded}>
         <List disablePadding>
           {polls.map(poll => (
-            <PollListItem key={poll.id} poll={poll} onClick={() => { navigate(`/poll/${poll.id}`); onNavigate() }} sx={{ pl: 3 }} />
+            <PollListItem key={poll.id} poll={poll} onClick={() => { navigate(`/${lang}/poll/${poll.id}`); onNavigate() }} sx={{ pl: 3 }} />
           ))}
         </List>
       </Collapse>

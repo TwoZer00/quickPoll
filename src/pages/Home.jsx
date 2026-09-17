@@ -1,5 +1,5 @@
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Add, BoltRounded, ShareRounded, BarChartRounded } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import useTitle from '../hook/useTitle'
@@ -8,6 +8,7 @@ import PollMock from '../components/PollMock'
 
 export default function Home () {
   const { t } = useTranslation()
+  const { lang } = useParams()
   useTitle({ title: 'Quick and easy polls', description: 'Create quick polls, share them and see results in real time.' })
 
   const features = [
@@ -31,7 +32,7 @@ export default function Home () {
           <Box>
             <Button
               variant='contained' size='large' startIcon={<Add />}
-              component={Link} to='/create'
+              component={Link} to={`/${lang}/create`}
               sx={{ px: 3, py: 1 }}
             >
               {t('home.createBtn')}

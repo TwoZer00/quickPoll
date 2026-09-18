@@ -5,17 +5,21 @@ import { alpha, IconButton, Tooltip } from '@mui/material'
 import { SortByAlpha } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
-function Bar ({ option, value, total, color, hasImages }) {
+function Bar ({ option, value, total, color, hasImages, entryDelay, didAnimate }) {
   const pct = total > 0 ? (value / total) * 100 : 0
   const barHeight = hasImages ? 14 : 8
 
   const spring = useSpring({
     width: `${pct}%`,
+    from: { width: didAnimate ? `${pct}%` : '0%' },
+    delay: didAnimate ? 0 : entryDelay + 100,
     config: { tension: 120, friction: 20 }
   })
 
   const countSpring = useSpring({
     val: value,
+    from: { val: didAnimate ? value : 0 },
+    delay: didAnimate ? 0 : entryDelay + 100,
     config: { tension: 120, friction: 20 }
   })
 
@@ -43,6 +47,7 @@ function Bar ({ option, value, total, color, hasImages }) {
 const BarChartView = memo(({ options, voteCounts }) => {
   const { t } = useTranslation()
   const [asc, setAsc] = useState(false)
+  const [didAnimate, setDidAnimate] = useState(false)
   const total = Object.values(voteCounts).reduce((a, b) => a + b, 0)
   const sorted = [...options].sort((a, b) => asc
     ? (voteCounts[a.id] || 0) - (voteCounts[b.id] || 0)
@@ -57,10 +62,11 @@ const BarChartView = memo(({ options, voteCounts }) => {
 
   const transitions = useTransition(sorted, {
     keys: opt => opt.id,
-    from: { opacity: 0 },
-    enter: (_, i) => ({ opacity: 1, y: i * rowHeight }),
-    update: (_, i) => ({ y: i * rowHeight }),
-    config: { tension: 200, friction: 26 }
+    from: (_, i) => ({ opacity: 0, x: 16, y: i * rowHeight }),
+    enter: (_, i) => ({ opacity: 1, x: 0, y: i * rowHeight, delay: didAnimate ? 0 : i * 60 }),
+    update: (_, i) => ({ y: i * rowHeight, x: 0, opacity: 1 }),
+    config: { tension: 200, friction: 26 },
+    onRest: () => setDidAnimate(true)
   })
 
   return (
@@ -73,9 +79,9 @@ const BarChartView = memo(({ options, voteCounts }) => {
         </Tooltip>
       </div>
       <div style={{ position: 'relative', height: containerHeight }}>
-        {transitions((style, opt) => (
+        {transitions((style, opt, _, i) => (
           <animated.div key={opt.id} style={{ position: 'absolute', width: '100%', ...style }}>
-            <Bar option={opt} value={voteCounts[opt.id] || 0} total={total} color={opt.color} hasImages={hasImages} />
+            <Bar option={opt} value={voteCounts[opt.id] || 0} total={total} color={opt.color} hasImages={hasImages} entryDelay={i * 60} didAnimate={didAnimate} />
           </animated.div>
         ))}
       </div>

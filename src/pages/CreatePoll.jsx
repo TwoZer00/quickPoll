@@ -1,6 +1,6 @@
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { Add, Launch, Remove, AddPhotoAlternate, Close } from '@mui/icons-material'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, InputAdornment, LinearProgress, Paper, TextField, Typography } from '@mui/material'
+import { Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel, IconButton, InputAdornment, LinearProgress, Link, Paper, TextField, Typography } from '@mui/material'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createPoll, requestStateEnum } from '../supabase/utils'
@@ -22,6 +22,7 @@ export default function CreatePoll () {
   const [showSuccess, setShowSuccess] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [pendingData, setPendingData] = useState(null)
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const navigate = useNavigate()
   useTitle({ title: t('create.pageTitle'), description: t('create.subtitle') })
 
@@ -119,6 +120,7 @@ export default function CreatePoll () {
   const handleConfirm = async () => {
     const { title, optionsData } = pendingData
     setShowConfirm(false)
+    setTermsAccepted(false)
     try {
       setRequestState(requestStateEnum.pending)
 
@@ -152,9 +154,9 @@ export default function CreatePoll () {
 
   return (
     <PageWrapper>
-      <Paper elevation={0} variant='outlined' sx={{ width: '100%', overflow: 'hidden' }}>
+      <Paper elevation={0} variant='outlined' sx={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <LinearProgress variant='indeterminate' sx={{ visibility: requestState === requestStateEnum.pending ? 'visible' : 'hidden' }} />
-        <Box component='form' display='flex' flexDirection='column' gap={2.5} p={3} onSubmit={handleSubmit}>
+        <Box component='form' display='flex' flexDirection='column' gap={2.5} p={3} onSubmit={handleSubmit} sx={{ overflow: 'hidden', flex: 1 }}>
           <Box>
             <Typography variant='h5' fontWeight={700}>{t('create.title')}</Typography>
             <Typography variant='body2' color='text.secondary'>{t('create.subtitle')}</Typography>
@@ -169,7 +171,14 @@ export default function CreatePoll () {
 
           <Divider />
 
-          <Box ref={optionsRef} display='flex' flexDirection='column' gap={2} sx={{ maxHeight: 500, pt: 1, overflowY: 'auto' }}>
+          <Box ref={optionsRef} display='flex' flexDirection='column' gap={2} sx={{
+            flex: 1, minHeight: 0, pt: 1, overflowY: 'auto', pr: 0.5,
+            scrollbarWidth: 'thin',
+            scrollbarColor: (theme) => `${theme.palette.divider} transparent`,
+            '&::-webkit-scrollbar': { width: 4 },
+            '&::-webkit-scrollbar-track': { background: 'transparent' },
+            '&::-webkit-scrollbar-thumb': { borderRadius: 4, backgroundColor: 'divider' }
+          }}>
             {options.map(item => (
               <Box key={item.index} display='flex' flexDirection='column' gap={0.75}>
                 {item.imagePreview && (
@@ -235,20 +244,42 @@ export default function CreatePoll () {
         </Box>
       </Paper>
 
-      <Dialog open={showConfirm} onClose={() => setShowConfirm(false)}>
+      <Dialog open={showConfirm} onClose={() => { setShowConfirm(false); setTermsAccepted(false) }} maxWidth='xs' fullWidth>
         <DialogTitle fontWeight={700}>{t('create.confirmTitle')}</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, minWidth: 300 }}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Typography variant='body2' color='text.secondary'>{t('create.confirmBody')}</Typography>
-          <Typography fontWeight={600}>{pendingData?.title}</Typography>
-          <Box component='ul' sx={{ m: 0, pl: 2.5, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            {pendingData?.optionsData.map((opt, i) => (
-              <Typography key={i} component='li' variant='body2'>{opt}</Typography>
-            ))}
+          <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography variant='subtitle2' fontWeight={700}>{pendingData?.title}</Typography>
+            <Divider />
+            <Box display='flex' flexDirection='column' gap={0.75} sx={{ maxHeight: 240, overflowY: 'auto' }}>
+              {pendingData?.optionsData.map((opt, i) => {
+                const optObj = options.find(o => o.value?.trim() === opt)
+                return (
+                  <Box key={i} display='flex' alignItems='center' gap={1}>
+                    {optObj?.imagePreview && (
+                      <Box component='img' src={optObj.imagePreview} sx={{ width: 36, height: 36, borderRadius: 0.5, objectFit: 'cover', flexShrink: 0 }} />
+                    )}
+                    <Typography variant='body2'>{opt}</Typography>
+                  </Box>
+                )
+              })}
+            </Box>
           </Box>
+          <FormControlLabel
+            control={<Checkbox size='small' checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />}
+            label={
+              <Typography variant='caption'>
+                {t('create.termsPrefix')}{' '}
+                <Link href={`/${lang}/terms`} target='_blank' rel='noopener'>{t('create.termsLink')}</Link>
+                {' '}{t('create.termsAnd')}{' '}
+                <Link href={`/${lang}/privacy`} target='_blank' rel='noopener'>{t('create.privacyLink')}</Link>
+              </Typography>
+            }
+          />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setShowConfirm(false)}>{t('create.edit')}</Button>
-          <Button variant='contained' onClick={handleConfirm}>{t('create.publish')}</Button>
+          <Button onClick={() => { setShowConfirm(false); setTermsAccepted(false) }}>{t('create.edit')}</Button>
+          <Button variant='contained' onClick={handleConfirm} disabled={!termsAccepted}>{t('create.publish')}</Button>
         </DialogActions>
       </Dialog>
 

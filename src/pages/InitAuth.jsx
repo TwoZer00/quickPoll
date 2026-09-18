@@ -128,7 +128,7 @@ function InitAuthInner () {
               {isLoading
                 ? <Box flex={1} display='flex' alignItems='center' justifyContent='center'><QuickPollLogo size='lg' spinner /></Box>
                 : <Suspense fallback={<Box flex={1} />}>
-                    <Box id='main-content' sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'auto' }}>
+                    <Box id='main-content' sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
                       <Outlet context={{ setMessage, setOpenModal }} />
                     </Box>
                   </Suspense>

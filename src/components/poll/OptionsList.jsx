@@ -9,6 +9,7 @@ import { assignColors } from '../../utils/color'
 import Option from './Option'
 import PieChartView from '../charts/PieChartView'
 import BarChartView from '../charts/BarChartView'
+import FadeScroll from '../FadeScroll'
 
 const VALID_VIEWS = ['vote', 'bars', 'pie']
 const DEBOUNCE_MS = 300
@@ -121,6 +122,16 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableU
   const showResult = preview || forceShowResult || coloredOptions.some(option => option.voted) || poll.closed
   const dataReady = Object.keys(voteCounts).length === coloredOptions.length
   const hasImages = coloredOptions.some(opt => opt.image)
+
+  const pctMap = useMemo(() => {
+    if (total === 0) return {}
+    const raws = coloredOptions.map(o => ({ id: o.id, exact: (voteCounts[o.id] || 0) / total * 100 }))
+    const floored = raws.map(o => ({ ...o, floor: Math.floor(o.exact), remainder: o.exact - Math.floor(o.exact) }))
+    let remaining = 100 - floored.reduce((s, o) => s + o.floor, 0)
+    floored.sort((a, b) => b.remainder - a.remainder)
+    floored.forEach(o => { if (remaining-- > 0) o.floor++ })
+    return Object.fromEntries(floored.map(o => [o.id, o.floor]))
+  }, [coloredOptions, voteCounts, total])
   const cols = options.length <= 2 ? 2 : options.length === 3 ? 3 : options.length <= 6 ? 3 : 4
 
   const [pieMounted, setPieMounted] = useState(false)
@@ -157,7 +168,7 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableU
   return (
     <>
       {showResult && total > 0 && (
-        <Stack direction='row' alignItems='center' justifyContent='space-between' gap={1} flexWrap='wrap'>
+        <Stack direction='row' alignItems='center' justifyContent='space-between' gap={1} flexWrap='wrap' sx={{ px: 2.5, pt: 1.5, pb: 1.5, flexShrink: 0, borderBottom: 1, borderColor: 'divider' }}>
           <Chip icon={<HowToVote fontSize='small' />} label={<Typography variant='caption' fontWeight={600}>{total}</Typography>} size='small' variant='outlined' />
           <ToggleButtonGroup
             size='small' value={viewMode} exclusive onChange={handleViewChange}
@@ -198,10 +209,21 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableU
           </ToggleButtonGroup>
         </Stack>
       )}
+      <FadeScroll snap={viewMode === 'vote'} sx={{ px: 2.5, py: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <OptionsContent viewMode={viewMode} coloredOptions={coloredOptions} poll={poll} option={option} handleChange={handleChange} voteCounts={voteCounts} total={total} showResult={showResult} dataReady={dataReady} pieMounted={pieMounted} barsMounted={barsMounted} pctMap={pctMap} />
+      </FadeScroll>
+    </>
+  )
+}
+
+function OptionsContent ({ viewMode, coloredOptions, poll, option, handleChange, voteCounts, total, showResult, dataReady, pieMounted, barsMounted, pctMap }) {
+  const hasImages = coloredOptions.some(opt => opt.image)
+  return (
+    <>
       <Box sx={{ display: viewMode === 'vote' ? 'block' : 'none' }}>
-        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: hasImages ? 'grid' : 'flex', gridTemplateColumns: hasImages ? { xs: 'repeat(2, 1fr)', sm: `repeat(${cols}, 1fr)` } : undefined, flexDirection: 'column', gap: 1.5, maxHeight: hasImages ? 640 : 300, overflowY: 'clip', px: hasImages ? 1 : 0, mx: hasImages ? -1 : 0, py: hasImages ? 2.5 : 0, my: hasImages ? 0.5 : 0 }}>
+        <RadioGroup name='radio-buttons-group' onChange={handleChange} value={option} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {coloredOptions.map((opt) => (
-            <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} cardMode={hasImages} compact={cols >= 3} selected={option} />
+            <Option key={opt.id} poll={poll} option={opt} voteCount={voteCounts[opt.id] || 0} total={total} showResult={showResult} cardMode={hasImages} selected={option} pctValue={pctMap[opt.id]} />
           ))}
         </RadioGroup>
       </Box>

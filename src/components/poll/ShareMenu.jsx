@@ -63,16 +63,18 @@ const ShareMenu = ({ setMessage, poll, options, voteCounts }) => {
   }
 
   return (
-    <Box display='flex' alignSelf='end' gap={0.5}>
-      {dataReady && (
-        <IconButton aria-label='Download CSV' onClick={() => { exportCSV(poll?.title || 'poll', options, voteCounts); track('csv_exported') }} sx={{ minWidth: 48, minHeight: 48, '&:hover': { bgcolor: 'action.hover' } }}>
-          <Download fontSize='inherit' />
-        </IconButton>
-      )}
-      <IconButton aria-label='Share poll' onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ minWidth: 48, minHeight: 48, '&:hover': { bgcolor: 'action.hover' } }}>
+    <Box display='flex' gap={0.5}>
+      <IconButton aria-label='Share poll' onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ minWidth: 48, minHeight: 48 }}>
         <Share fontSize='inherit' />
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        {dataReady && (
+          <MenuItem onClick={() => { exportCSV(poll?.title || 'poll', options, voteCounts); track('csv_exported'); setAnchorEl(null) }} sx={{ borderRadius: 2, mx: 0.5 }}>
+            <ListItemIcon><Download fontSize='small' /></ListItemIcon>
+            <ListItemText>{t('share.downloadCSV')}</ListItemText>
+          </MenuItem>
+        )}
+        {dataReady && <Divider />}
         {COPY_OPTIONS.map(({ labelKey, param, icon }) => (
           <MenuItem key={labelKey} onClick={() => handleCopy(param)} sx={{ borderRadius: 2, mx: 0.5 }}>
             <ListItemIcon>{icon}</ListItemIcon>

@@ -4,9 +4,9 @@ import { CheckCircle } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { animated, useSpring } from '@react-spring/web'
 
-const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, compact, selected }) => {
+const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, selected, pctValue }) => {
   const optionColor = option.color || '#888888'
-  const pct = total > 0 ? Math.round((voteCount / total) * 100) : 0
+  const pct = total > 0 ? pctValue ?? Math.round((voteCount / total) * 100) : 0
   const percentage = total > 0 && showResult ? (voteCount / total) * 100 : 0
   const isSelected = selected === option.id
   const isVoted = option.voted
@@ -39,27 +39,33 @@ const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, com
 
   if (cardMode) {
     return (
-      <animated.div style={{ scale: bounceSpring.scale, display: 'flex', flexDirection: 'column', containerType: 'inline-size' }}>
+      <animated.div style={{ scale: bounceSpring.scale, scrollSnapAlign: 'start' }}>
         <Box
           component='label'
-          position='relative' overflow='hidden' borderRadius={3}
+          borderRadius={2}
           border={1}
-          borderColor='transparent'
+          overflow='hidden'
           sx={{
             cursor: poll.closed ? 'default' : 'pointer',
-            transition: 'box-shadow .2s ease, transform .2s ease',
-            display: 'flex', flexDirection: 'column',
+            display: 'flex', flexDirection: 'row', alignItems: 'stretch',
             userSelect: 'none',
-            aspectRatio: { xs: '1/1', sm: '4/3' },
-            boxShadow: isVoted
-              ? `0 0 0 4px ${optionColor}, 0 2px 12px ${alpha(optionColor, 0.4)}`
+            minHeight: 72,
+            transition: 'box-shadow .2s ease, transform .2s ease',
+            borderColor: isVoted
+              ? optionColor
               : isSelected
-              ? `0 0 0 2px ${alpha(optionColor, 0.7)}, 0 4px 16px ${alpha(optionColor, 0.2)}`
-              : '0 1px 3px rgba(0,0,0,0.08)',
+              ? alpha(optionColor, 0.6)
+              : 'divider',
+            bgcolor: isVoted ? alpha(optionColor, 0.06) : 'background.paper',
+            boxShadow: isVoted
+              ? `0 0 0 1px ${optionColor}, 0 2px 10px ${alpha(optionColor, 0.25)}`
+              : isSelected
+              ? `0 2px 10px ${alpha(optionColor, 0.15)}`
+              : 'none',
             '&:hover': poll.closed ? {} : {
-              boxShadow: `0 0 0 2px ${alpha(optionColor, 0.5)}, 0 4px 16px ${alpha(optionColor, 0.2)}`,
-              transform: justVoted ? undefined : 'translateY(-2px)',
-              '& .card-img': { transform: 'scale(1.07)' }
+              transform: justVoted ? undefined : 'translateY(-1px)',
+              boxShadow: `0 2px 12px ${alpha(optionColor, 0.2)}`,
+              '& .card-img': { transform: 'scale(1.05)' }
             }
           }}
           role='option' aria-selected={!!option.voted}
@@ -67,68 +73,46 @@ const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, com
         >
           <Radio value={option.id} disabled={poll.closed} sx={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }} />
 
-          {/* image or placeholder */}
-          {option.image
-            ? <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-                <Box
+          {/* thumbnail */}
+          <Box sx={{ width: 80, flexShrink: 0, position: 'relative', overflow: 'hidden', borderRadius: '8px 0 0 8px', m: 0.75, borderRadius: 1.5 }}>
+            {option.image
+              ? <Box
                   className='card-img'
                   component='img'
                   src={option.image}
                   alt={option.title}
                   onError={(e) => { e.target.style.display = 'none' }}
-                  sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .35s ease, filter .3s ease', pointerEvents: 'none', filter: isVoted ? 'grayscale(0.7) brightness(0.6)' : 'none' }}
+                  sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .35s ease, filter .3s ease', filter: isVoted ? 'grayscale(0.5) brightness(0.75)' : 'none' }}
                 />
+              : <Box display='flex' alignItems='center' justifyContent='center' sx={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${alpha(optionColor, 0.35)} 0%, ${alpha(optionColor, 0.12)} 100%)` }}>
+                  <Typography fontWeight={800} sx={{ color: optionColor, opacity: 0.7, fontSize: '1.75rem', lineHeight: 1, userSelect: 'none' }}>{option.title?.charAt(0).toUpperCase()}</Typography>
+                </Box>
+            }
+            {isVoted && (
+              <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: alpha(optionColor, 0.35) }}>
+                <CheckCircle sx={{ fontSize: 28, color: '#fff', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))' }} />
               </Box>
-            : <Box display='flex' alignItems='center' justifyContent='center' sx={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${alpha(optionColor, 0.25)} 0%, ${alpha(optionColor, 0.08)} 100%)`, pointerEvents: 'none', filter: isVoted ? 'grayscale(0.7) brightness(0.6)' : 'none' }}>
-                <Typography variant='h4' fontWeight={700} sx={{ color: optionColor, opacity: 0.5, userSelect: 'none' }}>{option.title?.charAt(0).toUpperCase()}</Typography>
-              </Box>
-          }
+            )}
+          </Box>
 
-          {/* selected overlay — borde inset + tint de color */}
-          {isSelected && !isVoted && (
-            <Box sx={{ position: 'absolute', inset: 0, bgcolor: alpha(optionColor, 0.2), boxShadow: `inset 0 0 0 3px ${optionColor}`, pointerEvents: 'none', zIndex: 1 }} />
-          )}
-          {/* voted: solo el checkmark, el grayscale+brightness en la imagen hace el trabajo */}
-
-          {/* voted checkmark badge */}
-          {isVoted && (
-            <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: optionColor, borderRadius: '50%', width: '18%', height: 0, paddingBottom: '18%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.4)', zIndex: 2 }}>
-              <CheckCircle sx={{ fontSize: '60%', color: '#fff', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
-            </Box>
-          )}
-
-          {/* footer */}
-          <Box position='absolute' bottom={0} left={0} right={0} zIndex={2} sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%)', pt: '25%' }}>
+          {/* content */}
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', px: 1.5, py: 1, gap: 0.5, minWidth: 0 }}>
+            <Stack direction='row' alignItems='center' justifyContent='space-between' gap={1}>
+              <Typography variant='body2' fontWeight={isVoted ? 700 : 500} sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                {option.title}
+              </Typography>
+              {showResult && (
+                <Typography variant='caption' fontWeight={700} sx={{ color: optionColor, flexShrink: 0 }}>
+                  <animated.span>{countSpring.number.to(x => Math.round(x))}</animated.span>
+                  {total > 0 && ` · ${pct}%`}
+                </Typography>
+              )}
+            </Stack>
             {showResult && (
-              <Box sx={{ height: '1.5%', bgcolor: alpha(optionColor, 0.35), mx: '4%', mb: '2%', borderRadius: 2, overflow: 'hidden' }}>
+              <Box sx={{ height: 4, bgcolor: alpha(optionColor, 0.2), borderRadius: 2, overflow: 'hidden' }}>
                 <animated.div style={{ height: '100%', borderRadius: 8, backgroundColor: optionColor, width: widthSpring.width }} />
               </Box>
             )}
-            {compact
-              ? (
-                <Stack direction='row' alignItems='center' justifyContent='center' pb='4%'>
-                  {showResult && (
-                    <Typography variant='caption' fontWeight={700} sx={{ color: optionColor, textShadow: '0 1px 3px rgba(0,0,0,0.5)', filter: 'brightness(1.4)', fontSize: 'clamp(9px, 2cqw, 12px)' }}>
-                      <animated.span>{countSpring.number.to(x => Math.round(x))}</animated.span>
-                      {total > 0 && ` · ${pct}%`}
-                    </Typography>
-                  )}
-                </Stack>
-              )
-              : (
-                <Stack direction='row' alignItems='flex-end' justifyContent='space-between' px='4%' pb='4%' pt={0}>
-                  <Typography variant='body2' fontWeight={isVoted ? 700 : 600} sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.6)', letterSpacing: 0.1, fontSize: 'clamp(10px, 2.5cqw, 14px)' }}>
-                    {option.title}
-                  </Typography>
-                  {showResult && (
-                    <Typography variant='caption' fontWeight={700} sx={{ color: optionColor, flexShrink: 0, ml: 1, textShadow: '0 1px 3px rgba(0,0,0,0.5)', filter: 'brightness(1.4)', fontSize: 'clamp(9px, 2cqw, 12px)' }}>
-                      <animated.span>{countSpring.number.to(x => Math.round(x))}</animated.span>
-                      {total > 0 && ` · ${pct}%`}
-                    </Typography>
-                  )}
-                </Stack>
-              )
-            }
           </Box>
         </Box>
       </animated.div>
@@ -141,6 +125,7 @@ const Option = memo(({ poll, option, showResult, voteCount, total, cardMode, com
       border={1}
       borderColor={isVoted ? optionColor : isSelected ? alpha(optionColor, 0.5) : 'divider'}
       sx={{
+        scrollSnapAlign: 'start',
         transition: 'border-color .2s',
         bgcolor: isVoted ? alpha(optionColor, 0.06) : 'transparent'
       }}
@@ -194,8 +179,8 @@ Option.propTypes = {
   voteCount: PropTypes.number.isRequired,
   total: PropTypes.number.isRequired,
   cardMode: PropTypes.bool,
-  compact: PropTypes.bool,
-  selected: PropTypes.string
+  selected: PropTypes.string,
+  pctValue: PropTypes.number
 }
 
 export default Option

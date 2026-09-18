@@ -1,4 +1,4 @@
-import { useLoaderData, useOutletContext, useParams } from 'react-router-dom'
+import { useLoaderData, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 import { Box, Button, CircularProgress, LinearProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -73,29 +73,34 @@ export default function Poll () {
   }, [data])
 
   const isVoted = useMemo(() => options.some(o => o.voted), [options])
+  const [searchParams] = useSearchParams()
+  const paramView = searchParams.get('resultsOnly')?.toLowerCase()
+  const VALID_VIEWS = ['vote', 'bars', 'pie']
+  const [viewMode, setViewMode] = useState(VALID_VIEWS.includes(paramView) ? paramView : data.closed ? 'bars' : 'vote')
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         {refreshing && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
             <CircularProgress size={20} />
           </Box>
         )}
-        <Stack flex={1} justifyContent='center' alignItems='center' sx={{ flexDirection: { xs: 'column', lg: 'row' }, gap: 2, p: 2 }}>
+        <Stack flex={1} justifyContent='center' alignItems='center' sx={{ flexDirection: { xs: 'column', lg: 'row' }, gap: 2, p: 2, minHeight: 0 }}>
           <Box sx={{ display: { xs: 'none', lg: 'flex' }, maxWidth: 300, width: '100%' }} className='ad-wrapper'>
             <GoogleAd adSlot='3837806330' />
           </Box>
-          <PageWrapper maxWidth='md' sx={{ p: 0 }}>
-            <Box component='form' onSubmit={handleSubmit} width='100%'>
-              <Box component={Paper} width='100%' variant='outlined' elevation={0}>
-              <Box component='main' p={2.5} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                <ShareMenu setMessage={setMessage} poll={data} options={options} voteCounts={voteCounts} />
-                {
-                data?.title
-                  ? <Typography variant='h4' component='h1' fontWeight={700} title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis', wordBreak: 'break-word' }}>{data?.title}</Typography>
-                  : <Skeleton variant='text' height={32} width='12ch' />
-              }
+          <PageWrapper maxWidth='md' sx={{ p: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <Box component='form' onSubmit={handleSubmit} width='100%' sx={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <Box component={Paper} width='100%' variant='outlined' elevation={0} sx={{ display: 'flex', flexDirection: 'column', maxHeight: 'calc(100dvh - 120px)', overflow: 'hidden' }}>
+              <Box component='main' p={2.5} pb={1} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, flexShrink: 0 }}>
+                <Stack direction='row' alignItems='flex-start' justifyContent='space-between' gap={1}>
+                  {data?.title
+                    ? <Typography variant='h4' component='h1' fontWeight={700} title={data?.title} sx={{ overflow: 'hidden', textOverflow: 'ellipsis', wordBreak: 'break-word', flex: 1 }}>{data?.title}</Typography>
+                    : <Skeleton variant='text' height={32} width='12ch' />
+                  }
+                  <ShareMenu setMessage={setMessage} poll={data} options={options} voteCounts={voteCounts} />
+                </Stack>
                 {data?.user && <Typography variant='body2' color='text.secondary'>{t('poll.by', { name: data.user.name })}</Typography>}
                 {!data?.closed
                   ? (
@@ -106,11 +111,13 @@ export default function Poll () {
                       {t('poll.created', { date: dayjs(data.createdAt.seconds * 1000).format('DD/MM/YYYY HH:mm') })}
                     </Typography>
                     )}
-                <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} voteCounts={voteCounts} />
-                {!data?.closed && (
+              </Box>
+              <OptionsList poll={{ ...data, id }} options={options} option={option} setOptions={setOptions} handleChange={(event) => setOption(event.target.value)} results={results} id={id} setResults={setResults} voteCounts={voteCounts} onViewChange={setViewMode} />
+              <Box px={2.5} pb={2} pt={1} sx={{ flexShrink: 0, borderTop: 1, borderColor: 'divider', display: (data?.closed || (viewMode !== 'bars' && viewMode !== 'pie')) ? 'block' : 'none' }}>
+                {!data?.closed && viewMode !== 'bars' && viewMode !== 'pie' && (
                   <Button
                     type='submit' variant='contained' color='primary' size='large'
-                    sx={{ alignSelf: 'end', px: 4, ...(!isVoted && { animation: 'pulse 2s ease-in-out infinite', '@keyframes pulse': { '0%,100%': { boxShadow: '0 0 0 0 rgba(57,73,171,0.5)' }, '50%': { boxShadow: '0 0 0 8px rgba(57,73,171,0)' } } }) }}
+                    sx={{ float: 'right', px: 4, ...(!isVoted && { animation: 'pulse 2s ease-in-out infinite', '@keyframes pulse': { '0%,100%': { boxShadow: '0 0 0 0 rgba(57,73,171,0.5)' }, '50%': { boxShadow: '0 0 0 8px rgba(57,73,171,0)' } } }) }}
                     disabled={!data || (options.find(option => option.voted)?.id === option || state === requestStateEnum.pending)}
                   >
                     {t('poll.vote')}

@@ -3,7 +3,7 @@ import { PropTypes } from 'prop-types'
 
 export default function PageWrapper ({ children, maxWidth = 'sm', sx }) {
   return (
-    <Container maxWidth={maxWidth} sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', py: 3, ...sx }}>
+    <Container maxWidth={maxWidth} sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', py: 3, ...sx }}>
       {children}
     </Container>
   )

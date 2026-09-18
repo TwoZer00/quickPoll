@@ -50,10 +50,10 @@ function DonutSegment ({ color, startAngle, fraction, entryDelay, animated: didA
 
 const toData = (options, counts) => {
   const total = options.reduce((s, o) => s + (counts[o.id] || 0), 0)
-  if (total === 0) return []
+  if (total === 0) return { segments: [], all: [] }
   let offset = 0
-  return options
-    .map(opt => ({ id: opt.id, title: opt.title, image: opt.image, value: counts[opt.id] || 0, color: opt.color }))
+  const withValues = options.map(opt => ({ id: opt.id, title: opt.title, image: opt.image, value: counts[opt.id] || 0, color: opt.color }))
+  const segments = withValues
     .filter(d => d.value > 0)
     .map(d => {
       const fraction = d.value / total
@@ -61,6 +61,8 @@ const toData = (options, counts) => {
       offset += fraction
       return seg
     })
+  const all = withValues.map(d => ({ ...d, fraction: d.value / total }))
+  return { segments, all }
 }
 
 const PieChartView = memo(({ options, voteCounts }) => {
@@ -83,19 +85,18 @@ const PieChartView = memo(({ options, voteCounts }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [voteCounts, animated])
 
-  const total = useMemo(() => data.reduce((s, d) => s + d.value, 0), [data])
-  const h = hovered != null ? data[hovered] : null
-
-  const sorted = useMemo(() => [...data].sort((a, b) => b.value - a.value), [data])
+  const total = useMemo(() => data.segments.reduce((s, d) => s + d.value, 0), [data])
+  const h = hovered != null ? data.segments[hovered] : null
+  const sorted = useMemo(() => [...data.all].sort((a, b) => b.value - a.value), [data])
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16, overflow: 'hidden' }}>
       <div style={{ position: 'relative', width: DEFAULT_SIZE, height: DEFAULT_SIZE }}>
         <svg width={DEFAULT_SIZE} height={DEFAULT_SIZE}>
-          {data.map((seg, i) => (
+          {data.segments.map((seg, i) => (
             <DonutSegment key={seg.id} color={seg.color} startAngle={seg.offset} fraction={seg.fraction} entryDelay={i * 80} animated={animated} circumference={CIRCUMFERENCE} r={R} center={CENTER} stroke={STROKE} />
           ))}
-          {data.map((seg, i) => {
+          {data.segments.map((seg, i) => {
             const dash = seg.fraction * CIRCUMFERENCE
             const rotation = seg.offset * 360 - 90
             return (
@@ -130,7 +131,7 @@ const PieChartView = memo(({ options, voteCounts }) => {
             </>}
         </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 140, maxWidth: 200 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minWidth: 0, maxHeight: DEFAULT_SIZE, overflowY: 'auto', overflowX: 'hidden', paddingRight: 4, scrollbarWidth: 'thin', scrollbarColor: 'rgba(128,128,128,0.25) transparent' }}>
         {sorted.map((seg, i) => (
           <LegendItem key={seg.id} seg={seg} index={i} animated={animated} t={t} />
         ))}

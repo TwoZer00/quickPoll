@@ -48,6 +48,8 @@ function useMockVoteCounts (options, resetKey) {
 
   useEffect(() => {
     const t = setInterval(() => {
+      const remaining = POLL_DURATION_SECONDS - (Date.now() / 1000 - loadStorage().createdAt)
+      if (remaining <= 0) return
       const total = options.reduce((s, o) => s + WEIGHTS[o.id], 0)
       let r = Math.random() * total
       const optionId = options.find(o => (r -= WEIGHTS[o.id]) < 0)?.id ?? options[0].id
@@ -88,6 +90,10 @@ export default function PollMock () {
     setViewMode('bars')
     setResetKey(k => k + 1)
   }
+
+  useEffect(() => {
+    if (duration === 0) handleReset()
+  }, [duration])
 
   const poll = { id: POLL_ID, title: t('mock.title'), createdAt: { seconds: createdAt }, closed: false }
   const options = BASE_OPTIONS.map(o => ({ ...o, voted: o.id === voted }))

@@ -7,9 +7,12 @@ const supabase = createClient(
 
 const OPTIONS = [
   { title: 'JavaScript', image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
-  { title: 'Python',     image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
-  { title: 'Rust',       image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rust/rust-original.svg' },
-  { title: 'Go',         image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg' }
+  { title: 'Python', image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
+  { title: 'Rust', image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rust/rust-original.svg' },
+  { title: 'Go', image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg' },
+  { title: 'Java', image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
+  { title: 'C++', image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg' },
+  { title: "cobol", image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cobol/cobol-original.svg' }
 ]
 
 await supabase.auth.signInAnonymously()

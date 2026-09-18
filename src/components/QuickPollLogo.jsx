@@ -19,7 +19,7 @@ export default function QuickPollLogo ({ size = 'md', loading = false, spinner =
   const padding = (squareSize - barsW) / 2
 
   const textMeasureRef = useRef(null)
-  const [textPx, setTextPx] = useState(0)
+  const [textPx, setTextPx] = useState(() => fontSize * 3.8)
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -83,8 +83,8 @@ export default function QuickPollLogo ({ size = 'md', loading = false, spinner =
     return () => { cancelled = true }
   }, [phase, capH])
 
-  const isLoader = phase === 'loader' && textPx > 0
-  const isHiding = phase === 'hiding' && textPx > 0
+  const isLoader = phase === 'loader'
+  const isHiding = phase === 'hiding'
 
   const { barsLeft, borderOpacity } = useSpring({
     barsLeft: isLoader || isHiding ? barsCenterLeft : barsInitialLeft,
@@ -111,7 +111,7 @@ export default function QuickPollLogo ({ size = 'md', loading = false, spinner =
     <Box sx={{ display: 'inline-flex', userSelect: 'none', position: 'relative', height: fontSize, alignItems: 'flex-end' }}>
       <span ref={textMeasureRef} style={{ ...textStyle, position: 'absolute', visibility: 'hidden', pointerEvents: 'none' }}>QuickPo</span>
 
-      {textPx > 0 && (
+      {(
         <Box sx={{ position: 'relative', width: totalW, height: fontSize }}>
           <animated.div style={{ overflow: 'hidden', width: clipW, position: 'absolute', left: 0, bottom: 0 }}>
             <animated.span style={{ ...textStyle, display: 'block', transform: clipW.to(w => `translateX(${textPx - w}px)`) }}>QuickPo</animated.span>

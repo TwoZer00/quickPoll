@@ -108,8 +108,8 @@ export default function PollMock () {
   }
 
   return (
-    <Paper elevation={0} variant='outlined' sx={{ width: '100%', maxWidth: 380, overflow: 'hidden', userSelect: 'none' }}>
-      <Box p={2.5} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+    <Paper elevation={0} variant='outlined' sx={{ width: '100%', maxWidth: 480, maxHeight: 560, overflow: 'hidden', userSelect: 'none', display: 'flex', flexDirection: 'column' }}>
+      <Box p={2.5} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, flex: 1, minHeight: 0 }}>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
           <Typography variant='h6' fontWeight={600}>{poll.title}</Typography>
           <FormControlLabel
@@ -130,6 +130,7 @@ export default function PollMock () {
           id={POLL_ID}
           setResults={() => {}}
           voteCounts={voteCounts}
+          pieSize={160}
           disableUrlSync
           initialView={viewMode}
           forceShowResult

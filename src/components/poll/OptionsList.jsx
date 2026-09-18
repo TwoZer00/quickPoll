@@ -111,7 +111,7 @@ export function useVoteCounts (pollId, options) {
   return { voteCounts, applyOptimistic, revertOptimistic, refresh }
 }
 
-const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableUrlSync = false, initialView, forceShowResult = false, isVoted = false, onViewChange }) => {
+const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableUrlSync = false, initialView, forceShowResult = false, isVoted = false, onViewChange, pieSize }) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const { t } = useTranslation()
   const paramView = searchParams.get('resultsOnly')?.toLowerCase()
@@ -210,13 +210,13 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableU
         </Stack>
       )}
       <FadeScroll snap={viewMode === 'vote'} sx={{ px: 2.5, py: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <OptionsContent viewMode={viewMode} coloredOptions={coloredOptions} poll={poll} option={option} handleChange={handleChange} voteCounts={voteCounts} total={total} showResult={showResult} dataReady={dataReady} pieMounted={pieMounted} barsMounted={barsMounted} pctMap={pctMap} />
+        <OptionsContent viewMode={viewMode} coloredOptions={coloredOptions} poll={poll} option={option} handleChange={handleChange} voteCounts={voteCounts} total={total} showResult={showResult} dataReady={dataReady} pieMounted={pieMounted} barsMounted={barsMounted} pctMap={pctMap} pieSize={pieSize} />
       </FadeScroll>
     </>
   )
 }
 
-function OptionsContent ({ viewMode, coloredOptions, poll, option, handleChange, voteCounts, total, showResult, dataReady, pieMounted, barsMounted, pctMap }) {
+function OptionsContent ({ viewMode, coloredOptions, poll, option, handleChange, voteCounts, total, showResult, dataReady, pieMounted, barsMounted, pctMap, pieSize }) {
   const hasImages = coloredOptions.some(opt => opt.image)
   return (
     <>
@@ -232,7 +232,7 @@ function OptionsContent ({ viewMode, coloredOptions, poll, option, handleChange,
       )}
       {showResult && dataReady && pieMounted && (
         <Box sx={{ display: viewMode === 'pie' ? 'block' : 'none' }}>
-          <PieChartView options={coloredOptions} voteCounts={voteCounts} />
+          <PieChartView options={coloredOptions} voteCounts={voteCounts} size={pieSize} />
         </Box>
       )}
       {showResult && dataReady && barsMounted && (

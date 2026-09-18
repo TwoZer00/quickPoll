@@ -150,6 +150,50 @@ export default function QuickPollLogo ({ size = 'md', loading = false, spinner =
   )
 }
 
+export function ErrorBars ({ size = 'lg' }) {
+  const theme = useTheme()
+  const primary = theme.palette.primary.main
+  const error = theme.palette.error.main
+
+  const fontSize = size === 'sm' ? 15 : size === 'lg' ? 40 : size === 'xl' ? 56 : size === 'xxl' ? 72 : 17
+  const capH = fontSize * 0.72
+  const barW = fontSize * 0.25
+  const barGap = fontSize * 0.08
+  const barRadius = size === 'sm' ? 0.5 : size === 'md' ? 1 : size === 'lg' ? 2 : 3
+  const barsW = barW * 3 + barGap * 2
+  const squareSize = Math.max(capH, barsW) * 1.6
+  const padding = (squareSize - barsW) / 2
+
+  const barsBottom = fontSize * 0.15
+  const frameBottom = barsBottom + capH / 2 - squareSize / 2
+
+  const bar1H = useSpringValue(capH, { config: { tension: 60, friction: 16 } })
+  const bar2H = useSpringValue(capH * 0.65, { config: { tension: 60, friction: 16 } })
+  const bar3H = useSpringValue(capH * 0.85, { config: { tension: 60, friction: 16 } })
+  const [color, setColor] = useState(primary)
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setColor(error)
+      bar1H.start(capH * 0.12)
+      setTimeout(() => bar2H.start(capH * 0.12), 80)
+      setTimeout(() => bar3H.start(capH * 0.12), 160)
+    }, 600)
+    return () => clearTimeout(t)
+  }, [])
+
+  return (
+    <Box sx={{ position: 'relative', width: squareSize, height: squareSize, display: 'inline-flex' }}>
+      <Box sx={{ position: 'absolute', inset: 0, borderRadius: barRadius * 6, background: `${color}20`, transition: 'background 0.4s' }} />
+      <Box sx={{ position: 'absolute', bottom: barsBottom - frameBottom, left: padding, display: 'flex', alignItems: 'flex-end', gap: `${barGap}px` }}>
+        <animated.div style={{ width: barW, borderRadius: barRadius, background: color, height: bar1H, transition: 'background 0.4s' }} />
+        <animated.div style={{ width: barW, borderRadius: barRadius, background: color, height: bar2H, transition: 'background 0.4s' }} />
+        <animated.div style={{ width: barW, borderRadius: barRadius, background: color, height: bar3H, transition: 'background 0.4s' }} />
+      </Box>
+    </Box>
+  )
+}
+
 function BarsSpinner ({ size }) {
   const theme = useTheme()
   const primary = theme.palette.primary.main

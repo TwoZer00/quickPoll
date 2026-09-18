@@ -1,6 +1,6 @@
 import { useLoaderData, useOutletContext, useParams } from 'react-router-dom'
-import { Box, Button, LinearProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
-import { useEffect, useState, useMemo } from 'react'
+import { Box, Button, CircularProgress, LinearProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getResults, setVote, requestStateEnum } from '../supabase/utils'
 import dayjs from 'dayjs'
@@ -11,6 +11,7 @@ import OptionsList, { useVoteCounts } from '../components/poll/OptionsList'
 import TimeRemain from '../components/poll/TimeRemain'
 import PageWrapper from '../components/PageWrapper'
 import { track } from '../utils/analytics'
+import usePullToRefresh from '../hook/usePullToRefresh'
 
 export default function Poll () {
   const [data, setData] = useState((useLoaderData()))
@@ -22,7 +23,10 @@ export default function Poll () {
   const [results, setResults] = useState()
   const [duration, setDuration] = useState()
   const { id } = useParams()
-  const { voteCounts, applyOptimistic, revertOptimistic } = useVoteCounts(id, options)
+  const { voteCounts, applyOptimistic, revertOptimistic, refresh } = useVoteCounts(id, options)
+  const scrollRef = useRef(null)
+  useEffect(() => { scrollRef.current = document.getElementById('main-content') }, [])
+  const { refreshing } = usePullToRefresh(refresh, scrollRef)
   useTitle({ title: data?.title || 'Poll', description: t('poll.voteOn', { title: data?.title || '' }) })
 
   useEffect(() => {
@@ -73,6 +77,11 @@ export default function Poll () {
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+        {refreshing && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+            <CircularProgress size={20} />
+          </Box>
+        )}
         <Stack flex={1} justifyContent='center' alignItems='center' sx={{ flexDirection: { xs: 'column', lg: 'row' }, gap: 2, p: 2 }}>
           <Box sx={{ display: { xs: 'none', lg: 'flex' }, maxWidth: 300, width: '100%' }} className='ad-wrapper'>
             <GoogleAd adSlot='3837806330' />

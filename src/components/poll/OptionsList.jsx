@@ -80,6 +80,16 @@ export function useVoteCounts (pollId, options) {
     }
   }, [pollId])
 
+  const refresh = async () => {
+    const { data } = await supabase.from('votes').select('option_id').eq('poll_id', pollId)
+    if (!data) return
+    const counts = {}
+    optionsRef.current.forEach(o => { counts[o.id] = 0 })
+    data.forEach(v => { if (counts[v.option_id] !== undefined) counts[v.option_id]++ })
+    bufferRef.current = counts
+    setVoteCounts(counts)
+  }
+
   const applyOptimistic = (oldId, newId) => {
     // mark as pending so realtime event for this vote is ignored
     localDeltaRef.current[newId] = true
@@ -97,7 +107,7 @@ export function useVoteCounts (pollId, options) {
     setVoteCounts({ ...bufferRef.current })
   }
 
-  return { voteCounts, applyOptimistic, revertOptimistic }
+  return { voteCounts, applyOptimistic, revertOptimistic, refresh }
 }
 
 const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableUrlSync = false, initialView, forceShowResult = false, isVoted = false, onViewChange }) => {

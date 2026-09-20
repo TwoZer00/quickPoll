@@ -1,14 +1,15 @@
 import sharp from 'sharp'
 
 const svgLight = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="8" fill="#ffffff"/>
   <rect x="8" y="6" width="7" height="20" rx="2" fill="#3949ab"/>
   <rect x="17" y="13" width="7" height="13" rx="2" fill="#3949ab"/>
 </svg>`)
 
 const svgDark = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="#3949ab"/>
-  <rect x="8" y="6" width="7" height="20" rx="2" fill="#ffffff"/>
-  <rect x="17" y="13" width="7" height="13" rx="2" fill="#ffffff"/>
+  <rect width="32" height="32" rx="8" fill="#121212"/>
+  <rect x="8" y="6" width="7" height="20" rx="2" fill="#3949ab"/>
+  <rect x="17" y="13" width="7" height="13" rx="2" fill="#3949ab"/>
 </svg>`)
 
 const iconSize = Math.round(512 * 0.8)

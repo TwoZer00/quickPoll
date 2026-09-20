@@ -1,10 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <style>
-    rect.bg { fill: #3949ab }
-    rect.bar { fill: #ffffff }
-    @media (prefers-color-scheme: light) {
-      rect.bg { fill: transparent }
-      rect.bar { fill: #3949ab }
+    rect.bg { fill: transparent }
+    rect.bar { fill: #3949ab }
+    @media (prefers-color-scheme: dark) {
+      rect.bg { fill: #121212 }
     }
   </style>
   <rect class="bg" width="32" height="32" rx="8"/>

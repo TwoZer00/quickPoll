@@ -2,7 +2,7 @@
 
 Create and share real-time polls that auto-close after 30 minutes. No sign-up required — anonymous by default.
 
-![QuickPoll Screenshot](public/screenshots/screenshots.png)
+![QuickPoll Screenshot](public/screenshots/screenshot.png)
 
 ## Features
 

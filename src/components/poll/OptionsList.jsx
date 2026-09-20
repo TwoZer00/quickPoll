@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Box, Chip, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material'
+import { Box, Chip, RadioGroup, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { BallotOutlined, DonutLarge, BarChart as BarChartIcon, HowToVote } from '@mui/icons-material'
 import { PropTypes } from 'prop-types'
 import { useTranslation } from 'react-i18next'
@@ -176,33 +176,28 @@ const OptionsList = ({ poll, handleChange, option, options, voteCounts, disableU
             aria-label='Results view'
           >
             {!poll.closed && (
-              <Tooltip
-                title={!isVoted ? t('mock.voteTooltip') : ''}
-                open={!isVoted && forceShowResult}
-                placement='top'
-                arrow
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      bgcolor: 'primary.main',
-                      color: 'primary.contrastText',
-                      fontWeight: 700,
-                      fontSize: '0.75rem',
-                      px: 1.5, py: 0.75,
-                      borderRadius: 2,
-                      boxShadow: '0 4px 12px rgba(57,73,171,0.4)',
-                      animation: 'tooltipPulse 2s ease-in-out infinite',
-                      '@keyframes tooltipPulse': {
-                        '0%,100%': { boxShadow: '0 4px 12px rgba(57,73,171,0.4)' },
-                        '50%': { boxShadow: '0 4px 20px rgba(57,73,171,0.7)' }
-                      }
-                    }
+              <ToggleButton
+                value='vote'
+                aria-label='Vote view'
+                sx={!isVoted && forceShowResult && viewMode !== 'vote' ? {
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: 'inherit',
+                    border: '2px solid',
+                    borderColor: 'primary.main',
+                    animation: 'ringPulse 1.5s ease-out infinite',
                   },
-                  arrow: { sx: { color: 'primary.main' } }
-                }}
+                  '@keyframes ringPulse': {
+                    '0%': { transform: 'scale(1)', opacity: 0.8 },
+                    '100%': { transform: 'scale(1.6)', opacity: 0 }
+                  }
+                } : {}}
               >
-                <ToggleButton value='vote' aria-label='Vote view'><BallotOutlined fontSize='small' /></ToggleButton>
-              </Tooltip>
+                <BallotOutlined fontSize='small' />
+              </ToggleButton>
             )}
             <ToggleButton value='bars' aria-label='Bar chart'><BarChartIcon fontSize='small' /></ToggleButton>
             <ToggleButton value='pie' aria-label='Pie chart'><DonutLarge fontSize='small' /></ToggleButton>

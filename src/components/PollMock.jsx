@@ -110,15 +110,7 @@ export default function PollMock () {
   return (
     <Paper elevation={0} variant='outlined' sx={{ width: '100%', maxWidth: 480, maxHeight: 560, overflow: 'hidden', userSelect: 'none', display: 'flex', flexDirection: 'column' }}>
       <Box p={2.5} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, flex: 1, minHeight: 0 }}>
-        <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6' fontWeight={600}>{poll.title}</Typography>
-          <FormControlLabel
-            control={<Switch size='small' checked={withImages} onChange={e => { setWithImages(e.target.checked); setOption(null) }} />}
-            label={<Typography variant='caption' color='text.secondary'>{t('mock.images')}</Typography>}
-            labelPlacement='start'
-            sx={{ m: 0, gap: 0.5 }}
-          />
-        </Box>
+        <Typography variant='h6' fontWeight={600}>{poll.title}</Typography>
         <TimeRemain duration={duration} setDuration={setDuration} date={createdAt * 1000} />
         <OptionsList
           poll={poll}
@@ -138,16 +130,24 @@ export default function PollMock () {
           onViewChange={(v) => setViewMode(v)}
         />
         <Box display='flex' justifyContent='space-between' alignItems='center'>
-          {import.meta.env.DEV && (
-            <Button size='small' color='inherit' sx={{ opacity: 0.5, fontSize: 12 }} onClick={handleReset}>
-              {t('mock.reset')}
-            </Button>
-          )}
-          {viewMode === 'vote' && (
-            <Button variant='contained' color='primary' size='large' sx={{ px: 4 }} disabled={!option || option === voted} onClick={handleVote}>
-              {t('poll.vote')}
-            </Button>
-          )}
+          <FormControlLabel
+            control={<Switch size='small' checked={withImages} onChange={e => { setWithImages(e.target.checked); setOption(null) }} />}
+            label={<Typography variant='caption' color='text.secondary'>{t('mock.images')}</Typography>}
+            labelPlacement='start'
+            sx={{ m: 0, gap: 0.5 }}
+          />
+          <Box display='flex' gap={1} alignItems='center'>
+            {import.meta.env.DEV && (
+              <Button size='small' color='inherit' sx={{ opacity: 0.5, fontSize: 12 }} onClick={handleReset}>
+                {t('mock.reset')}
+              </Button>
+            )}
+            {viewMode === 'vote' && (
+              <Button variant='contained' color='primary' size='large' sx={{ px: 4 }} disabled={!option || option === voted} onClick={handleVote}>
+                {t('poll.vote')}
+              </Button>
+            )}
+          </Box>
         </Box>
       </Box>
     </Paper>

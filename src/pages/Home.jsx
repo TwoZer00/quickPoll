@@ -37,9 +37,9 @@ export default function Home () {
             </Button>
           </Box>
           <Divider />
-          <Stack direction='row' gap={3} flexWrap='wrap'>
+          <Stack direction='row' gap={3} flexWrap='wrap' justifyContent={{ xs: 'center', md: 'flex-start' }}>
             {features.map(f => (
-              <Stack key={f.label} direction='row' alignItems='center' gap={1} sx={{ minWidth: { xs: '100%', sm: 'auto' } }}>
+              <Stack key={f.label} direction='row' alignItems='center' gap={1} >
                 <Box sx={{ color: 'primary.main', display: 'flex', fontSize: 18 }}>{f.icon}</Box>
                 <Stack>
                   <Typography variant='caption' fontWeight={600} color='text.primary' lineHeight={1.2}>{f.label}</Typography>

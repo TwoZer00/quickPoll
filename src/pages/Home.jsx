@@ -18,7 +18,7 @@ export default function Home () {
   ]
 
   return (
-    <PageWrapper maxWidth='md' sx={{ alignItems: 'center', justifyContent: 'center' }}>
+    <PageWrapper maxWidth='md' sx={{ alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'center' } }}>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', gap: { xs: 5, md: 8 }, width: '100%' }}>
         <Stack component='main' gap={3} flex={1}>
           <Stack gap={1}>
@@ -39,7 +39,7 @@ export default function Home () {
           <Divider />
           <Stack direction='row' gap={3} flexWrap='wrap'>
             {features.map(f => (
-              <Stack key={f.label} direction='row' alignItems='center' gap={1}>
+              <Stack key={f.label} direction='row' alignItems='center' gap={1} sx={{ minWidth: { xs: '100%', sm: 'auto' } }}>
                 <Box sx={{ color: 'primary.main', display: 'flex', fontSize: 18 }}>{f.icon}</Box>
                 <Stack>
                   <Typography variant='caption' fontWeight={600} color='text.primary' lineHeight={1.2}>{f.label}</Typography>

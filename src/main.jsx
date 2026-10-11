@@ -102,7 +102,7 @@ const router = createBrowserRouter([
     errorElement: <Error />
   }
 ])
-router.subscribe(({ location }) => track({ url: location.pathname + location.search }))
+router.subscribe(({ location }) => track('pageview', { url: location.pathname + location.search }))
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

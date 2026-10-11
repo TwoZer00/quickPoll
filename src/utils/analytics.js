@@ -1,1 +1,1 @@
-export const track = (event, data) => window.umami?.track(event, data)
+export const track = (event, data) => import.meta.env.PROD && window.umami?.track(event, data)

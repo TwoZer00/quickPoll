@@ -104,7 +104,8 @@ const router = createBrowserRouter([
 ])
 router.subscribe(({ location }) => {
   if (location.pathname === '/') return
-  track('pageview', { url: location.pathname + location.search })
+  const url = (location.pathname.replace(/^\/(?:en|es)/, '') || '/') + location.search
+  track('pageview', { url })
 })
 
 ReactDOM.createRoot(document.getElementById('root')).render(

@@ -1,7 +1,7 @@
 import { Alert, Box, createTheme, CssBaseline, Dialog, DialogTitle, Divider, Link as MuiLink, List, responsiveFontSizes, Slide, Snackbar, ThemeProvider, Typography } from '@mui/material'
 import { Link } from 'react-router-dom'
 import React, { Suspense, useEffect, useMemo, useState } from 'react'
-import { Outlet, useNavigate, useNavigation, useLocation, useParams } from 'react-router-dom'
+import { Outlet, useNavigate, useNavigation, useParams } from 'react-router-dom'
 import Menu, { PollListItem } from '../components/Menu'
 import QuickPollLogo from '../components/QuickPollLogo'
 import { indigo } from '@mui/material/colors'
@@ -103,11 +103,6 @@ function InitAuthInner () {
       setAuthReady(true)
     })
   }, [])
-  const location = useLocation()
-
-  useEffect(() => {
-    if (import.meta.env.PROD) window.umami?.track({ url: location.pathname, referrer: document.referrer })
-  }, [location.pathname])
 
   return (
     <>

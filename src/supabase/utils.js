@@ -32,8 +32,6 @@ async function createPoll({ title, options }) {
   const lastPolls = JSON.parse(sessionStorage.getItem('lastPolls') || '[]')
   lastPolls.push({ id: poll.id, title, createdAt: { seconds: Date.now() / 1000 }, author: user.id })
   sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
-  if (import.meta.env.PROD) window.umami?.track('poll_created', { pollId: poll.id })
-
   return poll.id
 }
 
@@ -105,7 +103,6 @@ async function setVote({ voteId, pollId }) {
     sessionStorage.setItem('lastPolls', JSON.stringify(lastPolls))
   }
 
-  if (import.meta.env.PROD) window.umami?.track('poll_voted', { pollId, optionId: voteId })
 }
 
 async function getResults(id) {

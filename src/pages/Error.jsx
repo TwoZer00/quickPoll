@@ -4,6 +4,7 @@ import { useRouteError, Link as RouterLink, isRouteErrorResponse } from 'react-r
 import { useTranslation } from 'react-i18next'
 import { indigo } from '@mui/material/colors'
 import QuickPollLogo, { ErrorBars } from '../components/QuickPollLogo'
+import { track } from '../utils/analytics'
 
 function getErrorInfo (error, t) {
   if (isRouteErrorResponse(error)) {
@@ -32,7 +33,7 @@ export default function Error () {
 
   useEffect(() => {
     document.title = 'Error'
-    if (import.meta.env.PROD) window.umami?.track('error', { message, url: window.location.pathname })
+    track('error', { message, url: window.location.pathname })
   }, [])
 
   return (
